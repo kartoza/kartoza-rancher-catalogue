@@ -1,0 +1,55 @@
+version: '2'
+catalog:
+  name: Kartoza Geoserver
+  version: v2.10.5
+  questions:
+  - variable: BTSYNC_DB_SECRET
+    label: Resilio sync read/write key for syncing database backups
+    required: true
+    default: 
+    type: string
+  - variable: BTSYNC_MEDIA_SECRET
+    label: Resilio sync read/write key for syncing Geoserver media backups
+    required: true
+    default: 
+    type: string
+  services:
+    qgis-server:
+      scale: 1
+      start_on_create: true
+      lb_config:
+        certs: []
+        port_rules:
+      - hostname: qgis-server
+          priority: 1
+          protocol: http
+          service: qgis-server-backend
+        source_port: 80
+          target_port: 80
+      health_check:
+        healthy_threshold: 2
+        response_timeout: 2000
+        port: 42
+        unhealthy_threshold: 3
+        initializing_timeout: 60000
+        interval: 2000
+        reinitializing_timeout: 60000
+    celery:
+      scale: 1
+      start_on_create: true
+    django:
+      scale: 1
+      start_on_create: true
+    nginx:
+      scale: 1
+    start_on_create: true
+      rabbitmq:
+      scale: 1
+      start_on_create: true
+    qgis-server-backend:
+      scale: 4
+      start_on_create: true
+    postgis:
+      scale: 1
+      start_on_create: true
+    

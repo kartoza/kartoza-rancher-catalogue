@@ -1,0 +1,177 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  postgis-data:
+  postgis-history-data:
+  django-media-data:
+  django-media-history-data:
+  django-static-data:
+  qgis-server-qgis-layer-data:
+  qgis-server-qgis-layer-history-data:
+  qgis-server-qgis-cache-data:
+
+services:
+
+  rabbitmq:
+    image: rabbitmq
+
+  postgis:
+    image: kartoza/geonode_db
+    restart: on-failure
+    volumes:
+      - 'postgis-data:/var/lib/postgresql'
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+
+  dbbackup: &dbbackup
+    image: kartoza/pg-backup:9.4
+    volumes:
+      - postgis-history-data:/backups
+    links:
+      - postgis
+    environment:
+      # make this equal to PG_$(PROJECT_ID) in makefile
+      - DUMPPREFIX=PG_geonode
+      # These are all defaults anyway, but setting explicitly in
+      # case we ever want to ever use different credentials
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGPORT=5432
+      - PGHOST=postgis
+      - PGDATABASE=gis
+
+  mediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - django-media-history-data:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - django-media-data:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_geonode
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+
+  qgisservermediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - qgis-server-qgis-layer-history-data:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - qgis-server-qgis-layer-data:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_qgisserver
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+
+  qgis-server:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+    - 80:80/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+
+  qgis-server-backend:
+    image: kartoza/geonode_qgis-server
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+    environment:
+      - DEBUG=True
+      - QGIS_LOG_FILE=/tmp/qgis-server/qgis.log
+      - QGIS_SERVER_LOG_FILE=/tmp/qgis-server/qgis-server.log
+      # Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)
+      - QGIS_DEBUG=0
+      - QGIS_SERVER_LOG_LEVEL=0
+      # It is important to include this environment variable
+      # QGIS-Server:LTR cgi needs it
+      - QGIS_PROJECT_FILE=
+    labels:
+      io.rancher.container.pull_image: always
+
+  django:
+    image: kartoza/geonode_django_qgis-server
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'django-static-data:/usr/src/app/geonode/static_root'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+      - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+    command: /entry-point.sh
+    environment:
+      - DATABASE_URL=postgres://docker:docker@postgis:5432/gis
+      - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
+# Should be specified in docker-compose.override.yml. Because it depends on the
+# host
+      - ALLOWED_HOSTS=['django','localhost','geonode.dev']
+      - DEBUG=False
+      - PYTHONPATH=/usr/src:/usr/src/app/
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ROOT_URLCONF=core.urls
+      - SITEURL=http://geonode.dev/
+      - GEONODE_BASE_URL=http://nginx/
+      - QGIS_SERVER_URL=http://qgis-server/
+      - USE_GEOSAFE=False
+    links:
+      - postgis
+      - rabbitmq
+      - qgis-server
+    labels:
+      io.rancher.container.pull_image: always
+
+  nginx:
+    image: kartoza/geonode_nginx
+    links:
+      - django
+    volumes:
+      - 'django-media-data:/home/web/media:ro'
+      - 'django-static-data:/home/web/static:ro'
+    ports:
+      - 7000:80
+
+  celery:
+    image: kartoza/geonode_django_qgis-server
+    restart: on-failure
+    working_dir: /usr/src/app
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+      - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+    environment:
+      - DEBUG=False
+      - C_FORCE_ROOT=True
+      - ALLOWED_HOSTS=['django','localhost','geonode.dev']
+      - DATABASE_URL=postgres://docker:docker@postgis:5432/gis
+      - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - PYTHONPATH=/usr/src:/usr/src/app/
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ROOT_URLCONF=core.urls
+      - SITEURL=http://geonode.dev/
+      - GEONODE_BASE_URL=http://nginx/
+      - QGIS_SERVER_URL=http://qgis-server/
+      - USE_GEOSAFE=False
+    command: celery -A geonode.celery_app worker -l debug -Q default,cleanup,email,update -n geonode.%h -B
+    links:
+      - rabbitmq
+      - postgis
+      - qgis-server
+    labels:
+      io.rancher.container.pull_image: always
