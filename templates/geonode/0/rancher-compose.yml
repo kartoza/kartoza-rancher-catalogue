@@ -23,22 +23,3 @@ catalog:
       required: true
       default: 
       type: "string"
-services:
-  celery:
-    scale: 1
-    start_on_create: true
-  django:
-    scale: 1
-    start_on_create: true
-  nginx:
-    scale: 1
-  start_on_create: true
-    rabbitmq:
-    scale: 1
-    start_on_create: true
-  qgis-server-backend:
-    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
-    start_on_create: true
-  postgis:
-    scale: 1
-    start_on_create: true
