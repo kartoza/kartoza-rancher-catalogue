@@ -1,48 +1,5 @@
 # GeoNode with QGIS Server Backend - Rancher Setup Guide
 
-**Contents**
-
-* [Prerequisites](https://github.com/kartoza/docker-geosafe/blob/develop/deployment/production/docs/Rancher.md#prerequisites)
-* [Creating a stack](https://github.com/kartoza/docker-geosafe/blob/develop/deployment/production/docs/Rancher.md#creating-a-stack)
-* [GeoNode with QGIS Server](https://github.com/kartoza/docker-geosafe/blob/develop/deployment/production/docs/Rancher.md#geonode-with-qgis-server)
-* [Troubleshooting](https://github.com/kartoza/docker-geosafe/blob/develop/deployment/production/docs/Rancher.md#troubleshooting)
-
-
-# Overview
-
-This guide serves as a quick setup guide to spin up a GeoNode_QGIS-server or a GeoNode_QGIS-server + GeoSAFE instance. If you are new to docker and/or rancher, take a look at this video walk through so you understand the process:
-
-[![GeoNode and Rancher Walkthrough](https://img.youtube.com/vi/lJCrbCizsmo/0.jpg)](https://www.youtube.com/watch?v=lJCrbCizsmo)
-
-# Prerequisites
-
-This guide assumes that the following requirements are met:
-
-1. Docker is installed on your server. Use Ubuntu 16.04 for the best results because that is what we are testing on. For quick installation, use the [convenience scripts](http://rancher.com/docs/rancher/v1.6/en/hosts/#supported-docker-versions) provided by Rancher (make sure you choose a supported version).
-
-
-2. The **stable** version of Rancher Server has been set up.
-
-If it's not, refer to [Rancher quickstart guide](http://rancher.com/docs/rancher/v1.6/en/installing-rancher/installing-server/). Here is an example of how to run the latest stable release with a persistent mysql database stored on the file system:
-
-```
-mkdir /home/mysql
-docker run -d -v /home/mysql:/var/lib/mysql --restart=unless-stopped -p 8080:8080 rancher/server:stable
-```
-
-3. One rancher agent has been set up to actually run the instance (it could be
-on the same host as the rancher server). Take care not to specify the
-``--name`` argument when running the agent - this is not supported and will
-cause problems with your installation later.
-
-# Creating a stack
-
-This is the default compose file to quickly set up a new instance.
-However, there are some environment variables which are dependent on how you set up 
-your instance. You need to change these values depending on your environment. Again see 
-the video at the top of this page if you need some background on how a stack is created in rancher.
-
-# GeoNode with QGIS Server
 
 A GeoNode with QGIS Server backend sample stack is stored [here](../docker/compose-files/qgis-server).
 
@@ -99,6 +56,11 @@ this value after you have created the stack.
 ## Hung containers
 
 If a service (e.g. qgis-server-backend service) is in a stale condition (stuck on rolling back but didn’t do anything), the easiest way to deal with this is to rename the service first (e.g. qgis-server-backend-old). Next clone the service into the previous name (qgis-server-backend), so we have the same service name, but with fresh containers and the same settings. Then because the qgis-server service is a load balancer to qgis-server-backend, I restart that service too. To make sure it picks up the new container instance’s internal ip.
+
+## 400 Error
+
+Your siteurl is probably not set. Use the upgrade option on the django container, 
+perform the upgrade, then restart the nginx container.
 
 ## Gateway errors
 
