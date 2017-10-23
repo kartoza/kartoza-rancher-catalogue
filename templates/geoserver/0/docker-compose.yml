@@ -12,11 +12,12 @@ services:
          #- ./pg/postgres_data:/var/lib/postgresql
          - db-backups:/backups
       ports:
-        - "25432:5432"
+        - "5432:5432"
       environment:
-         - USERNAME=${PG_USER}
-         - PASS=${PG_PASSWORD}
-         - ALLOW_IP_RANGE=${PG_HBA_RANGE}
+         - POSTGRES_DB=${POSTGRES_DB}
+         - POSTGRES_USER=${POSTGRES_USER}
+         - POSTGRES_PASS=${POSTGRES_PASS}
+         - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
       restart: unless-stopped
 
    geoserver:
@@ -44,11 +45,12 @@ services:
          - DUMPPREFIX=PG_geoserver
          # These are all defaults anyway, but setting explicitly in
          # case we ever want to ever use different credentials
-         - PGUSER=${PG_USER}
-         - PGPASSWORD=${PG_PASSWORD}
+         # TODO: Normalise these paramer names in pg backup docker image to match pg docker image
+         - PGUSER=${POSTGRES_USER}
+         - PGPASSWORD=${POSTGRES_PASS}
+         - PGDATABASE=${POSTGRES_DB}
          - PGPORT=5432
          - PGHOST=db
-         - PGDATABASE=gis
       restart: unless-stopped
 
    btsync-data:

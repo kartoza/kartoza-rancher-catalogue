@@ -3,20 +3,25 @@ catalog:
   name: Kartoza Geoserver
   version: v2.10.5
   questions:
-  - variable: PG_HBA_RANGE
-    label: PostgreSQL pg_hba address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses.
+  - variable: POSTGRES_DB
+    label: PostgreSQL db to create.
     required: true
-    default: 10.42.0.0/16
+    default: gis
     type: string
-  - variable: PG_USER
-    label: PostgreSQL superuser account to create.
+  - variable: POSTGRES_USER
+    label: PostgrsSQL superuser account to create.
     required: true
     default: docker
     type: string
-  - variable: PG_PASSWORD
+  - variable: POSTGRES_PASS
     label: PostgreSQL superuser password to create.
     required: true
     default: docker
+    type: string
+  - variable: POSTGRES_HBA_RANGE
+    label: PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses.
+    required: true
+    default: 10.42.0.0/16
     type: string
   - variable: BTSYNC_DB_SECRET
     label: Resilio sync read/write key for syncing database backups
