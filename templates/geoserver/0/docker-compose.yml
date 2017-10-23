@@ -16,7 +16,7 @@ services:
       environment:
          - USERNAME=docker
          - PASS=docker
-         - ALLOW_IP_RANGE=172.20.0.0/24
+         - ALLOW_IP_RANGE=${PG_HBA_RANGE}
       restart: unless-stopped
 
    geoserver:
