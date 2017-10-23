@@ -28,7 +28,7 @@ services:
     scale: 1
     start_on_create: true
     lb_config:
-    certs: []
+      certs: []
       port_rules:
       - hostname: qgis-server
         priority: 1
