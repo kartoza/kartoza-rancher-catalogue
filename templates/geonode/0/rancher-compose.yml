@@ -23,3 +23,7 @@ catalog:
       required: true
       default: 
       type: "string"
+services:
+  postgis:
+    scale: 1
+    start_on_create: true
