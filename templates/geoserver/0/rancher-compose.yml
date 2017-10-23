@@ -8,6 +8,16 @@ catalog:
     required: true
     default: 10.42.0.0/16
     type: string
+  - variable: PG_USER
+    label: PostgreSQL superuser account to create.
+    required: true
+    default: docker
+    type: string
+  - variable: PG_PASSWORD
+    label: PostgreSQL superuser password to create.
+    required: true
+    default: docker
+    type: string
   - variable: BTSYNC_DB_SECRET
     label: Resilio sync read/write key for syncing database backups
     required: true

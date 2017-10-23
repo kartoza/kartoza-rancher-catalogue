@@ -14,8 +14,8 @@ services:
       ports:
         - "25432:5432"
       environment:
-         - USERNAME=docker
-         - PASS=docker
+         - USERNAME=${PG_USER}
+         - PASS=${PG_PASSWORD}
          - ALLOW_IP_RANGE=${PG_HBA_RANGE}
       restart: unless-stopped
 
@@ -44,8 +44,8 @@ services:
          - DUMPPREFIX=PG_geoserver
          # These are all defaults anyway, but setting explicitly in
          # case we ever want to ever use different credentials
-         - PGUSER=docker
-         - PGPASSWORD=docker
+         - PGUSER=${PG_USER}
+         - PGPASSWORD=${PG_PASSWORD}
          - PGPORT=5432
          - PGHOST=db
          - PGDATABASE=gis
