@@ -9,8 +9,6 @@ Provided Catalogue Entries:
 * GeoServer (http://geoserver.org)
 * GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org)
 
-![screen shot 2017-10-23 at 17 04 52](https://user-images.githubusercontent.com/178003/31914192-02bae616-b84a-11e7-8265-abd92bcb2dee.png)
-
 
 # Overview
 
