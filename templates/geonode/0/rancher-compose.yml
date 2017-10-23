@@ -24,6 +24,9 @@ catalog:
       default: 
       type: "string"
 services:
+  qgis-server-backend:
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
   postgis:
     scale: 1
     start_on_create: true
