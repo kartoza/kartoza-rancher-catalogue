@@ -1,8 +1,6 @@
 # GeoNode with QGIS Server Backend
 
-A GeoNode with QGIS Server backend sample stack is stored [here](../docker/compose-files/qgis-server).
-
-Here is the link diagram for GeoNode with QGIS Server
+A GeoNode with QGIS Server backend stack. Here is the link diagram for GeoNode with QGIS Server
 
 ![screen shot 2017-09-10 at 4 52 01 pm](https://user-images.githubusercontent.com/178003/30250023-6a8082fc-9648-11e7-8d6b-e2dca9e68dfd.png)
 
