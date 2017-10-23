@@ -1,4 +1,5 @@
-.catalog:
+version: '2'
+catalog:
   name: "Kartoza Geonode"
   description: "Kartoza's spin of GeoNode with a QGIS backend."
   version: 1
@@ -22,42 +23,22 @@
       required: true
       default: 
       type: "string"
-qgis-server:
-  scale: 1
+services:
+  celery:
+    scale: 1
+    start_on_create: true
+  django:
+    scale: 1
+    start_on_create: true
+  nginx:
+    scale: 1
   start_on_create: true
-  lb_config:
-  certs: []
-  port_rules:
-  - hostname: qgis-server
-    priority: 1
-    protocol: http
-    service: qgis-server-backend
-    source_port: 80
-    target_port: 80
-    health_check:
-    healthy_threshold: 2
-    response_timeout: 2000
-    port: 42
-    unhealthy_threshold: 3
-    initializing_timeout: 60000
-    interval: 2000
-    reinitializing_timeout: 60000
-celery:
-  scale: 1
-  start_on_create: true
-django:
-  scale: 1
-  start_on_create: true
-nginx:
-  scale: 1
-start_on_create: true
-  rabbitmq:
-  scale: 1
-  start_on_create: true
-qgis-server-backend:
-  scale: ${QGIS_BACKEND_INSTANCE_COUNT}
-  start_on_create: true
-postgis:
-  scale: 1
-  start_on_create: true
-
+    rabbitmq:
+    scale: 1
+    start_on_create: true
+  qgis-server-backend:
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
+  postgis:
+    scale: 1
+    start_on_create: true
