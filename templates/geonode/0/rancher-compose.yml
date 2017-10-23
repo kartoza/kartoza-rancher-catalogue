@@ -1,19 +1,28 @@
-version: '2'
-catalog:
-  name: Kartoza Geoserver
-  version: v2.10.5
+.catalog:
+  name: "Kartoza Geonode"
+  description: "Kartoza's spin of GeoNode with a QGIS backend."
+  version: 1
+  uuid: kartoza-geonode-0
   questions:
-  - variable: BTSYNC_DB_SECRET
-    label: Resilio sync read/write key for syncing database backups
-    required: true
-    default: 
-    type: string
-  - variable: BTSYNC_MEDIA_SECRET
-    label: Resilio sync read/write key for syncing Geoserver media backups
-    required: true
-    default: 
-    type: string
-services:
+    - variable: QGIS_BACKEND_INSTANCE_COUNT
+      label: "QGIS backend instance count"
+      description: "How many QGIS backend rendering instances to start with."
+      required: true
+      default: 4
+      type: "int"
+    - variable: BTSYNC_DB_SECRET
+      label: "Database backups key"
+      description: "Resilio sync read/write key for syncing database backups"
+      required: true
+      default: 
+      type: "string"
+    - variable: BTSYNC_MEDIA_SECRET
+      label: "Media backups key"
+      description: "Resilio sync read/write key for syncing geonode media backups"
+      required: true
+      default: 
+      type: "string"
+geonode:
   qgis-server:
     scale: 1
     start_on_create: true
@@ -47,7 +56,7 @@ services:
     scale: 1
     start_on_create: true
   qgis-server-backend:
-    scale: 4
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
     start_on_create: true
   postgis:
     scale: 1

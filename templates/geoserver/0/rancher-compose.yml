@@ -1,35 +1,39 @@
-version: '2'
-catalog:
+.catalog:
   name: Kartoza Geoserver
+  description: "This is GeoServer (http://geoserver.org) with PostGIS and Resilio sync all set up and ready to go in Rancher."
   version: v2.10.5
+  uuid: kartoza-geoserver-0
   questions:
   - variable: POSTGRES_DB
     label: PostgreSQL db to create.
     required: true
     default: gis
-    type: string
+    type: "string"
   - variable: POSTGRES_USER
     label: PostgrsSQL superuser account to create.
     required: true
     default: docker
-    type: string
+    type: "string"
   - variable: POSTGRES_PASS
     label: PostgreSQL superuser password to create.
     required: true
     default: docker
-    type: string
+    type: "string"
   - variable: POSTGRES_HBA_RANGE
-    label: PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses.
+    label: "Database allowed hosts"
+    description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
     required: true
     default: 10.42.0.0/16
-    type: string
+    type: "string"
   - variable: BTSYNC_DB_SECRET
-    label: Resilio sync read/write key for syncing database backups
+    label: "Database backups key"
+    description: "Resilio sync read/write key for syncing database backups"
     required: true
     default: 
-    type: string
+    type: "string"
   - variable: BTSYNC_MEDIA_SECRET
-    label: Resilio sync read/write key for syncing Geoserver media backups
+    label: "Media backups key"
+    description: "Resilio sync read/write key for syncing geonode media backups"
     required: true
     default: 
-    type: string
+    type: "string"
