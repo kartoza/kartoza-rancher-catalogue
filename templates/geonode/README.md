@@ -1,5 +1,4 @@
-# GeoNode with QGIS Server Backend - Rancher Setup Guide
-
+# GeoNode with QGIS Server Backend
 
 A GeoNode with QGIS Server backend sample stack is stored [here](../docker/compose-files/qgis-server).
 
