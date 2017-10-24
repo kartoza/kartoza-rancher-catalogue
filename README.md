@@ -7,7 +7,21 @@ open source community.
 Provided Catalogue Entries:
 ---------------------------
 * GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
-* GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see [README](./templates/geonode/README.md)
+* GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see
+  [README](./templates/geonode/README.md)
+
+Planned Catalogue Entries:
+---------------------------
+
+* OSM Reporter
+* QGIS Server with Btsync replication
+* PostGIS with Btsync backups
+* MapCampaigner
+* Feti?
+* Mapproxy
+* User map
+* QGIS Plugins repo
+* Projecta
 
 
 
@@ -19,7 +33,10 @@ This guide serves as a quick setup guide to spin up a one of our Rancher catalog
 
 This guide assumes that the following requirements are met:
 
-1. Docker is installed on your server. Use Ubuntu 16.04 for the best results because that is what we are testing on. For quick installation, use the [convenience scripts](http://rancher.com/docs/rancher/v1.6/en/hosts/#supported-docker-versions) provided by Rancher (make sure you choose a supported version).
+1. Docker is installed on your server. Use Ubuntu 16.04 for the best results
+because that is what we are testing on. For quick installation, use the
+[convenience scripts](http://rancher.com/docs/rancher/v1.6/en/hosts/#supported-docker-versions)
+provided by Rancher (make sure you choose a supported version).
 
 
 2. The **stable** version of Rancher Server has been set up.
