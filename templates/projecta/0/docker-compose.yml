@@ -3,6 +3,9 @@ volumes:
   backups:
   media:
   static:
+  logs:
+  reports:
+  django_project:
 
 services:
   smtp:
@@ -40,11 +43,11 @@ services:
       - VIRTUAL_HOST=projecta
       - VIRTUAL_PORT=8080
     volumes:
-      - ../django_project:/home/web/django_project
-      - ./static:/home/web/static:rw
-      - ./media:/home/web/media:rw
-      - ./reports:/home/web/reports
-      - ./logs:/var/log/
+      - jango_project:/home/web/django_project
+      - static:/home/web/static:rw
+      - media:/home/web/media:rw
+      - reports:/home/web/reports
+      - logs:/var/log/
     links:
       - smtp:smtp
       - db:db
@@ -56,17 +59,17 @@ services:
     image: nginx
     hostname: nginx
     volumes:
-      - /sites-enabled:/etc/nginx/conf.d:ro
+      - sites-enabled:/etc/nginx/conf.d:ro
       # I dont use volumes_from as I want to use the ro modifier
-      - /static:/home/web/static:ro
-      - /media:/home/web/media:ro
-      - /logs:/var/log/nginx
-  links:
-    - uwsgi:uwsgi
-  ports:
-    - "80:8080"
-    - "443:443"
-  restart: on-failure:5
+      - static:/home/web/static:ro
+      - media:/home/web/media:ro
+      - logs:/var/log/nginx
+    links:
+      - uwsgi:uwsgi
+    ports:
+      - "80:8080"
+      - "443:443"
+    restart: on-failure:5
   
   dbbackups:
     image: kartoza/pg-backup:9.6
