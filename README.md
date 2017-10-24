@@ -6,8 +6,9 @@ open source community.
 
 Provided Catalogue Entries:
 ---------------------------
-* GeoServer (http://geoserver.org)
-* GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org)
+* GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
+* GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see [README](./templates/geonode/README.md)
+
 
 
 # Overview
