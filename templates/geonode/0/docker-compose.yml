@@ -23,7 +23,6 @@ services:
 
   postgis:
     image: kartoza/geonode_db
-    restart: on-failure
     volumes:
       - 'postgis-data:/var/lib/postgresql'
     environment:

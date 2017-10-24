@@ -1,0 +1,57 @@
+.catalog:
+  name: Kartoza Projecta
+  description: "This is [Projecta](https://github.com/kartoza/projecta) all set up and ready to go in Rancher."
+  version: 1
+  uuid: kartoza-projecta-0
+  questions:
+  - variable: POSTGRES_DB
+    label: PostgreSQL db to create.
+    required: true
+    default: gis
+    type: "string"
+  - variable: POSTGRES_USER
+    label: PostgrsSQL superuser account to create.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_PASS
+    label: PostgreSQL superuser password to create.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_HBA_RANGE
+    label: "Database allowed hosts"
+    description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+    required: true
+    default: 10.42.0.0/16
+    type: "string"
+  - variable: SITE_URL
+    label: "Site URL"
+    description: "Primary URL for the site e.g. 'http://foo.com'."
+    required: true
+    default: ""
+    type: "string"
+  - variable: WEBSERVER_PORT
+    description: "Website port"
+    label: "Port on which the site should be served. Typically 80"
+    required: true
+    default: 80
+    type: "int"
+  - variable: DJANGO_ALLOWED_HOSTS
+    label: "Django allowed hosts"
+    description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'."
+    required: true
+    default: ""
+    type: "string"
+  - variable: BTSYNC_DB_SECRET
+    label: "Database backups key"
+    description: "Resilio sync read/write key for syncing database backups"
+    required: false
+    default: ""
+    type: "string"
+  - variable: BTSYNC_MEDIA_SECRET
+    label: "Media backups key"
+    description: "Resilio sync read/write key for syncing geonode media backups"
+    required: false
+    default: ""
+    type: "string"
