@@ -5,7 +5,6 @@ volumes:
   static:
   logs:
   reports:
-  django_project:
 
 services:
   smtp:
@@ -30,9 +29,8 @@ services:
     restart: unless-stopped
   
   uwsgi:
-    # Note you cannot scale if you use conteiner_name
-    container_name: projecta-uwsgi
-    build: docker
+    # At the moment these are built manually on my desktop...
+    image: kartoza/projecta-uwsgi:latest
     hostname: uwsgi
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -43,7 +41,6 @@ services:
       - VIRTUAL_HOST=projecta
       - VIRTUAL_PORT=8080
     volumes:
-      - jango_project:/home/web/django_project
       - static:/home/web/static:rw
       - media:/home/web/media:rw
       - reports:/home/web/reports
