@@ -53,7 +53,7 @@ services:
     user: root
   # This is main entry point for a production server
   web:
-    image: kartoza/projecta-nginx:latest
+    image: kartoza/django-nginx:latest
     hostname: nginx
     volumes:
       - static:/home/web/static:ro
