@@ -23,6 +23,7 @@ Planned Catalogue Entries:
 * QGIS Plugins repo
 * Projecta
 * Docker OSM
+* [POSM](https://github.com/posm/posm-build)
 
 
 
