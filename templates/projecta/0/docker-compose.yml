@@ -56,7 +56,6 @@ services:
     image: kartoza/projecta-nginx:latest
     hostname: nginx
     volumes:
-      - sites-enabled:/etc/nginx/conf.d:ro
       - static:/home/web/static:ro
       - media:/home/web/media:ro
     links:
