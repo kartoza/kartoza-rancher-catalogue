@@ -22,6 +22,7 @@ Planned Catalogue Entries:
 * User map
 * QGIS Plugins repo
 * Projecta
+* Docker OSM
 
 
 
