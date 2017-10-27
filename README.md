@@ -24,6 +24,7 @@ Planned Catalogue Entries:
 * Projecta
 * Docker OSM
 * [POSM](https://github.com/posm/posm-build)
+* Sentry
 
 
 
