@@ -4,7 +4,6 @@ A GeoNode with QGIS Server backend stack. Here is the link diagram for GeoNode w
 
 ![screen shot 2017-09-10 at 4 52 01 pm](https://user-images.githubusercontent.com/178003/30250023-6a8082fc-9648-11e7-8d6b-e2dca9e68dfd.png)
 
-In `docker-compose.yml` file, there are some options that might need additional configuration:
 
 1. **Volumes**
 
@@ -19,13 +18,18 @@ Usually this is useful when you have some existing data.
 
 The Django framework used by GeoNode will run in production mode. For security reasons,
 it doesn't allow a hostname that is not described in the ALLOWED_HOSTS setting. 
-Simply append your hostname into this setting located in `django.environment` key
-and `celery.environment` key. Again, see the video at the top of this page for a demonstration of how you upgrade your services to set their settings.
+Simply append your hostname during initial setup of the catalogue service, or after deployment
+by putting the correct valye into this setting located in `django.environment` key
+and `celery.environment` keys - editable by performing an upgrade on the django and celery containers. 
+Again, see the video at the top of this page for a demonstration of how you upgrade your services to 
+set their settings.
+
+**When entering this value in the catalogue be sure to place the allowed hosts in quotes and separated by commas e.g. ``'host1','host'`` (you can use ip addresses too).**
 
 3. **Django SITEURL setting**
 
-Change this value into something your instance will be referenced from the network. 
-This settinng is located in `django.environment` key and `celery.environment` key.
+Change this value into something your instance will be referenced from the internet. 
+This setting is located in `django.environment` key and `celery.environment` key. Include the ``http://`` prefix too e.g. ``foo.com``
 
 4. **Nginx frontend port**
 
@@ -36,8 +40,6 @@ you can use `80:80` for example.
 
 Note that all of these settings can also be changed by upgrading the relevant services 
 after you have created the stack.
-
-In `rancher-compose.yml` file, there are some options that might need additional configuration:
 
 5. **Service scaling**
 
