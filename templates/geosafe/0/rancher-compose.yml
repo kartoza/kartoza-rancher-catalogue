@@ -1,7 +1,7 @@
 version: '2'
 catalog:
-  name: "Kartoza Geonode"
-  description: "Kartoza's spin of GeoNode with a QGIS backend."
+  name: "Kartoza GeoSAFE"
+  description: "Kartoza's spin of GeoNode with a QGIS backend and GeoSAFE."
   version: 1
   uuid: kartoza-geonode-0
   questions:
@@ -84,13 +84,19 @@ services:
         interval: 2000
         reinitializing_timeout: 60000
   celery:
-    scale: 1
+    scale: 4
     start_on_create: true
   django:
     scale: 1
     start_on_create: true
   nginx:
     scale: 1
+    start_on_create: true
+  inasafe-headless-analysis:
+    scale: 4
+    start_on_create: true
+  inasafe-headless:
+    scale: 4
     start_on_create: true
   rabbitmq:
     scale: 1
