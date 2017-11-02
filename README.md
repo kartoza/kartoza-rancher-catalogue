@@ -54,6 +54,7 @@ docker run -d -v /home/mysql:/var/lib/mysql --restart=unless-stopped -p 8080:808
 3. Once rancher server has been set up, you need to add a host to the environment has been set up to actually run the instance (the agent could be on the same host as the rancher server). You can do this by ensuring your chosen environment is active and then from the menu do Environment -> Hosts. The process is quite logical and simple and involves pasting a single line of code onto the host that will run the agent. Once the host is set up with a running agent, you should see it join the environment as shown below:
 
 
+![screen shot 2017-11-02 at 19 03 32](https://user-images.githubusercontent.com/178003/32339631-0bbb10f6-c001-11e7-9218-37074d7feafc.png)
 
 
 
