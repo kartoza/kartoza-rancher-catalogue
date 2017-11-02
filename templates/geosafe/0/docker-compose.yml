@@ -15,6 +15,7 @@ volumes:
   qgis-server-qgis-layer-data:
   qgis-server-qgis-layer-history-data:
   qgis-server-qgis-cache-data:
+  inasafe-headless-output-data:
 
 services:
 
@@ -116,12 +117,13 @@ services:
     restart: unless-stopped
 
   django:
-    image: kartoza/geonode_django_qgis-server
+    image: kartoza/geonode_django_geosafe
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'django-static-data:/usr/src/app/geonode/static_root'
       - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
     command: /entry-point.sh
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgis:5432/gis
@@ -137,14 +139,22 @@ services:
       - SITEURL=${SITE_URL}
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
-      - USE_GEOSAFE=False
+      # GeoSAFE Related
+      - USE_GEOSAFE=True
+      - USE_LAYER_FILE_ACCESS=True
+      # Base directory that will be used by InaSAFE Headless
+      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
+      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/uploaded/
+      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
+      - INASAFE_IMPACT_BASE_URL=/output/
+      - USE_LAYER_HTTP_ACCESS=False
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
+      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
     restart: unless-stopped
     links:
       - postgis
       - rabbitmq
       - qgis-server
-    labels:
-      io.rancher.container.pull_image: always
 
   nginx:
     image: kartoza/geonode_nginx
@@ -158,13 +168,14 @@ services:
     restart: unless-stopped
 
   celery:
-    image: kartoza/geonode_django_qgis-server
+    image: kartoza/geonode_django_geosafe
     restart: on-failure
     working_dir: /usr/src/app
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
     environment:
       - DEBUG=False
       - C_FORCE_ROOT=True
@@ -178,10 +189,68 @@ services:
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       - USE_GEOSAFE=False
-    command: celery -A geonode.celery_app worker -l debug -Q default,cleanup,email,update -n geonode.%h -B
+      # GeoSAFE Related
+      - USE_GEOSAFE=True
+      - USE_LAYER_FILE_ACCESS=True
+      # Base directory that will be used by InaSAFE Headless
+      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
+      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/uploaded/
+      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
+      - INASAFE_IMPACT_BASE_URL=/output/
+      - USE_LAYER_HTTP_ACCESS=False
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
+      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
+    command: celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
     links:
       - rabbitmq
       - postgis
       - qgis-server
-    labels:
-      io.rancher.container.pull_image: always
+  inasafe-headless:
+    image: kartoza/geonode_inasafe-headless
+    restart: on-failure
+    working_dir: /home/src/inasafe
+    environment:
+      - C_FORCE_ROOT=True
+      - PYTHONPATH=/home/src/inasafe
+      - InaSAFEQGIS=/home/src/inasafe
+      - DISPLAY=:99
+      - INASAFE_HEADLESS_BROKER_HOST=amqp://guest:guest@rabbitmq:5672/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_DIR=/home/output/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
+      - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
+      - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
+      - QGIS_DEBUG=0
+      - INASAFE_WORK_DIR=/tmp/inasafe
+    volumes:
+      - 'django-media-data:/home/geosafe/media/'
+      - 'inasafe-headless-output-data:/home/output/'
+    command: /start-celery.sh prod inasafe-headless
+    links:
+      - rabbitmq
+      - nginx
+      - django
+
+  inasafe-headless-analysis:
+    image: kartoza/geonode_inasafe-headless
+    restart: on-failure
+    working_dir: /home/src/inasafe
+    environment:
+      - C_FORCE_ROOT=True
+      - PYTHONPATH=/home/src/inasafe
+      - InaSAFEQGIS=/home/src/inasafe
+      - DISPLAY=:99
+      - INASAFE_HEADLESS_BROKER_HOST=amqp://guest:guest@rabbitmq:5672/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_DIR=/home/output/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
+      - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
+      - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
+      - QGIS_DEBUG=0
+      - INASAFE_WORK_DIR=/tmp/inasafe
+    volumes:
+      - 'django-media-data:/home/geosafe/media/'
+      - 'inasafe-headless-output-data:/home/output/'
+    command: /start-celery.sh prod inasafe-headless-analysis
+    links:
+      - rabbitmq
+      - nginx
+      - django
