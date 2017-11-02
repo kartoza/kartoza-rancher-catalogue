@@ -9,6 +9,9 @@ Provided Catalogue Entries:
 * GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
 * GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see
   [README](./templates/geonode/README.md)
+* GeoSAFE based on GeoNode with QGIS Backend (Kartoza build of InaSAFE for the web) - see
+  [README](./templates/geosafe/README.md)  
+  
 
 Planned Catalogue Entries:
 ---------------------------
