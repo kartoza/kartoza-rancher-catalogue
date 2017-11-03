@@ -54,7 +54,7 @@ services:
   btsync-plugins:
     # BTSync for pushing and pulling plugins from the server
     # Note that you probably need to restart the QGIS containers
- 	# When pushing new versions of the plugins
+    # When pushing new versions of the plugins
     image: kartoza/btsync
     hostname: btsync-plugins
     restart: unless-stopped
