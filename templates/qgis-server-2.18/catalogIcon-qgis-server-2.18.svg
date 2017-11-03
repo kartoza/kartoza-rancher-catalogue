@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="1024" height="1024" viewBox="0, 0, 1024, 1024">
+  <defs>
+    <linearGradient id="Gradient_1" gradientUnits="userSpaceOnUse" x1="773.667" y1="931.608" x2="760.659" y2="107.091">
+      <stop offset="0" stop-color="#589632"/>
+      <stop offset="1" stop-color="#93B023"/>
+    </linearGradient>
+    <linearGradient id="Gradient_2" gradientUnits="userSpaceOnUse" x1="518.97" y1="944.475" x2="506.074" y2="126.842">
+      <stop offset="0" stop-color="#589632"/>
+      <stop offset="1" stop-color="#93B023"/>
+    </linearGradient>
+  </defs>
+  <g id="Layer_1">
+    <path d="M546.537,542.858 L670.335,542.858 L565.558,442.935 L437.191,442.935 L437.191,561.907 L546.537,667.032 z" fill="#EE7913" id="polygon3"/>
+    <path d="M943.608,803.447 L722.727,592.818 L598.315,592.818 L598.315,716.822 L809.985,920.31 L943.608,920.31 z" fill="url(#Gradient_1)" id="polygon10"/>
+    <path d="M598.314,592.818 L722.727,592.818 L670.335,542.858 L546.537,542.858 L546.537,667.032 L598.314,716.822 z" fill="#F0E64A" id="polygon12"/>
+    <path d="M572.488,759.243 C553.722,763.41 534.227,765.672 514.115,765.672 C370.221,765.672 247.832,651.539 247.832,503.553 C247.832,355.566 368.859,243.936 514.115,243.936 C659.352,243.936 774.997,355.547 774.997,503.553 C774.997,527.607 771.895,550.778 766.151,572.714 L899.33,701.163 C933.669,643.127 952.881,575.644 952.881,502.558 C952.881,274.463 764.171,103.691 511.421,103.691 C259.815,103.691 71.119,273.351 71.119,502.558 C71.119,732.881 259.815,905.917 511.421,905.917 C576.367,905.917 637.07,894.393 691.444,873.42 L572.488,759.243 z" fill="url(#Gradient_2)" id="path19"/>
+    <path d="M437.191,442.935 L943.608,920.309 L943.608,803.446 L722.727,592.817 L670.335,542.856 L565.558,442.935 z" fill="#FFFFFF" fill-opacity="0.172" id="polygon4153"/>
+  </g>
+</svg>
