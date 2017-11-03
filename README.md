@@ -11,6 +11,8 @@ Provided Catalogue Entries:
   [README](./templates/geonode/README.md)
 * GeoSAFE based on GeoNode with QGIS Backend (Kartoza build of InaSAFE for the web) - see
   [README](./templates/geosafe/README.md)  
+* PostgreSQL with PostGIS (enterprise geodatabase) - see
+  [README](./templates/postgis/README.md)  
   
 
 Planned Catalogue Entries:
@@ -18,7 +20,6 @@ Planned Catalogue Entries:
 
 * OSM Reporter
 * QGIS Server with Btsync replication
-* PostGIS with Btsync backups
 * MapCampaigner
 * Feti?
 * Mapproxy
