@@ -53,13 +53,13 @@ catalog:
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
-      required: true
+      required: false
       default: 
       type: "string"
     - variable: BTSYNC_MEDIA_SECRET
       label: "Media backups key"
       description: "Resilio sync read/write key for syncing geonode media backups"
-      required: true
+      required: false
       default: 
       type: "string"
 services:
