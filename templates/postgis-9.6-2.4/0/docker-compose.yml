@@ -28,7 +28,7 @@ services:
     links:
       - db:db
     environment:
-      - DUMPPREFIX=PG_projecta
+      - DUMPPREFIX=PG_${POSTGRES_DUMP_PREFIX}
       # TODO: Normalise these paramer names in pg backup docker image to match pg docker image
       - PGUSER=${POSTGRES_USER}
       - PGPASSWORD=${POSTGRES_PASS}

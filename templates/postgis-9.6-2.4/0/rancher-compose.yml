@@ -4,6 +4,12 @@
   version: 1
   uuid: kartoza-postgis
   questions:
+  - variable: POSTGRES_DUMP_PREFIX
+    label: Database dump prefix.
+    label: Prefix to use in the name of database dumps made by the backup container.
+    required: true
+    default: "postgis"
+    type: "string"
   - variable: POSTGRES_DB
     label: PostgreSQL db to create.
     required: true
