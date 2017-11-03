@@ -17,8 +17,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASS=${POSTGRES_PASS}
-      - POSTGRES_PORT=${POSTGRES_PORT}
       - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    ports:
+      - ${POSTGRES_PORT}:5432 
     restart: unless-stopped
   
   dbbackups:
@@ -34,7 +35,7 @@ services:
       - PGUSER=${POSTGRES_USER}
       - PGPASSWORD=${POSTGRES_PASS}
       - PGDATABASE=${POSTGRES_DB}
-      - PGPORT=5432
+      - PGPORT=${POSTGRES_PORT}
       - PGHOST=db
     restart: unless-stopped
 
