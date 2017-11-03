@@ -2,9 +2,7 @@ version: '2'
 volumes:
   backups:
   media:
-  static:
-  logs:
-  reports:
+  postgis-data:
 
 services:
   
