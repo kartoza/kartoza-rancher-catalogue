@@ -23,7 +23,7 @@
     label: "Database allowed hosts"
     description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
     required: true
-    default: 0.0.0.0/32
+    default: 0.0.0.0/0
     type: "string"
   - variable: POSTGRES_PORT
     description: "Postgres port"
