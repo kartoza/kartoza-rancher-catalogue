@@ -21,8 +21,8 @@ catalog:
       label: "Debug level for QGIS Server"
       description: "Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)"
       required: true
-      default: ""
-      type: "string"
+      default: 5
+      type: "int"
     - variable: QGIS_PROJECT_FILE
       label: "Default project file for QGIS Server"
       description: "If you leave this blank you will need to explicitly include a project file in your OGC requests."

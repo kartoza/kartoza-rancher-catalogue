@@ -46,7 +46,7 @@ services:
     hostname: btsync-data
     restart: unless-stopped
     volumes:
-      - /project:/project:rw
+      - /project:/web:rw
     environment:
       - SECRET=${BTSYNC_DATA_SECRET}
       - DEVICE=QGISDataContainer
@@ -60,7 +60,7 @@ services:
     restart: unless-stopped
     volumes:
       # Read only mount
-      - /plugins:/plugins:ro
+      - /plugins:/web:ro
     environment:
       - SECRET=${BTSYNC_PLUGINS_SECRET}
       - DEVICE=QGISPluginsContainer
