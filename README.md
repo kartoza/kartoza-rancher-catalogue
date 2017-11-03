@@ -13,13 +13,14 @@ Provided Catalogue Entries:
   [README](./templates/geosafe/README.md)  
 * PostgreSQL with PostGIS (enterprise geodatabase) - see
   [README](./templates/postgis/README.md)  
+* QGIS Server with Btsync replication
+  [README](./templates/qgis-server-2.18/README.md)  
   
 
 Planned Catalogue Entries:
 ---------------------------
 
 * OSM Reporter
-* QGIS Server with Btsync replication
 * MapCampaigner
 * Feti?
 * Mapproxy
