@@ -254,3 +254,25 @@ services:
       - rabbitmq
       - nginx
       - django
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - postgis-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=ProjectaDatabase
+     
+  btsync-media:
+    # BTSync backups for django media
+    image: kartoza/btsync
+    hostname: btsync-media
+    restart: unless-stopped
+    volumes:
+      - django-media-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=ProjectaMedia
+
