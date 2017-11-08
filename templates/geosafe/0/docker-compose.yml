@@ -126,7 +126,8 @@ services:
     restart: unless-stopped
 
   django:
-    image: kartoza/geonode_django_geosafe
+    image: kartoza/geonode_django_geosafe:qgis-server-2.7-stable-1.0
+    #image: kartoza/geonode_django_geosafe
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'django-static-data:/usr/src/app/geonode/static_root'
