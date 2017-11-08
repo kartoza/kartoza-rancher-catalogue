@@ -32,9 +32,15 @@ catalog:
       required: true
       default: 10.42.0.0/16
       type: "string"
+    - variable: ADMIN_EMAIL
+      label: "Administrator email"
+      description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      required: true
+      default: ""
+      type: "string"
     - variable: SITE_URL
       label: "Site URL"
-      description: "Primary URL for the site e.g. 'http://foo.com'."
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http://)."
       required: true
       default: ""
       type: "string"
@@ -46,8 +52,8 @@ catalog:
       type: "int"
     - variable: DJANGO_ALLOWED_HOSTS
       label: "Django allowed hosts"
-      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'."
-      required: true
+      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
+      required: false
       default: ""
       type: "string"
     - variable: BTSYNC_DB_SECRET

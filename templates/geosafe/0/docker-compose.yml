@@ -48,7 +48,7 @@ services:
       - PGPASSWORD=${POSTGRES_PASS}
       - PGDATABASE=${POSTGRES_DB}
       - PGPORT=5432
-      - PGHOST=db
+      - PGHOST=postgis
     restart: unless-stopped
 
   mediabackup:
@@ -116,6 +116,15 @@ services:
       io.rancher.container.pull_image: always
     restart: unless-stopped
 
+  smtp:
+    image: catatnight/postfix
+    hostname: postfix
+    environment:
+      # You could change this to something more suitable
+      - maildomain=${SITE_URL}
+      - smtp_user=noreply:docker
+    restart: unless-stopped
+
   django:
     image: kartoza/geonode_django_geosafe
     volumes:
@@ -131,12 +140,13 @@ services:
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
-      - ALLOWED_HOSTS=['django','localhost',${DJANGO_ALLOWED_HOSTS}]
+      - ADMIN=tim@kartoza.com
+      - ALLOWED_HOSTS=['django','localhost', '${SITE_URL}', ${DJANGO_ALLOWED_HOSTS}]
       - DEBUG=False
       - PYTHONPATH=/usr/src:/usr/src/app/
       - DJANGO_SETTINGS_MODULE=core.settings
       - ROOT_URLCONF=core.urls
-      - SITEURL=${SITE_URL}
+      - SITEURL="http://${SITE_URL}"
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       # GeoSAFE Related
