@@ -179,7 +179,7 @@ services:
     restart: unless-stopped
 
   celery:
-    image: kartoza/geonode_django_geosafe
+    image: kartoza/geonode_django_geosafe:qgis-server-2.7-stable-1.0
     restart: on-failure
     working_dir: /usr/src/app
     volumes:
