@@ -1,0 +1,7 @@
+name: InaSAFE Realtime
+description: InaSAFE Realtime server using InaSAFE v3.5
+version: 3.4
+category: GIS
+maintainer: Kartoza (Pty) Ltd. - Rizky Maulana Nugraha, rizky@kartoza.com
+license: GPL v3
+projectURL: https://github.com/inasafe/inasafe-django
