@@ -33,7 +33,7 @@ services:
     links:
       - db:db
     volumes:
-	  - ./reporter:/reporter
+      - ./reporter:/reporter
     labels:
       io.rancher.container.pull_image: always
       # Each web instance gets it's own db instance
