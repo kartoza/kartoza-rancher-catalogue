@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: kartoza/osm-reporter:develop
+    image: kartoza/osm-reporter:latest
     hostname: web
     environment:
       - PGUSER=docker
