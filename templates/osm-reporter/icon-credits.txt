@@ -1,0 +1,21 @@
+License for the logo used in this folder:
+
+You are free:
+to share – to copy, distribute and transmit the work
+to remix – to adapt the work
+Under the following conditions:
+attribution – You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
+share alike – If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+
+
+This file is a derivative work from:
+
+  * report by Wilson Joseph from the Noun Project
+
+and 
+
+  * 29 April 2011
+  * Source	https://wiki.openstreetmap.org/wiki/File:Public-images-osm_logo.svg
+  * Author	Ken Vermette
+  * Permission (Reusing this file)	
+    None, Trade Mark UK2500155 at ipo.gov.uk for Class 41 to Proprietor "Openstreetmap Foundation, Surrey, UK"

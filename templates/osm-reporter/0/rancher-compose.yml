@@ -1,0 +1,46 @@
+version: '2'
+catalog:
+  name: "OSM Reporter"
+  description: "A simple tool for getting stats for an openstreetmap area."
+  version: 1
+  uuid: kartoza-osm-reporter-0
+  questions:
+    - variable: REPORTER_BACKEND_INSTANCE_COUNT
+      label: "Reporter backend instance count"
+      description: "How many OSM reporter rendering instances to start with."
+      required: true
+      default: 1
+      type: "int"
+    - variable: BTSYNC_MEDIA_SECRET
+      label: "Logs key"
+      description: "Resilio sync read/write key for syncing geojson activity logs"
+      required: false
+      default: 
+      type: "string"
+services:
+  web-lb:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: web-lb 
+        priority: 1
+        protocol: http
+        service: web-lb
+        source_port: 80
+        target_port: 80
+      health_check:
+        healthy_threshold: 2
+        response_timeout: 2000
+        port: 42
+        unhealthy_threshold: 3
+        initializing_timeout: 60000
+        interval: 2000
+        reinitializing_timeout: 60000
+  web:
+    scale: ${REPORTER_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
+  postgis:
+    scale: ${REPORTER_BACKEND_INSTANCE_COUNT}
+    start_on_create: true

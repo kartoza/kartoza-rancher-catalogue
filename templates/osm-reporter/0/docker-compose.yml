@@ -1,0 +1,54 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  activity-logs:
+
+services:
+
+  db:
+    image: kartoza/postgis:9.4-2.1
+    hostname: db
+    environment:
+     - USERNAME=docker
+     - PASS=docker
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  web:
+    image: kartoza/osm-reporter:stable
+    hostname: web
+    environment:
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGHOST=db
+    ports:
+      - "8080:8080"
+    links:
+      - db:db
+    volumes:
+	  - ./reporter:/reporter
+    labels:
+      io.rancher.container.pull_image: always
+      # Each web instance gets it's own db instance
+      io.rancher.sidekicks: db
+    restart: unless-stopped
+
+  # Web load balancer
+  web-lb:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+      - 80:80/tcp
+    links:
+      - web:web
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
+
