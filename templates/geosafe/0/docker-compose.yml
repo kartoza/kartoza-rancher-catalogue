@@ -279,11 +279,11 @@ services:
   btsync-media:
     # BTSync backups for django media
     image: kartoza/btsync
-    hostname: btsync-media
+    hostname: btsync-logs
     restart: unless-stopped
     volumes:
       - django-media-history-data:/web:rw
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
-      - DEVICE=ProjectaMedia
+      - DEVICE=OsmReporterLogs
 

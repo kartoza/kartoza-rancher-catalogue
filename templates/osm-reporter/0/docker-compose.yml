@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: kartoza/osm-reporter:stable
+    image: kartoza/osm-reporter:master
     hostname: web
     environment:
       - PGUSER=docker
@@ -33,7 +33,7 @@ services:
     links:
       - db:db
     volumes:
-      - ./reporter:/reporter
+      - activity-logs:/logs:rw
     labels:
       io.rancher.container.pull_image: always
       # Each web instance gets it's own db instance
@@ -51,4 +51,15 @@ services:
       io.rancher.container.agent.role: environmentAdmin
       io.rancher.container.create_agent: 'true'
     restart: unless-stopped
+
+  btsync-logs:
+    # BTSync backups for activity logs
+    image: kartoza/btsync
+    hostname: btsync-media
+    restart: unless-stopped
+    volumes:
+      - activity-logs:/logs:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=ProjectaMedia
 

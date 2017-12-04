@@ -27,7 +27,7 @@ services:
       - hostname: web-lb 
         priority: 1
         protocol: http
-        service: web-lb
+        service: web
         source_port: 80
         target_port: 80
       health_check:
