@@ -41,6 +41,6 @@ services:
   web:
     scale: ${REPORTER_BACKEND_INSTANCE_COUNT}
     start_on_create: true
-  postgis:
+  db:
     scale: ${REPORTER_BACKEND_INSTANCE_COUNT}
     start_on_create: true

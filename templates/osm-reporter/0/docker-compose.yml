@@ -28,6 +28,8 @@ services:
       - PGUSER=docker
       - PGPASSWORD=docker
       - PGHOST=db
+    depends_on:
+      - db
     ports:
       - "8080:8080"
     links:
@@ -42,7 +44,7 @@ services:
 
   # Web load balancer
   web-lb:
-    image: rancher/lb-service-haproxy:v0.6.4
+    image: rancher/lb-service-haproxy:v0.7.9
     expose:
       - 80:80/tcp
     links:
