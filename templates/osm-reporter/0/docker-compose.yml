@@ -32,6 +32,8 @@ services:
       - db
     ports:
       - "8080:8080"
+    expose:
+      - 8080:8080/tcp
     links:
       - db:db
     volumes:
