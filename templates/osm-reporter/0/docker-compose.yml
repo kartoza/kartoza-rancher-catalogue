@@ -67,5 +67,5 @@ services:
       - activity-logs:/logs:rw
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
-      - DEVICE=ProjectaMedia
+      - DEVICE=OSMLogs
 
