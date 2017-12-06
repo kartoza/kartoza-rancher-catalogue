@@ -45,6 +45,8 @@ services:
   # Web load balancer
   web-lb:
     image: rancher/lb-service-haproxy:v0.7.9
+    ports:
+      - "80:80"
     expose:
       - 80:80/tcp
     links:
