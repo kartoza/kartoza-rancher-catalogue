@@ -32,8 +32,6 @@ services:
       - db
     ports:
       - "8080:8080"
-    expose:
-      - 8080:8080/tcp
     links:
       - db:db
     volumes:
@@ -49,8 +47,6 @@ services:
     image: rancher/lb-service-haproxy:v0.7.9
     ports:
       - "80:80"
-    expose:
-      - 80:80/tcp
     links:
       - web:web
     labels:
@@ -63,8 +59,10 @@ services:
     image: kartoza/btsync
     hostname: btsync-media
     restart: unless-stopped
+    # activity logs is mounted as /logs in web container and 
+    # as /web in btsync because btsync expects it there
     volumes:
-      - activity-logs:/logs:rw
+      - activity-logs:/web:rw
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
       - DEVICE=OSMLogs
