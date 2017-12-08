@@ -28,6 +28,10 @@ services:
       - PGUSER=docker
       - PGPASSWORD=docker
       - PGHOST=db
+      - CREW=${CREW}
+      - BBOX=${BBOX}
+      - CACHE_DIR=${CACHE_DIR}
+      - LOG_DIR=${LOG_DIR}  
     depends_on:
       - db
     ports:

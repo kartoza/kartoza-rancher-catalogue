@@ -17,6 +17,38 @@ catalog:
       required: false
       default: 
       type: "string"
+    - variable: CREW
+      label: "Comma separated list of crew members"
+      description: "Valid OSM users names of people actively working on your data gathering project. When set, an additional tag will be added in the user profile areas to indicate those who are crew members."
+      required: false
+      default: ''
+      type: "string"
+    - variable: BBOX
+      label: "Initial BBOX for when page loads."
+      description: "Default bbox to use for the map and the stats. Format is: {SW_lng},{SW_lat},{NE_lng},{NE_lat}."
+      required: false
+      default: ''
+      type: "string"
+    - variable: CACHE_DIR
+      label: "Directory to cache OSM files."
+      description: "Path to a dir where to cache the OSM files used by the backend. Note you may need to clear this directory out periodically."
+      required: false
+      default: '/tmp'
+      type: "string"
+    - variable: LOG_DIR
+      label: "Path to a dir where to store request logs in geojson format."
+      description: "OSM-Reporter will log requests as geojson files - one file per request. The attributes of each geojson file will contain the following:
+
+feature_type (building, roads etc.)
+qgis_version
+inasafe_version (if applicable)
+year / month / day / hour of request
+bounding box of request as a GeoJSON geometry
+
+If you use the btsync log sync option, make sure to leave this at its default value."
+      required: false
+      default: '/logs'
+      type: "string"
 services:
   web-lb:
     scale: 1
