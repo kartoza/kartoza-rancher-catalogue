@@ -12,14 +12,20 @@ volumes:
 services:
 
   db:
-    image: kartoza/postgis:9.4-2.1
-    hostname: db
+    image: kartoza/postgis:9.6-2.4
+    volumes:
+      - 'postgis-data:/var/lib/postgresql'
+      - 'backups:/backups'
     environment:
-     - USERNAME=docker
-     - PASS=docker
+      - POSTGRES_DB=gis
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      #- ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    ports:
+      - 5432:5432 
+    restart: unless-stopped
     labels:
       io.rancher.container.pull_image: always
-    restart: unless-stopped
 
   web:
     image: kartoza/osm-reporter:latest
