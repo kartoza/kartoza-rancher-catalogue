@@ -6,21 +6,22 @@ open source community.
 
 Provided Catalogue Entries:
 ---------------------------
-* GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
+* InaSAFE Realtime
 * GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see
   [README](./templates/geonode/README.md)
 * GeoSAFE based on GeoNode with QGIS Backend (Kartoza build of InaSAFE for the web) - see
   [README](./templates/geosafe/README.md)  
+* GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
+* OSM-Reporter - see [README](./templates/osm-reporter/README.md) 
 * PostgreSQL with PostGIS (enterprise geodatabase) - see
-  [README](./templates/postgis/README.md)  
-* QGIS Server with Btsync replication
-  [README](./templates/qgis-server-2.18/README.md)  
-  
+  [README](./templates/postgis-9.6-2.4/README.md)  
+* Projecta - see [README](./templates/projecta/README.md) 
+* QGIS Server with Btsync replication see [README](./templates/qgis-server-2.18/README.md)  
+
 
 Planned Catalogue Entries:
 ---------------------------
 
-* OSM Reporter
 * MapCampaigner
 * Feti?
 * Mapproxy
@@ -30,8 +31,6 @@ Planned Catalogue Entries:
 * Docker OSM
 * [POSM](https://github.com/posm/posm-build)
 * Sentry
-
-
 
 # Overview
 
