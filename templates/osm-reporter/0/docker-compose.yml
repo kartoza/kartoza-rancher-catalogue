@@ -40,7 +40,7 @@ services:
       - LOG_DIR=${LOG_DIR}  
     depends_on:
       - db
-	# do not expose using ports since we want to be able to spin up multiple
+    # do not expose using ports since we want to be able to spin up multiple
     # copies on a single # server if needed
     expose:
       - 8080
