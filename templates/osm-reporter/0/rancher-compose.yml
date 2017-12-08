@@ -58,7 +58,8 @@ services:
       port_rules:
       - hostname: web-lb 
         priority: 1
-        protocol: http
+        # we are forwarding to port 8080 so we need to use tcp not http
+        protocol: tcp
         service: web
         source_port: 80
         target_port: 8080
