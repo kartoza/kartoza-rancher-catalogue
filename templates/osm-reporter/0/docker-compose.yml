@@ -20,9 +20,9 @@ services:
       - POSTGRES_DB=gis
       - POSTGRES_USER=docker
       - POSTGRES_PASS=docker
-      #- ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
-    ports:
-      - 5432:5432 
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    expose:
+      - 5432 
     restart: unless-stopped
     labels:
       io.rancher.container.pull_image: always
