@@ -21,7 +21,7 @@ catalog:
       label: "Comma separated list of crew members"
       description: "Valid OSM users names of people actively working on your data gathering project. When set, an additional tag will be added in the user profile areas to indicate those who are crew members."
       required: false
-      default: ''
+      default: '20.411482,-34.053726,20.467358,-34.009483'
       type: "string"
     - variable: BBOX
       label: "Initial BBOX for when page loads."
