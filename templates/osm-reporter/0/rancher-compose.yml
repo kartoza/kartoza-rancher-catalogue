@@ -21,13 +21,13 @@ catalog:
       label: "Comma separated list of crew members"
       description: "Valid OSM users names of people actively working on your data gathering project. When set, an additional tag will be added in the user profile areas to indicate those who are crew members."
       required: false
-      default: '20.411482,-34.053726,20.467358,-34.009483'
+      default: ''
       type: "string"
     - variable: BBOX
       label: "Initial BBOX for when page loads."
       description: "Default bbox to use for the map and the stats. Format is: {SW_lng},{SW_lat},{NE_lng},{NE_lat}."
       required: false
-      default: ''
+      default: '20.411482,-34.053726,20.467358,-34.009483'
       type: "string"
     - variable: CACHE_DIR
       label: "Directory to cache OSM files."
