@@ -28,7 +28,7 @@ services:
       io.rancher.container.pull_image: always
 
   web:
-    image: kartoza/osm-reporter:latest
+    image: kartoza/osm-reporter:stable
     hostname: web
     environment:
       - PGUSER=docker
