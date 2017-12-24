@@ -15,7 +15,7 @@ catalog:
       label: "Logs key"
       description: "Resilio sync read/write key for syncing geojson activity logs"
       required: false
-      default: 
+      default:
       type: "string"
     - variable: CREW
       label: "Comma separated list of crew members"
@@ -56,11 +56,11 @@ services:
     lb_config:
       certs: []
       port_rules:
-      - hostname: web-lb 
+      - hostname: web-lb
         priority: 1
         # we are forwarding to port 8080 so we need to use tcp not http
         protocol: tcp
-        service: web
+        service: qgisserver
         source_port: 9000
         target_port: 90
       health_check:
