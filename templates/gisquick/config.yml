@@ -1,0 +1,7 @@
+name: GIS Quick
+description: A slick and easy to use map publishing platform.
+version: 1
+category: GIS
+maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
+license: GPL v3
+projectURL: http://gisquick.org

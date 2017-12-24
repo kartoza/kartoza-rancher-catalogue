@@ -1,0 +1,107 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  postgres-data:
+  postgres-backups:
+  gis-data:
+  media:
+  publish:
+  certs:
+
+services:
+
+  db:
+    image: kartoza/postgis:9.6-2.4
+    volumes:
+      - 'postgis-data:/var/lib/postgresql'
+      - 'backups:/backups'
+    environment:
+      - POSTGRES_DB=gis
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    expose:
+      - 5432 
+    restart: unless-stopped
+    labels:
+      io.rancher.container.pull_image: always
+
+  qgisserver:
+    restart: always
+    image: gisquick/qgis-server
+    volumes:
+      - ./_data/publish:/publish/:ro
+    expose:
+      - "90"
+
+  django:
+    restart: always
+    image: gisquick/django
+    links:
+      - qgisserver
+    volumes:
+      - gis-data:/var/www/gisquick/data/
+      - media:/var/www/qisquick/media/
+      - publish:/publish/
+    environment:
+      - GUNICORN_WORKERS=2
+      - GUNICORN_ERRORLOG=-
+      - GUNICORN_ACCESSLOG=-
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  nginx:
+    restart: unless-stopped
+    image: gisquick/nginx
+    links:
+      - django
+    volumes_from:
+      - django:ro
+    volumes:
+      - ./_data/etc/letsencrypt/:/etc/letsencrypt/
+      - ./_data/var/www/certbot/:/var/www/certbot/
+    ports:
+      - "443:443"
+    environment:
+      - NGINX_HOST=server
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+
+  # QGIS Server load balancer
+  web-lb:
+    image: rancher/lb-service-haproxy:v0.7.9
+    ports:
+      - "9000:9000"
+    links:
+      - qgisserver:qgisserver
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
+
+  btsync-gis-data:
+    # BTSync backups for activity logs
+    image: kartoza/btsync
+    hostname: btsync-media
+    restart: unless-stopped
+    # activity logs is mounted as /logs in web container and 
+    # as /web in btsync because btsync expects it there
+    volumes:
+      - gis-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=GISQuickGISDataBackups
+
