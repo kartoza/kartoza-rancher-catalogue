@@ -13,14 +13,15 @@ volumes:
   media:
   publish:
   certs:
+  certbot:
 
 services:
 
   db:
     image: kartoza/postgis:9.6-2.4
     volumes:
-      - 'postgis-data:/var/lib/postgresql'
-      - 'backups:/backups'
+      - 'postgres-data:/var/lib/postgresql'
+      - 'postgres-backups:/backups'
     environment:
       - POSTGRES_DB=gis
       - POSTGRES_USER=docker
@@ -36,7 +37,7 @@ services:
     restart: always
     image: gisquick/qgis-server
     volumes:
-      - ./_data/publish:/publish/:ro
+      - gis-data:/publish/:ro
     expose:
       - "90"
 
@@ -67,8 +68,8 @@ services:
     volumes_from:
       - django:ro
     volumes:
-      - ./_data/etc/letsencrypt/:/etc/letsencrypt/
-      - ./_data/var/www/certbot/:/var/www/certbot/
+      - certs:/etc/letsencrypt/
+      - certbot/:/var/www/certbot/
     ports:
       - "443:443"
     environment:
