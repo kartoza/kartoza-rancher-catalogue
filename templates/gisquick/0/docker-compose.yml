@@ -27,7 +27,7 @@ services:
       - POSTGRES_PASS=docker
       - ALLOW_IP_RANGE=0.0.0.0/0
     expose:
-      - 5432 
+      - 5432
     restart: unless-stopped
     labels:
       io.rancher.container.pull_image: always
@@ -79,7 +79,6 @@ services:
         max-size: "10m"
         max-file: "10"
 
-
   # QGIS Server load balancer
   web-lb:
     image: rancher/lb-service-haproxy:v0.7.9
@@ -97,7 +96,7 @@ services:
     image: kartoza/btsync
     hostname: btsync-media
     restart: unless-stopped
-    # activity logs is mounted as /logs in web container and 
+    # activity logs is mounted as /logs in web container and
     # as /web in btsync because btsync expects it there
     volumes:
       - gis-data:/web:rw
