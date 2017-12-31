@@ -6,8 +6,8 @@ catalog:
   uuid: gisquick-0
   questions:
     - variable: QGIS_BACKEND_INSTANCE_COUNT
-      label: "Reporter backend instance count"
-      description: "How many OSM reporter rendering instances to start with."
+      label: "QGIS Server backend instance count"
+      description: "How many QGIS Server rendering instances to start with."
       required: true
       default: 1
       type: "int"
