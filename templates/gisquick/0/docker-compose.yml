@@ -65,8 +65,12 @@ services:
     image: gisquick/nginx
     links:
       - django
-    volumes_from:
-      - django:ro
+    # volumes_from django gives error in rancher
+    # rancher 422 status code 422
+    volumes:
+      - gis-data:/var/www/gisquick/data/
+      - media:/var/www/qisquick/media/
+      - publish:/publish/
     volumes:
       - certs:/etc/letsencrypt/
       - certbot/:/var/www/certbot/
