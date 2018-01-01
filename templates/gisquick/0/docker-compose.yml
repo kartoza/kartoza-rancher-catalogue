@@ -73,7 +73,7 @@ services:
       - publish:/publish/
     volumes:
       - certs:/etc/letsencrypt/
-      - certbot/:/var/www/certbot/
+      - certbot:/var/www/certbot/
     ports:
       - "443:443"
     environment:
