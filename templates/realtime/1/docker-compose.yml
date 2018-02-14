@@ -1,0 +1,507 @@
+version: '2'
+volumes:
+  django-static-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  django-postgis-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  sftpbackup-media-history-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  django-postgis-dbbackup-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  sftpbackup-postgis-target-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  django-realtime-indicator:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  sftpbackup-postgis-history-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  django-media-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+
+  sftp-ssh-config-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-corrected-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-extracted-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  floodmaps-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  analysis-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-corrected-extracted-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  ashmaps-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-bnpb-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-bmkg-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  sftp-ssh-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+
+  report-template-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+services:
+  ssh-config-migrate:
+    image: kartoza/btsync:rancher
+    environment:
+      SECRET: ${SSH_CONFIG_SYNC}
+      DEVICE: InaSAFE Realtime Production - SSH Config
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - sftp-ssh-config-data:/web
+    labels:
+      io.rancher.container.pull_image: always
+
+  ssh-data-migrate:
+    image: kartoza/btsync:rancher
+    environment:
+      SECRET: ${SSH_DATA_SYNC}
+      DEVICE: InaSAFE Realtime Production - SSH Data
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - sftp-ssh-data:/web
+    labels:
+      io.rancher.container.pull_image: always
+
+  media-migrate:
+    image: kartoza/btsync:rancher
+    environment:
+      SECRET: ${MEDIA_SYNC}
+      DEVICE: InaSAFE Django Productions - Media
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - django-media-data:/web
+    labels:
+      io.rancher.container.pull_image: always
+
+  sftppgbackup:
+    image: kartoza/sftp-backup:1.0
+    environment:
+      DAILY: '14'
+      DUMPPREFIX: PG_inasafedjango
+      MONTHLY: '12'
+      SFTP_DIR: /
+      SFTP_HOST: 192.168.1.5
+      SFTP_PASSWORD: password
+      SFTP_USER: user
+      TARGET_FOLDER: /pg_backup
+      USE_SFTP_BACKUP: 'False'
+      YEARLY: '3'
+    volumes:
+    - sftpbackup-postgis-history-data:/backups
+    - sftpbackup-postgis-target-data:/pg_backup
+  smtp:
+    image: catatnight/postfix
+    environment:
+      maildomain: kartoza.com
+      smtp_user: noreply:docker
+  sftpmediabackup:
+    image: kartoza/sftp-backup:1.0
+    environment:
+      DAILY: '3'
+      DUMPPREFIX: MEDIA_inasafedjango
+      MONTHLY: '2'
+      SFTP_DIR: /
+      SFTP_HOST: 192.168.1.5
+      SFTP_PASSWORD: password
+      SFTP_USER: user
+      TARGET_FOLDER: /media_backup
+      USE_SFTP_BACKUP: 'False'
+      YEARLY: '1'
+    volumes:
+    - sftpbackup-media-history-data:/backups
+    - django-media-data:/media_backup
+  web:
+    image: kartoza/inasafe-django_nginx:v3.5
+    volumes:
+    - django-static-data:/home/web/static:ro
+    - django-media-data:/home/web/media:ro
+    links:
+    - uwsgi:uwsgi
+    ports:
+    - ${WEBSERVER_PORT}:8080/tcp
+  indicator-worker:
+    image: kartoza/inasafe-django_uwsgi:v3.5
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      C_FORCE_ROOT: 'true'
+      DATABASE_HOST: db
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_PASSWORD: ${POSTGRES_PASS}
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INAWARE_HOST: ${INAWARE_HOST}
+      INAWARE_PASS: ${INAWARE_PASS}
+      INAWARE_USER: ${INAWARE_USER}
+      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_MAIL_ADMINS: 'False'
+      LOGGING_SENTRY: 'False'
+      MAPQUEST_MAP_KEY: ''
+      PYTHONPATH: /home/web/django_project
+      SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
+      SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
+    working_dir: /home/web/django_project
+    external_links:
+    - rabbitmq:rabbitmq
+    volumes:
+    - django-static-data:/home/web/static
+    - django-media-data:/home/web/media
+    - django-realtime-indicator:/home/web/django_project/.run
+    links:
+    - dbbackup:dbbackup
+    - sftpmediabackup:sftpmediabackup
+    - db:db
+    - smtp:smtp
+    - sftppgbackup:sftppgbackup
+    command:
+    - celery
+    - -A
+    - core.celery_app
+    - worker
+    - --loglevel=info
+    - -Q
+    - inasafe-django-indicator
+    - -B
+    - -n
+    - indicator.%h
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
+  dbbackup:
+    image: kartoza/inasafe-django_dbbackup:v3.4.1
+    environment:
+      DUMPPREFIX: PG_inasafedjango
+      PGDATABASE: ${POSTGRES_DB}
+      PGHOST: db
+      PGPASSWORD: ${POSTGRES_PASS}
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER}
+    volumes:
+    - django-postgis-dbbackup-data:/backups
+    - sftpbackup-postgis-target-data:/pg_backup
+    links:
+    - db:db
+  uwsgi:
+    image: kartoza/inasafe-django_uwsgi:v3.5
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      DATABASE_HOST: db
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_PASSWORD: ${POSTGRES_PASS}
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INAWARE_HOST: ${INAWARE_HOST}
+      INAWARE_PASS: ${INAWARE_PASS}
+      INAWARE_USER: ${INAWARE_USER}
+      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_MAIL_ADMINS: 'False'
+      LOGGING_SENTRY: 'False'
+      MAPQUEST_MAP_KEY: ''
+      SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
+      SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
+    external_links:
+    - rabbitmq:rabbitmq
+    volumes:
+    - django-static-data:/home/web/static
+    - django-media-data:/home/web/media
+    - django-realtime-indicator:/home/web/django_project/.run
+    links:
+    - dbbackup:dbbackup
+    - sftpmediabackup:sftpmediabackup
+    - db:db
+    - smtp:smtp
+    - sftppgbackup:sftppgbackup
+    labels:
+      io.rancher.container.pull_image: always
+  inasafe-worker:
+    image: kartoza/inasafe-django_uwsgi:v3.5
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      C_FORCE_ROOT: 'true'
+      DATABASE_HOST: db
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_PASSWORD: ${POSTGRES_PASS}
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INAWARE_HOST: ${INAWARE_HOST}
+      INAWARE_PASS: ${INAWARE_PASS}
+      INAWARE_USER: ${INAWARE_USER}
+      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_MAIL_ADMINS: 'False'
+      LOGGING_SENTRY: 'False'
+      MAPQUEST_MAP_KEY: ''
+      PYTHONPATH: /home/web/django_project
+      SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
+      SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
+    working_dir: /home/web/django_project
+    external_links:
+    - rabbitmq:rabbitmq
+    volumes:
+    - django-static-data:/home/web/static
+    - django-media-data:/home/web/media
+    - django-realtime-indicator:/home/web/django_project/.run
+    links:
+    - dbbackup:dbbackup
+    - sftpmediabackup:sftpmediabackup
+    - db:db
+    - smtp:smtp
+    - sftppgbackup:sftppgbackup
+    command:
+    - celery
+    - -A
+    - core.celery_app
+    - worker
+    - --loglevel=info
+    - -Q
+    - inasafe-django
+    - -n
+    - inasafe-django.%h
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
+  rabbitmq:
+    image: library/rabbitmq
+    links:
+    - db:db
+    labels:
+      io.rancher.container.pull_image: always
+  db:
+    image: kartoza/postgis:9.6-2.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASS: ${POSTGRES_PASS}
+      POSTGRES_USER: ${POSTGRES_USER}
+      ALLOW_IP_RANGE: ${POSTGRES_HBA_RANGE}
+      REPLICATE_FROM: ${REPLICATE_FROM}
+      REPLICATE_PORT: ${REPLICATE_PORT}
+    labels:
+      io.rancher.container.pull_image: always
+    volumes:
+    - django-postgis-data:/var/lib/postgresql
+    - django-postgis-dbbackup-data:/backups
+
+
+  shakemaps-extracted-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Shakemaps Extracted
+      SECRET: ${SHAKEMAPS_EXTRACTED_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-extracted-data:/web
+  floodmaps-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Floodmaps
+      SECRET: ${FLOODMAPS_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - floodmaps-data:/web
+  bmkg-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Shakemaps BMKG
+      SECRET: ${BMKG_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-bmkg-data:/web
+  bnpb-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Shakemaps BNPB
+      SECRET: ${BNPB_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-bnpb-data:/web
+  shakemaps-corrected-extracted-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Shakemaps Corrected Extracted
+      SECRET: ${SHAKEMAPS_CORRECTED_EXTRACTED_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-corrected-extracted-data:/web
+  ashmaps-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Ashmaps
+      SECRET: ${ASHMAPS_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - ashmaps-data:/web
+  sftp:
+    image: kartoza/realtime-orchestration_sftp:v3.1
+    volumes:
+    - sftp-ssh-data:/home/realtime/.ssh
+    - sftp-ssh-config-data:/etc/ssh
+    - shakemaps-bmkg-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    ports:
+    - 9222:22/tcp
+  shakemaps-corrected-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Shakemaps Corrected
+      SECRET: ${SHAKEMAPS_CORRECTED_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-corrected-data:/web
+  inasafe-shakemap-monitor:
+    image: kartoza/realtime-orchestration_inasafe:v3.2.0
+    environment:
+      ASHMAPS_DIR: /home/realtime/ashmaps
+      C_FORCE_ROOT: 'True'
+      FLOODMAPS_DIR: /home/realtime/floodmaps
+      GEONAMES_SQLITE_PATH: /home/realtime/analysis_data/indonesia.sqlite
+      INASAFE_ASH_AIRPORT_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Airport_OpenFlights_WGS84.shp
+      INASAFE_ASH_CITIES_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Capital_City_Point_WGS84.shp
+      INASAFE_ASH_HIGHLIGHT_BASE_PATH: /home/realtime/analysis_data/ash/srtm_indo_hillshade.tif
+      INASAFE_ASH_LANDCOVER_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Landcover_250K_WGS84.shp
+      INASAFE_ASH_OVERVIEW_PATH: /home/realtime/analysis_data/ash/overview.shp
+      INASAFE_ASH_POPULATION_PATH: /home/realtime/analysis_data/ash/exposure/WorldPop_200m.tif
+      INASAFE_ASH_VOLCANO_PATH: /home/realtime/analysis_data/ash/exposure/home/realtime/analysis_data/ash/exposure/GVP_Volcano_List_Darwin_VAAC_AOR_final.shp
+      INASAFE_FLOOD_POPULATION_PATH: /home/realtime/analysis_data/exposure/DKI_Jakarta_Population_Dukcapil_Ages_WGS84.shp
+      INASAFE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
+      INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
+      INASAFE_REALTIME_REST_PASSWORD: 7ny3pQZ8he
+      INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
+      INASAFE_REALTIME_REST_USER: realtimepush@realtime.inasafe.org
+      INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
+      INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
+      INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      INASAFE_SHAKE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
+      INASAFE_SOURCE_DIR: /home/realtime/src/inasafe
+      SHAKEMAPS_DIR: /home/realtime/shakemaps
+      SHAKEMAPS_EXTRACT_DIR: /home/realtime/shakemaps-extracted
+      WEB_DIR: /var/www
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
+      INASAFE_LOCALE: id
+      INASAFE_ASH_TEMPLATE_PATH: /home/realtime/report-template/ash/realtime-ash.qpt
+    working_dir: /home/realtime/src/inasafe
+    volumes:
+    - analysis-data:/home/realtime/analysis_data
+    - shakemaps-bmkg-data:/home/realtime/shakemaps
+    - shakemaps-extracted-data:/home/realtime/shakemaps-extracted
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - report-template-data:/home/realtime/report-template
+    links:
+    - rabbitmq:rabbitmq
+    - sftp:sftp
+    - web:web
+    command:
+    - /entry-point.sh
+    - shakemaps-monitor
+    labels:
+      io.rancher.container.pull_image: always
+  inasafe-worker:
+    image: kartoza/realtime-orchestration_inasafe:v3.2.0
+    environment:
+      ASHMAPS_DIR: /home/realtime/ashmaps
+      C_FORCE_ROOT: 'True'
+      FLOODMAPS_DIR: /home/realtime/floodmaps
+      GEONAMES_SQLITE_PATH: /home/realtime/analysis_data/indonesia.sqlite
+      INASAFE_ASH_AIRPORT_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Airport_OpenFlights_WGS84.shp
+      INASAFE_ASH_CITIES_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Capital_City_Point_WGS84.shp
+      INASAFE_ASH_HIGHLIGHT_BASE_PATH: /home/realtime/analysis_data/ash/srtm_indo_hillshade.tif
+      INASAFE_ASH_LANDCOVER_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Landcover_250K_WGS84.shp
+      INASAFE_ASH_OVERVIEW_PATH: /home/realtime/analysis_data/ash/overview.shp
+      INASAFE_ASH_POPULATION_PATH: /home/realtime/analysis_data/ash/exposure/WorldPop_200m.tif
+      INASAFE_ASH_VOLCANO_PATH: /home/realtime/analysis_data/ash/exposure/home/realtime/analysis_data/ash/exposure/GVP_Volcano_List_Darwin_VAAC_AOR_final.shp
+      INASAFE_FLOOD_POPULATION_PATH: /home/realtime/analysis_data/exposure/DKI_Jakarta_Population_Dukcapil_Ages_WGS84.shp
+      INASAFE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
+      INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
+      INASAFE_REALTIME_REST_PASSWORD: 7ny3pQZ8he
+      INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
+      INASAFE_REALTIME_REST_USER: realtimepush@realtime.inasafe.org
+      INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
+      INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
+      INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      INASAFE_SHAKE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
+      INASAFE_SOURCE_DIR: /home/realtime/src/inasafe
+      SHAKEMAPS_DIR: /home/realtime/shakemaps
+      SHAKEMAPS_EXTRACT_DIR: /home/realtime/shakemaps-extracted
+      WEB_DIR: /var/www
+      INASAFE_LOCALE: id
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
+      INASAFE_ASH_TEMPLATE_PATH: /home/realtime/report-template/ash/realtime-ash.qpt
+    working_dir: /home/realtime/src/inasafe
+    volumes:
+    - analysis-data:/home/realtime/analysis_data
+    - shakemaps-bmkg-data:/home/realtime/shakemaps
+    - shakemaps-extracted-data:/home/realtime/shakemaps-extracted
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - report-template-data:/home/realtime/report-template
+    links:
+    - rabbitmq:rabbitmq
+    - sftp:sftp
+    - web:web
+    command:
+    - /entry-point.sh
+    - celery-workers
+  rabbitmq:
+    image: library/rabbitmq
+  analysis-data-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Analysis Data
+      SECRET: ${ANALYSIS_DATA_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - analysis-data:/web
+  report-template-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: InaSAFE Realtime Production - Report Template
+      SECRET: ${REPORT_TEMPLATE_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+      - report-template-data:/web
