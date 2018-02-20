@@ -1,0 +1,289 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  postgis-data:
+  postgis-history-data:
+  django-media-data:
+  django-media-history-data:
+  django-static-data:
+  qgis-server-qgis-layer-data:
+  qgis-server-qgis-layer-history-data:
+  qgis-server-qgis-cache-data:
+  inasafe-headless-output-data:
+
+services:
+
+  rabbitmq:
+    image: rabbitmq
+
+  postgis:
+    image: kartoza/geonode_db
+    volumes:
+      - 'postgis-data:/var/lib/postgresql'
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    restart: unless-stopped
+
+  dbbackup: &dbbackup
+    image: kartoza/pg-backup:9.4
+    volumes:
+      - postgis-history-data:/backups
+    links:
+      - postgis
+    environment:
+      # make this equal to PG_$(PROJECT_ID) in makefile
+      - DUMPPREFIX=PG_geonode
+      # These are all defaults anyway, but setting explicitly in
+      # case we ever want to ever use different credentials
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASS}
+      - PGDATABASE=${POSTGRES_DB}
+      - PGPORT=5432
+      - PGHOST=postgis
+    restart: unless-stopped
+
+  mediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - django-media-history-data:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - django-media-data:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_geonode
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+    restart: unless-stopped
+
+  qgisservermediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - qgis-server-qgis-layer-history-data:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - qgis-server-qgis-layer-data:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_qgisserver
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+    restart: unless-stopped
+
+  qgis-server:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+    - 80:80/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
+
+  qgis-server-backend:
+    image: kartoza/geonode_qgis-server
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+    environment:
+      - DEBUG=True
+      # Write to stdout so we dont fill the container with logs
+      - QGIS_LOG_FILE=/dev/stdout
+      - QGIS_SERVER_LOG_FILE=/dev/stdout
+      # Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)
+      - QGIS_DEBUG=0
+      - QGIS_SERVER_LOG_LEVEL=0
+      # It is important to include this environment variable
+      # QGIS-Server:LTR cgi needs it
+      - QGIS_PROJECT_FILE=
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  smtp:
+    image: catatnight/postfix
+    hostname: postfix
+    environment:
+      # You could change this to something more suitable
+      - maildomain=${SITE_URL}
+      - smtp_user=noreply:docker
+    restart: unless-stopped
+
+  django:
+    image: kartoza/geonode_django_geosafe
+    #image: kartoza/geonode_django_geosafe
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'django-static-data:/usr/src/app/geonode/static_root'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+      - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
+    command: /entry-point.sh
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgis:5432/gis
+      - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - GEOSERVER_BASE_URL=http://geoserver:8080/geoserver/
+# Should be specified in docker-compose.override.yml. Because it depends on the
+# host
+      - ADMIN=tim@kartoza.com
+      - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
+      - DEBUG=False
+      - PYTHONPATH=/usr/src:/usr/src/app/
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ROOT_URLCONF=core.urls
+      - SITEURL=http://${SITE_URL}/
+      - GEONODE_BASE_URL=http://nginx/
+      - QGIS_SERVER_URL=http://qgis-server/
+      # GeoSAFE Related
+      - USE_GEOSAFE=True
+      - USE_LAYER_FILE_ACCESS=True
+      # Base directory that will be used by InaSAFE Headless
+      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
+      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/uploaded/
+      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
+      - INASAFE_IMPACT_BASE_URL=/output/
+      - USE_LAYER_HTTP_ACCESS=False
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
+      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
+    restart: unless-stopped
+    links:
+      - postgis
+      - rabbitmq
+      - qgis-server
+
+  nginx:
+    image: kartoza/geonode_nginx
+    links:
+      - django
+    volumes:
+      - 'django-media-data:/home/web/media:ro'
+      - 'django-static-data:/home/web/static:ro'
+    ports:
+      - ${WEBSERVER_PORT}:80
+    restart: unless-stopped
+
+  celery:
+    image: kartoza/geonode_django_geosafe
+    restart: on-failure
+    working_dir: /usr/src/app
+    volumes:
+      - 'django-media-data:/usr/src/app/geonode/uploaded'
+      - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
+      - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
+      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
+    environment:
+      - DEBUG=False
+      - C_FORCE_ROOT=True
+      - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgis:5432/gis
+      - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - PYTHONPATH=/usr/src:/usr/src/app/
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ROOT_URLCONF=core.urls
+      - SITEURL=http://${SITE_URL}/
+      - GEONODE_BASE_URL=http://nginx/
+      - QGIS_SERVER_URL=http://qgis-server/
+      - USE_GEOSAFE=False
+      # GeoSAFE Related
+      - USE_GEOSAFE=True
+      - USE_LAYER_FILE_ACCESS=True
+      # Base directory that will be used by InaSAFE Headless
+      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
+      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/uploaded/
+      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
+      - INASAFE_IMPACT_BASE_URL=/output/
+      - USE_LAYER_HTTP_ACCESS=False
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
+      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
+    command: celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
+    links:
+      - rabbitmq
+      - postgis
+      - qgis-server
+  inasafe-headless:
+    image: kartoza/geonode_inasafe-headless
+    restart: on-failure
+    working_dir: /home/src/inasafe
+    environment:
+      - C_FORCE_ROOT=True
+      - PYTHONPATH=/home/src/inasafe
+      - InaSAFEQGIS=/home/src/inasafe
+      - DISPLAY=:99
+      - INASAFE_HEADLESS_BROKER_HOST=amqp://guest:guest@rabbitmq:5672/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_DIR=/home/output/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
+      - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
+      - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
+      - QGIS_DEBUG=0
+      - INASAFE_WORK_DIR=/tmp/inasafe
+    volumes:
+      - 'django-media-data:/home/geosafe/media/'
+      - 'inasafe-headless-output-data:/home/output/'
+    command: /start-celery.sh prod inasafe-headless
+    links:
+      - rabbitmq
+      - nginx
+      - django
+
+  inasafe-headless-analysis:
+    image: kartoza/geonode_inasafe-headless
+    restart: on-failure
+    working_dir: /home/src/inasafe
+    environment:
+      - C_FORCE_ROOT=True
+      - PYTHONPATH=/home/src/inasafe
+      - InaSAFEQGIS=/home/src/inasafe
+      - DISPLAY=:99
+      - INASAFE_HEADLESS_BROKER_HOST=amqp://guest:guest@rabbitmq:5672/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_DIR=/home/output/
+      - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
+      - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
+      - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
+      - QGIS_DEBUG=0
+      - INASAFE_WORK_DIR=/tmp/inasafe
+    volumes:
+      - 'django-media-data:/home/geosafe/media/'
+      - 'inasafe-headless-output-data:/home/output/'
+    command: /start-celery.sh prod inasafe-headless-analysis
+    links:
+      - rabbitmq
+      - nginx
+      - django
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - postgis-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=ProjectaDatabase
+     
+  btsync-media:
+    # BTSync backups for django media
+    image: kartoza/btsync
+    hostname: btsync-logs
+    restart: unless-stopped
+    volumes:
+      - django-media-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=OsmReporterLogs
+
