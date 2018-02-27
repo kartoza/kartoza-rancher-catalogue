@@ -2,78 +2,114 @@ version: '2'
 volumes:
   django-static-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   django-postgis-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   sftpbackup-media-history-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   django-postgis-dbbackup-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   sftpbackup-postgis-target-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   django-realtime-indicator:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   sftpbackup-postgis-history-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   django-media-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
 
   sftp-ssh-config-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   shakemaps-corrected-data:
-    driver: ${VOLUME_DRIVER}t
+    driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   analysis-context-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   hazard-drop-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   ashmaps-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   floodmaps-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   shakemaps-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   sftp-ssh-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
 
   report-template-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
   headless-output-data:
     driver: ${VOLUME_DRIVER}
+{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+{{- end}}
 services:
   ssh-config-migrate:
     image: kartoza/btsync:rancher
@@ -132,11 +168,13 @@ services:
     - sftpbackup-postgis-target-data:/pg_backup
     links:
     - db:db
+
   smtp:
     image: catatnight/postfix
     environment:
       maildomain: kartoza.com
       smtp_user: noreply:docker
+
   sftpmediabackup:
     image: kartoza/sftp-backup:1.0
     environment:
@@ -155,8 +193,10 @@ services:
     - django-media-data:/media_backup
     links:
     - uwsgi:uwsgi
+
   web:
     image: kartoza/inasafe-django_nginx:develop_v4
+    command: prod
     volumes:
     - django-static-data:/home/web/static:ro
     - django-media-data:/home/web/media:ro
@@ -164,6 +204,7 @@ services:
     - uwsgi:uwsgi
     ports:
     - ${WEBSERVER_PORT}:8080/tcp
+
   indicator-worker:
     image: kartoza/inasafe-django_uwsgi:develop_v4
     environment:
@@ -212,6 +253,7 @@ services:
       io.rancher.container.pull_image: always
       cron.schedule: 0 0 * * * ?
       cron.action: restart
+
   dbbackup:
     image: kartoza/inasafe-django_dbbackup:v3.4.1
     environment:
@@ -226,6 +268,7 @@ services:
     - sftpbackup-postgis-target-data:/pg_backup
     links:
     - db:db
+
   uwsgi:
     image: kartoza/inasafe-django_uwsgi:develop_v4
     environment:
@@ -260,6 +303,7 @@ services:
     - smtp:smtp
     labels:
       io.rancher.container.pull_image: always
+
   django-worker:
     image: kartoza/inasafe-django_uwsgi:develop_v4
     environment:
@@ -307,10 +351,12 @@ services:
       io.rancher.container.pull_image: always
       cron.schedule: 0 0 * * * ?
       cron.action: restart
+
   rabbitmq:
     image: library/rabbitmq
     labels:
       io.rancher.container.pull_image: always
+
   db:
     image: kartoza/postgis:9.6-2.4
     environment:
@@ -335,8 +381,9 @@ services:
     - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     ports:
     - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
+
   shakemap-monitor:
-    image: inasafe/realtime-hazard_processor
+    image: inasafe/realtime_hazard-processor
     command:
     - /docker-entrypoint.sh
     - prod
@@ -344,6 +391,7 @@ services:
     environment:
       ASHMAPS_DIR: /home/realtime/ashmaps
       C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
       FLOODMAPS_DIR: /home/realtime/floodmaps
       GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
       INASAFE_LOCALE: id
@@ -368,8 +416,9 @@ services:
       io.rancher.container.pull_image: always
       cron.schedule: 0 0 * * * ?
       cron.action: restart
+
   realtime-worker:
-    image: inasafe/realtime-hazard_processor
+    image: inasafe/realtime_hazard-processor
     command:
     - /docker-entrypoint.sh
     - prod
@@ -377,6 +426,7 @@ services:
     environment:
       ASHMAPS_DIR: /home/realtime/ashmaps
       C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
       FLOODMAPS_DIR: /home/realtime/floodmaps
       GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
       INASAFE_LOCALE: id
@@ -410,6 +460,7 @@ services:
       STANDBY_MODE: 'TRUE'
     volumes:
     - analysis-context-data:/web
+
   report-template-sync:
     image: kartoza/btsync:rancher
     environment:

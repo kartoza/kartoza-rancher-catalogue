@@ -1,10 +1,17 @@
-version: '2'
-catalog:
+.catalog:
   name: "InaSAFE Realtime v4"
   description: "InaSAFE Realtime using InaSAFE core v4"
   version: 4.0-rc-1
   uuid: inasafe-realtime-v4-2
   questions:
+    - variable: RANCHER_SERVER_VERSION
+      label: Rancher Server Version
+      description: Choose Rancher Server Version you want to use
+      type: "enum"
+      options:
+        - v1.6.10
+        - v1.6.12
+      default: v1.6.12
     - variable: VOLUME_DRIVER
       label: Storage driver
       description: Storage driver used for volume
@@ -32,7 +39,7 @@ catalog:
     - variable: INASAFE_REALTIME_REST_USER
       label: InaSAFE Realtime REST Username
       description: Credentials User for Realtime REST API
-      default:
+      default: realtimepush@realtime.inasafe.org
       type: "string"
     - variable: INASAFE_REALTIME_REST_PASSWORD
       label: InaSAFE Realtime REST Password
@@ -43,7 +50,7 @@ catalog:
       label: SFTP Port for Shakemap drop
       description: This is SFTP exposed port into outside world
       default: 9222
-      type: "string"
+      type: "int"
     - variable: SITE_DOMAIN_NAME
       label: InaSAFE Realtime Site Domain Name
       description: Internet resolvable domain name for InaSAFE Realtime. Used for redirect from InAWARE to InaSAFE. Must start with http:// and ends with /
@@ -65,7 +72,7 @@ catalog:
       label: PostgreSQL superuser password to create.
       required: true
       default: docker
-      type: "string"
+      type: "password"
     - variable: REPLICATE_FROM
       description: Fill this if you need the initial db replicated from other sources
       label: Database replication master host
@@ -86,12 +93,6 @@ catalog:
     - variable: ADMIN_EMAIL
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
-      required: true
-      default: ""
-      type: "string"
-    - variable: SITE_URL
-      label: "Site URL"
-      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
       required: true
       default: ""
       type: "string"
@@ -131,53 +132,3 @@ catalog:
       label: "Report Template Data Key"
       description: "BtSync Key for Report Template"
       type: "string"
-services:
-  sftppgbackup:
-    scale: 1
-    start_on_create: true
-  smtp:
-    scale: 1
-    start_on_create: true
-  sftpmediabackup:
-    scale: 1
-    start_on_create: true
-  web:
-    scale: 1
-    start_on_create: true
-  indicator-worker:
-    scale: 1
-    start_on_create: true
-  dbbackup:
-    scale: 1
-    start_on_create: true
-  uwsgi:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  db:
-    scale: 1
-    start_on_create: true
-
-  sftp:
-    scale: 1
-    start_on_create: true
-  inasafe-shakemap-monitor:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  analysis-context-sync:
-    scale: 1
-    start_on_create: true
-  report-template-sync:
-    scale: 1
-    start_on_create: true
