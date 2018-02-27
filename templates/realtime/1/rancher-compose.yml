@@ -29,6 +29,21 @@ catalog:
       description: Credentials Password for Realtime API to integrate with InAWARE
       default:
       type: "password"
+    - variable: INASAFE_REALTIME_REST_USER
+      label: InaSAFE Realtime REST Username
+      description: Credentials User for Realtime REST API
+      default: realtime
+      type: "string"
+    - variable: INASAFE_REALTIME_REST_PASSWORD
+      label: InaSAFE Realtime REST Password
+      description: Credentials Passwords for Realtime REST API
+      default:
+      type: "password"
+    - variable: SHAKEMAP_DROP_EXPOSE_PORT
+      label: SFTP Port for Shakemap drop
+      description: This is SFTP exposed port into outside world
+      default: 9222
+      type: "string"
     - variable: SITE_DOMAIN_NAME
       label: InaSAFE Realtime Site Domain Name
       description: Internet resolvable domain name for InaSAFE Realtime. Used for redirect from InAWARE to InaSAFE. Must start with http:// and ends with /
@@ -87,6 +102,13 @@ catalog:
       required: true
       default: 80
       type: "int"
+
+    - variable: SYNC_DEVICE_PREFIX
+      label: "BtSync Device prefix"
+      description: "Device prefix used by BtSync. Useful to differentiate sync devices."
+      required: true
+      default:
+      type: "string"
 
     - variable: SSH_CONFIG_SYNC
       description: "BtSync Key for SSH Config"
