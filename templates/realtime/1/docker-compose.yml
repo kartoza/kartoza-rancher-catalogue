@@ -83,10 +83,12 @@ services:
     image: kartoza/btsync:rancher
     environment:
       SECRET: ${SSH_CONFIG_SYNC}
-      DEVICE: InaSAFE Realtime Production - SSH Config
+      DEVICE: ${SYNC_DEVICE_PREFIX} - SSH Config
       STANDBY_MODE: 'TRUE'
     volumes:
     - sftp-ssh-config-data:/web
+    links:
+    - sftp:sftp
     labels:
       io.rancher.container.pull_image: always
 
@@ -94,10 +96,12 @@ services:
     image: kartoza/btsync:rancher
     environment:
       SECRET: ${SSH_DATA_SYNC}
-      DEVICE: InaSAFE Realtime Production - SSH Data
+      DEVICE: ${SYNC_DEVICE_PREFIX} - SSH Data
       STANDBY_MODE: 'TRUE'
     volumes:
     - sftp-ssh-data:/web
+    links:
+    - sftp:sftp
     labels:
       io.rancher.container.pull_image: always
 
@@ -105,10 +109,12 @@ services:
     image: kartoza/btsync:rancher
     environment:
       SECRET: ${MEDIA_SYNC}
-      DEVICE: InaSAFE Django Productions - Media
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Media
       STANDBY_MODE: 'TRUE'
     volumes:
     - django-media-data:/web
+    links:
+    - uwsgi:uwsgi
     labels:
       io.rancher.container.pull_image: always
 
@@ -128,6 +134,8 @@ services:
     volumes:
     - sftpbackup-postgis-history-data:/backups
     - sftpbackup-postgis-target-data:/pg_backup
+    links:
+    - db:db
   smtp:
     image: catatnight/postfix
     environment:
@@ -149,6 +157,8 @@ services:
     volumes:
     - sftpbackup-media-history-data:/backups
     - django-media-data:/media_backup
+    links:
+    - uwsgi:uwsgi
   web:
     image: kartoza/inasafe-django_nginx:v3.5
     volumes:
@@ -180,18 +190,14 @@ services:
       SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
       SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
     working_dir: /home/web/django_project
-    external_links:
-    - rabbitmq:rabbitmq
     volumes:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     links:
-    - dbbackup:dbbackup
-    - sftpmediabackup:sftpmediabackup
+    - rabbitmq:rabbitmq
     - db:db
     - smtp:smtp
-    - sftppgbackup:sftppgbackup
     command:
     - celery
     - -A
@@ -225,6 +231,7 @@ services:
     image: kartoza/inasafe-django_uwsgi:v3.5
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      C_FORCE_ROOT: 'true'
       DATABASE_HOST: db
       DATABASE_NAME: ${POSTGRES_DB}
       DATABASE_PASSWORD: ${POSTGRES_PASS}
@@ -240,18 +247,14 @@ services:
       MAPQUEST_MAP_KEY: ''
       SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
       SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
-    external_links:
-    - rabbitmq:rabbitmq
     volumes:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     links:
-    - dbbackup:dbbackup
-    - sftpmediabackup:sftpmediabackup
+    - rabbitmq:rabbitmq
     - db:db
     - smtp:smtp
-    - sftppgbackup:sftppgbackup
     labels:
       io.rancher.container.pull_image: always
   inasafe-worker:
@@ -276,18 +279,14 @@ services:
       SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
       SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
     working_dir: /home/web/django_project
-    external_links:
-    - rabbitmq:rabbitmq
     volumes:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     links:
-    - dbbackup:dbbackup
-    - sftpmediabackup:sftpmediabackup
+    - rabbitmq:rabbitmq
     - db:db
     - smtp:smtp
-    - sftppgbackup:sftppgbackup
     command:
     - celery
     - -A
@@ -304,8 +303,6 @@ services:
       cron.action: restart
   rabbitmq:
     image: library/rabbitmq
-    links:
-    - db:db
     labels:
       io.rancher.container.pull_image: always
   db:
@@ -327,7 +324,7 @@ services:
   shakemaps-extracted-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Shakemaps Extracted
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Extracted
       SECRET: ${SHAKEMAPS_EXTRACTED_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -335,7 +332,7 @@ services:
   floodmaps-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Floodmaps
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Floodmaps
       SECRET: ${FLOODMAPS_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -343,7 +340,7 @@ services:
   bmkg-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Shakemaps BMKG
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps BMKG
       SECRET: ${BMKG_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -351,7 +348,7 @@ services:
   bnpb-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Shakemaps BNPB
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps BNPB
       SECRET: ${BNPB_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -359,7 +356,7 @@ services:
   shakemaps-corrected-extracted-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Shakemaps Corrected Extracted
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Corrected Extracted
       SECRET: ${SHAKEMAPS_CORRECTED_EXTRACTED_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -367,7 +364,7 @@ services:
   ashmaps-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Ashmaps
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Ashmaps
       SECRET: ${ASHMAPS_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -380,11 +377,11 @@ services:
     - shakemaps-bmkg-data:/home/realtime/shakemaps
     - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     ports:
-    - 9222:22/tcp
+    - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
   shakemaps-corrected-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Shakemaps Corrected
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Corrected
       SECRET: ${SHAKEMAPS_CORRECTED_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -408,9 +405,9 @@ services:
       INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
       INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
-      INASAFE_REALTIME_REST_PASSWORD: 7ny3pQZ8he
+      INASAFE_REALTIME_REST_PASSWORD: ${INASAFE_REALTIME_REST_PASSWORD}
       INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
-      INASAFE_REALTIME_REST_USER: realtimepush@realtime.inasafe.org
+      INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
       INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
@@ -433,12 +430,13 @@ services:
     links:
     - rabbitmq:rabbitmq
     - sftp:sftp
-    - web:web
     command:
     - /entry-point.sh
     - shakemaps-monitor
     labels:
       io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
   inasafe-worker:
     image: kartoza/realtime-orchestration_inasafe:v3.2.0
     environment:
@@ -458,9 +456,9 @@ services:
       INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
       INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
-      INASAFE_REALTIME_REST_PASSWORD: 7ny3pQZ8he
+      INASAFE_REALTIME_REST_PASSWORD: ${INASAFE_REALTIME_REST_PASSWORD}
       INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
-      INASAFE_REALTIME_REST_USER: realtimepush@realtime.inasafe.org
+      INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
       INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
@@ -483,16 +481,17 @@ services:
     links:
     - rabbitmq:rabbitmq
     - sftp:sftp
-    - web:web
     command:
     - /entry-point.sh
     - celery-workers
-  rabbitmq:
-    image: library/rabbitmq
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
   analysis-data-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Analysis Data
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Analysis Data
       SECRET: ${ANALYSIS_DATA_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
@@ -500,7 +499,7 @@ services:
   report-template-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: InaSAFE Realtime Production - Report Template
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Report Template
       SECRET: ${REPORT_TEMPLATE_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
