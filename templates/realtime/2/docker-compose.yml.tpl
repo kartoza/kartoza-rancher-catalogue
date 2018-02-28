@@ -221,7 +221,8 @@ services:
       INAWARE_HOST: ${INAWARE_HOST}
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
-      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_HANDLER: console
+      LOGGING_DEFAULT_LOG_LEVEL: INFO
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
@@ -234,6 +235,12 @@ services:
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
@@ -286,6 +293,7 @@ services:
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
       LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_LOG_LEVEL: ERROR
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
@@ -297,6 +305,12 @@ services:
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
@@ -320,7 +334,8 @@ services:
       INAWARE_HOST: ${INAWARE_HOST}
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
-      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_HANDLER: console
+      LOGGING_DEFAULT_LOG_LEVEL: INFO
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
@@ -333,6 +348,12 @@ services:
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
@@ -484,6 +505,10 @@ services:
     - headless-output-data:/home/headless/outputs
     - analysis-context-data:/home/headless/contexts
     - report-template-data:/home/headless/qgis-templates
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
     environment:
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       DISPLAY: ':99'
