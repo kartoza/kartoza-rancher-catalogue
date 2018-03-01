@@ -524,3 +524,7 @@ services:
       INASAFE_HEADLESS_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_WORK_DIR: /home/headless
       INASAFE_OUTPUT_DIR: /home/headless/outputs
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
