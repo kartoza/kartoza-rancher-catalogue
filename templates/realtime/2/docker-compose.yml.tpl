@@ -483,13 +483,20 @@ services:
     - analysis-context-data:/web
 
   report-template-sync:
-    image: kartoza/btsync:rancher
+    image: alpine/git
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - "git pull origin master && git log HEAD^..HEAD && tail -f /dev/null"
     environment:
       DEVICE: ${SYNC_DEVICE_PREFIX} - Report Template
       SECRET: ${REPORT_TEMPLATE_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
     - report-template-data:/web
+    labels:
+      cron.schedule: */5 * * * * ?
+      cron.action: restart
 
   headless-worker:
     image: inasafe/headless_processor
