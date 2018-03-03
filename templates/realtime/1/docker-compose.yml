@@ -1,5 +1,6 @@
 version: '2'
 volumes:
+{{- if eq .Values.VOLUME_DRIVER "rancher-nfs" }}
   django-static-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
@@ -78,6 +79,48 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
+{{- else}}
+  django-static-data:
+    driver: ${VOLUME_DRIVER}
+  django-postgis-data:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-media-history-data:
+    driver: ${VOLUME_DRIVER}
+  django-postgis-dbbackup-data:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-postgis-target-data:
+    driver: ${VOLUME_DRIVER}
+  django-realtime-indicator:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-postgis-history-data:
+    driver: ${VOLUME_DRIVER}
+  django-media-data:
+    driver: ${VOLUME_DRIVER}
+
+  sftp-ssh-config-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-corrected-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-extracted-data:
+    driver: ${VOLUME_DRIVER}
+  floodmaps-data:
+    driver: ${VOLUME_DRIVER}
+  analysis-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-corrected-extracted-data:
+    driver: ${VOLUME_DRIVER}
+  ashmaps-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-bnpb-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-bmkg-data:
+    driver: ${VOLUME_DRIVER}
+  sftp-ssh-data:
+    driver: ${VOLUME_DRIVER}
+
+  report-template-data:
+    driver: ${VOLUME_DRIVER}
+{{- end}}
 services:
   ssh-config-migrate:
     image: kartoza/btsync:rancher
@@ -105,6 +148,7 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
+{{- if eq .Values.MEDIA_ALLOW_SYNC "true" }}
   media-migrate:
     image: kartoza/btsync:rancher
     environment:
@@ -117,6 +161,7 @@ services:
     - uwsgi:uwsgi
     labels:
       io.rancher.container.pull_image: always
+{{- end}}
 
   sftppgbackup:
     image: kartoza/sftp-backup:1.0
@@ -320,23 +365,7 @@ services:
     - django-postgis-data:/var/lib/postgresql
     - django-postgis-dbbackup-data:/backups
 
-
-  shakemaps-extracted-sync:
-    image: kartoza/btsync:rancher
-    environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Extracted
-      SECRET: ${SHAKEMAPS_EXTRACTED_SYNC}
-      STANDBY_MODE: 'TRUE'
-    volumes:
-    - shakemaps-extracted-data:/web
-  floodmaps-sync:
-    image: kartoza/btsync:rancher
-    environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Floodmaps
-      SECRET: ${FLOODMAPS_SYNC}
-      STANDBY_MODE: 'TRUE'
-    volumes:
-    - floodmaps-data:/web
+{{- if eq .Values.BMKG_ALLOW_SYNC "true" }}
   bmkg-sync:
     image: kartoza/btsync:rancher
     environment:
@@ -345,30 +374,8 @@ services:
       STANDBY_MODE: 'TRUE'
     volumes:
     - shakemaps-bmkg-data:/web
-  bnpb-sync:
-    image: kartoza/btsync:rancher
-    environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps BNPB
-      SECRET: ${BNPB_SYNC}
-      STANDBY_MODE: 'TRUE'
-    volumes:
-    - shakemaps-bnpb-data:/web
-  shakemaps-corrected-extracted-sync:
-    image: kartoza/btsync:rancher
-    environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Corrected Extracted
-      SECRET: ${SHAKEMAPS_CORRECTED_EXTRACTED_SYNC}
-      STANDBY_MODE: 'TRUE'
-    volumes:
-    - shakemaps-corrected-extracted-data:/web
-  ashmaps-sync:
-    image: kartoza/btsync:rancher
-    environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Ashmaps
-      SECRET: ${ASHMAPS_SYNC}
-      STANDBY_MODE: 'TRUE'
-    volumes:
-    - ashmaps-data:/web
+{{- end}}
+
   sftp:
     image: kartoza/realtime-orchestration_sftp:v3.1
     volumes:
@@ -378,6 +385,8 @@ services:
     - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     ports:
     - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
+
+{{- if eq .Values.SHAKEMAPS_CORRECTED_ALLOW_SYNC "true" }}
   shakemaps-corrected-sync:
     image: kartoza/btsync:rancher
     environment:
@@ -386,6 +395,8 @@ services:
       STANDBY_MODE: 'TRUE'
     volumes:
     - shakemaps-corrected-data:/web
+{{- end}}
+
   inasafe-shakemap-monitor:
     image: kartoza/realtime-orchestration_inasafe:v3.2.0
     environment:
