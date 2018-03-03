@@ -2,8 +2,9 @@ version: '2'
 catalog:
   name: "InaSAFE Realtime v3.5"
   description: "InaSAFE Realtime using InaSAFE core v3.5."
-  version: 2
+  version: v3.5
   uuid: inasafe-realtime-v3.5-1
+  minimum_rancher_version: v1.6.10
   questions:
     - variable: VOLUME_DRIVER
       label: Storage driver
@@ -32,7 +33,7 @@ catalog:
     - variable: INASAFE_REALTIME_REST_USER
       label: InaSAFE Realtime REST Username
       description: Credentials User for Realtime REST API
-      default: realtime
+      default: realtimepush@realtime.inasafe.org
       type: "string"
     - variable: INASAFE_REALTIME_REST_PASSWORD
       label: InaSAFE Realtime REST Password
@@ -118,35 +119,30 @@ catalog:
       description: "BtSync Key for SSH Data"
       label: "SSH Data Key"
       type: "string"
+    - variable: MEDIA_ALLOW_SYNC
+      description: "Allow Media folder to sync"
+      label: "Media Allow Sync"
+      type: "boolean"
+      default: true
     - variable: MEDIA_SYNC
       description: "BtSync Key for Media"
       label: "Media Key"
       type: "string"
 
-    - variable: SHAKEMAPS_EXTRACTED_SYNC
-      description: "BtSync Key for Shakemaps Extracted"
-      label: "Shakemaps Extracted Key"
-      type: "string"
-    - variable: FLOODMAPS_SYNC
-      description: "BtSync Key for Floodmaps"
-      label: "Floodmaps Key"
-      type: "string"
+    - variable: BMKG_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps to sync"
+      label: "BMKG Shakemaps Allow Sync"
+      type: "boolean"
+      default: true
     - variable: BMKG_SYNC
       description: "BtSync Key for BMKG Shakemaps"
       label: "BMKG Shakemaps Key"
       type: "string"
-    - variable: BNPB_SYNC
-      description: "BtSync Key for BNPB Shakemaps"
-      label: "BNPB Shakemaps Key"
-      type: "string"
-    - variable: SHAKEMAPS_CORRECTED_EXTRACTED_SYNC
-      description: "BtSync Key for Shakemaps Corrected Extracted"
-      label: "Shakemaps Corrected Extracted Key"
-      type: "string"
-    - variable: ASHMAPS_SYNC
-      description: "BtSync Key for Ashmaps"
-      label: "Ashmaps Key"
-      type: "string"
+    - variable: SHAKEMAPS_CORRECTED_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps Corrected to sync"
+      label: "BMKG Shakemaps Corrected Allow Sync"
+      type: "boolean"
+      default: true
     - variable: SHAKEMAPS_CORRECTED_SYNC
       description: "BtSync Key for Shakemaps Corrected"
       label: "Shakemaps Corrected Key"
@@ -159,71 +155,3 @@ catalog:
       description: "BtSync Key for Report Template"
       label: "Report Template Data Key"
       type: "string"
-services:
-  sftppgbackup:
-    scale: 1
-    start_on_create: true
-  smtp:
-    scale: 1
-    start_on_create: true
-  sftpmediabackup:
-    scale: 1
-    start_on_create: true
-  web:
-    scale: 1
-    start_on_create: true
-  indicator-worker:
-    scale: 1
-    start_on_create: true
-  dbbackup:
-    scale: 1
-    start_on_create: true
-  uwsgi:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  db:
-    scale: 1
-    start_on_create: true
-
-  shakemaps-extracted-sync:
-    scale: 1
-    start_on_create: true
-  floodmaps-sync:
-    scale: 1
-    start_on_create: true
-  bmkg-sync:
-    scale: 1
-    start_on_create: true
-  bnpb-sync:
-    scale: 1
-    start_on_create: true
-  shakemaps-corrected-extracted-sync:
-    scale: 1
-    start_on_create: true
-  ashmaps-sync:
-    scale: 1
-    start_on_create: true
-  sftp:
-    scale: 1
-    start_on_create: true
-  shakemaps-corrected-sync:
-    scale: 1
-    start_on_create: true
-  inasafe-shakemap-monitor:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  analysis-data-sync:
-    scale: 1
-    start_on_create: true
