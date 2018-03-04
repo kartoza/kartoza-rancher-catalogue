@@ -3,15 +3,8 @@
   description: "InaSAFE Realtime using InaSAFE core v4"
   version: v4.0-rc-1
   uuid: inasafe-realtime-v4-2
+  minimum_rancher_version: v1.6.12
   questions:
-    - variable: RANCHER_SERVER_VERSION
-      label: Rancher Server Version
-      description: Choose Rancher Server Version you want to use
-      type: "enum"
-      options:
-        - v1.6.10
-        - v1.6.12
-      default: v1.6.12
     - variable: VOLUME_DRIVER
       label: Storage driver
       description: Storage driver used for volume
@@ -94,7 +87,7 @@
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
       required: true
-      default: ""
+      default: admin@realtime.inasafe.org
       type: "string"
 
     - variable: WEBSERVER_PORT
@@ -108,7 +101,7 @@
       label: "BtSync Device prefix"
       description: "Device prefix used by BtSync. Useful to differentiate sync devices."
       required: true
-      default:
+      default: "Device Prefix"
       type: "string"
 
     - variable: SSH_CONFIG_SYNC
@@ -119,9 +112,33 @@
       label: "SSH Data Key"
       description: "BtSync Key for SSH Data"
       type: "string"
+    - variable: MEDIA_ALLOW_SYNC
+      description: "Allow Media folder to sync"
+      label: "Media Allow Sync"
+      type: "boolean"
+      default: true
     - variable: MEDIA_SYNC
       label: "Media Key"
       description: "BtSync Key for Media"
+      type: "string"
+
+    - variable: BMKG_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps to sync"
+      label: "BMKG Shakemaps Allow Sync"
+      type: "boolean"
+      default: true
+    - variable: BMKG_SYNC
+      description: "BtSync Key for BMKG Shakemaps"
+      label: "BMKG Shakemaps Key"
+      type: "string"
+    - variable: SHAKEMAPS_CORRECTED_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps Corrected to sync"
+      label: "BMKG Shakemaps Corrected Allow Sync"
+      type: "boolean"
+      default: true
+    - variable: SHAKEMAPS_CORRECTED_SYNC
+      description: "BtSync Key for Shakemaps Corrected"
+      label: "Shakemaps Corrected Key"
       type: "string"
 
     - variable: ANALYSIS_CONTEXT_SYNC

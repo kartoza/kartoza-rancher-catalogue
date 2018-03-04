@@ -4,7 +4,6 @@ catalog:
   description: "InaSAFE Realtime using InaSAFE core v3.5."
   version: v3.5
   uuid: inasafe-realtime-v3.5-1
-  minimum_rancher_version: v1.6.10
   questions:
     - variable: VOLUME_DRIVER
       label: Storage driver

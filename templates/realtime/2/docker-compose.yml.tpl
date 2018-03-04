@@ -1,114 +1,121 @@
 version: '2'
 volumes:
+{{- if eq .Values.VOLUME_DRIVER "rancher-nfs" }}
   django-static-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   django-postgis-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   sftpbackup-media-history-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   django-postgis-dbbackup-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   sftpbackup-postgis-target-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   django-realtime-indicator:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   sftpbackup-postgis-history-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   django-media-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
 
   sftp-ssh-config-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   shakemaps-corrected-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   analysis-context-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   hazard-drop-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   ashmaps-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   floodmaps-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   shakemaps-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   sftp-ssh-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
 
   report-template-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
-{{- end}}
   headless-output-data:
     driver: ${VOLUME_DRIVER}
-{{- if eq .Values.RANCHER_SERVER_VERSION "v1.6.12"}}
     driver_opts:
       onRemove: retain
+
+{{- else}}
+
+  django-static-data:
+    driver: ${VOLUME_DRIVER}
+  django-postgis-data:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-media-history-data:
+    driver: ${VOLUME_DRIVER}
+  django-postgis-dbbackup-data:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-postgis-target-data:
+    driver: ${VOLUME_DRIVER}
+  django-realtime-indicator:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-postgis-history-data:
+    driver: ${VOLUME_DRIVER}
+  django-media-data:
+    driver: ${VOLUME_DRIVER}
+
+  sftp-ssh-config-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-corrected-data:
+    driver: ${VOLUME_DRIVER}
+  analysis-context-data:
+    driver: ${VOLUME_DRIVER}
+  hazard-drop-data:
+    driver: ${VOLUME_DRIVER}
+  ashmaps-data:
+    driver: ${VOLUME_DRIVER}
+  floodmaps-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-data:
+    driver: ${VOLUME_DRIVER}
+  sftp-ssh-data:
+    driver: ${VOLUME_DRIVER}
+
+  report-template-data:
+    driver: ${VOLUME_DRIVER}
+  headless-output-data:
+    driver: ${VOLUME_DRIVER}
 {{- end}}
 services:
   ssh-config-migrate:
@@ -137,6 +144,7 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
+{{- if eq .Values.MEDIA_ALLOW_SYNC "true" }}
   media-migrate:
     image: kartoza/btsync:rancher
     environment:
@@ -149,6 +157,7 @@ services:
     - uwsgi:uwsgi
     labels:
       io.rancher.container.pull_image: always
+{{- end}}
 
   sftppgbackup:
     image: kartoza/sftp-backup:1.0
@@ -258,7 +267,7 @@ services:
     - indicator.%h
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
 
   dbbackup:
@@ -370,7 +379,7 @@ services:
     - inasafe-django.%h
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
 
   rabbitmq:
@@ -392,6 +401,28 @@ services:
     volumes:
     - django-postgis-data:/var/lib/postgresql
     - django-postgis-dbbackup-data:/backups
+
+{{- if eq .Values.BMKG_ALLOW_SYNC "true" }}
+  bmkg-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps BMKG
+      SECRET: ${BMKG_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-data:/web
+{{- end}}
+
+{{- if eq .Values.SHAKEMAPS_CORRECTED_ALLOW_SYNC "true" }}
+  shakemaps-corrected-sync:
+    image: kartoza/btsync:rancher
+    environment:
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Shakemaps Corrected
+      SECRET: ${SHAKEMAPS_CORRECTED_SYNC}
+      STANDBY_MODE: 'TRUE'
+    volumes:
+    - shakemaps-corrected-data:/web
+{{- end}}
 
   sftp:
     image: kartoza/realtime-orchestration_sftp:v3.1
@@ -435,7 +466,7 @@ services:
     - sftp:sftp
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
 
   realtime-worker:
@@ -470,7 +501,7 @@ services:
     - sftp:sftp
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
 
   analysis-context-data-sync:
@@ -485,6 +516,7 @@ services:
   report-template-sync:
     image: alpine/git
     entrypoint: /bin/sh
+    working_dir: /web
     command:
       - -c
       - "git pull origin master && git log HEAD^..HEAD && tail -f /dev/null"
@@ -495,7 +527,7 @@ services:
     volumes:
     - report-template-data:/web
     labels:
-      cron.schedule: */5 * * * * ?
+      cron.schedule: "*/5 * * * * ?"
       cron.action: restart
 
   headless-worker:
@@ -526,5 +558,5 @@ services:
       INASAFE_OUTPUT_DIR: /home/headless/outputs
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
