@@ -456,6 +456,11 @@ services:
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+{{- end}}
+
     volumes:
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
@@ -491,6 +496,11 @@ services:
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+{{- end}}
+
     volumes:
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
@@ -556,6 +566,11 @@ services:
       INASAFE_HEADLESS_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_WORK_DIR: /home/headless
       INASAFE_OUTPUT_DIR: /home/headless/outputs
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+{{- end}}
+
     labels:
       io.rancher.container.pull_image: always
       cron.schedule: "0 0 * * * ?"

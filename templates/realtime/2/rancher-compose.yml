@@ -1,4 +1,5 @@
-.catalog:
+version: '2'
+catalog:
   name: "InaSAFE Realtime v4"
   description: "InaSAFE Realtime using InaSAFE core v4"
   version: v4.0-rc-1
@@ -97,6 +98,13 @@
       default: 80
       type: "int"
 
+    - variable: ENABLE_SENTRY
+      label: "Enable sentry report"
+      description: "Enable sentry report. Will be handled and interpreted differently by each service"
+      required: true
+      default: false
+      type: "boolean"
+
     - variable: SYNC_DEVICE_PREFIX
       label: "BtSync Device prefix"
       description: "Device prefix used by BtSync. Useful to differentiate sync devices."
@@ -149,3 +157,17 @@
       label: "Report Template Data Key"
       description: "BtSync Key for Report Template"
       type: "string"
+services:
+  web:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 8080
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/realtime/" "HTTP/1.1\r\nHost: testing.realtime.inasafe.org"'
+      reinitializing_timeout: 60000
