@@ -158,6 +158,10 @@ catalog:
       description: "BtSync Key for Report Template"
       type: "string"
 services:
+  headless-worker:
+    scale: 4
+  django-worker:
+    scale: 2
   web:
     scale: 1
     start_on_create: true
