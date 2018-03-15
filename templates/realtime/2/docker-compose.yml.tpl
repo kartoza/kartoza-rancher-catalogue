@@ -38,10 +38,6 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  shakemaps-corrected-data:
-    driver: ${VOLUME_DRIVER}
-    driver_opts:
-      onRemove: retain
   analysis-context-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
@@ -59,6 +55,10 @@ volumes:
     driver_opts:
       onRemove: retain
   shakemaps-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-corrected-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
@@ -97,8 +97,6 @@ volumes:
 
   sftp-ssh-config-data:
     driver: ${VOLUME_DRIVER}
-  shakemaps-corrected-data:
-    driver: ${VOLUME_DRIVER}
   analysis-context-data:
     driver: ${VOLUME_DRIVER}
   hazard-drop-data:
@@ -108,6 +106,8 @@ volumes:
   floodmaps-data:
     driver: ${VOLUME_DRIVER}
   shakemaps-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-corrected-data:
     driver: ${VOLUME_DRIVER}
   sftp-ssh-data:
     driver: ${VOLUME_DRIVER}
@@ -245,6 +245,7 @@ services:
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     - headless-output-data:/home/headless/outputs
@@ -315,6 +316,7 @@ services:
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     - headless-output-data:/home/headless/outputs
@@ -358,6 +360,7 @@ services:
     - django-realtime-indicator:/home/web/django_project/.run
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     - headless-output-data:/home/headless/outputs
@@ -435,7 +438,7 @@ services:
     - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
 
   shakemap-monitor:
-    image: inasafe/realtime_hazard-processor
+    image: inasafe/realtime_hazard-processor:latest
     command:
     - /docker-entrypoint.sh
     - prod
@@ -465,6 +468,50 @@ services:
     volumes:
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    links:
+    - rabbitmq:rabbitmq
+    - sftp:sftp
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: "0 0 * * * ?"
+      cron.action: restart
+
+  shakemap-corrected-monitor:
+    image: inasafe/realtime_hazard-processor:latest
+    command:
+    - /docker-entrypoint.sh
+    - prod
+    - inasafe-realtime-monitor
+    environment:
+      ASHMAPS_DIR: /home/realtime/ashmaps
+      C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
+      FLOODMAPS_DIR: /home/realtime/floodmaps
+      EQ_GRID_SOURCE_TYPE: corrected
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})([\d_-]*)(/output)?/grid\.xml$$
+      INASAFE_LOCALE: id
+      INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
+      INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
+      INASAFE_REALTIME_REST_PASSWORD: ${INASAFE_REALTIME_REST_PASSWORD}
+      INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
+      INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
+      INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
+      PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
+      SHAKEMAPS_DIR: /home/realtime/shakemaps-corrected
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
+{{- end}}
+
+    volumes:
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     links:
@@ -476,7 +523,7 @@ services:
       cron.action: restart
 
   realtime-worker:
-    image: inasafe/realtime_hazard-processor
+    image: inasafe/realtime_hazard-processor:latest
     command:
     - /docker-entrypoint.sh
     - prod
@@ -506,6 +553,7 @@ services:
     volumes:
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     links:
@@ -543,7 +591,7 @@ services:
       cron.action: restart
 
   headless-worker:
-    image: inasafe/headless_processor
+    image: inasafe/headless_processor:latest
     command:
     - /docker-entrypoint.sh
     - prod
@@ -558,6 +606,7 @@ services:
     - report-template-data:/home/headless/qgis-templates
     - hazard-drop-data:/home/realtime/hazard-drop
     - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
     environment:

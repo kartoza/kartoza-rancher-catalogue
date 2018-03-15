@@ -159,7 +159,7 @@ catalog:
       type: "string"
 services:
   headless-worker:
-    scale: 1
+    scale: 4
   django-worker:
     scale: 2
   web:
