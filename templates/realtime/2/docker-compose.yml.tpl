@@ -459,6 +459,7 @@ services:
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
 {{- end}}
 
     volumes:
@@ -499,6 +500,7 @@ services:
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
 {{- end}}
 
     volumes:
@@ -569,6 +571,7 @@ services:
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
 {{- end}}
 
     labels:
