@@ -8,6 +8,7 @@ services:
   
   db:
     image: kartoza/postgis:9.6-2.4
+    hostname: db
     volumes:
       - 'postgis-data:/var/lib/postgresql'
       - 'backups:/backups'
@@ -24,7 +25,7 @@ services:
     image: kartoza/pg-backup:9.6
     hostname: pg-backups
     volumes:
-      - db-backups:/backups
+      - backups:/backups
     links:
       - db:db
     environment:
@@ -43,7 +44,7 @@ services:
     hostname: btsync-data
     restart: unless-stopped
     volumes:
-      - db-backups:/web:rw
+      - backups:/web:rw
     environment:
       - SECRET=${BTSYNC_DB_SECRET}
       - DEVICE=PostGISDatabase
