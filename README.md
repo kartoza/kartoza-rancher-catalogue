@@ -13,8 +13,10 @@ Provided Catalogue Entries:
   [README](./templates/geosafe/README.md)  
 * GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
 * OSM-Reporter - see [README](./templates/osm-reporter/README.md) 
-* PostgreSQL with PostGIS (enterprise geodatabase) - see
+* PostgreSQL 9.6 with PostGIS 2.4 (enterprise geodatabase) - see
   [README](./templates/postgis-9.6-2.4/README.md)  
+* PostgreSQL 10.0 with PostGIS 2.4 (enterprise geodatabase) - see
+  [README](./templates/postgis-10.0-2.4/README.md)  
 * Projecta - see [README](./templates/projecta/README.md) 
 * QGIS Server with Btsync replication see [README](./templates/qgis-server-2.18/README.md)  
 
