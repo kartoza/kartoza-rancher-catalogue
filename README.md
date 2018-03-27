@@ -4,6 +4,9 @@ This is our catalogue of Rancher recipes - mainly related to
 Geographical Information Systems (GIS) provided by the
 open source community.
 
+![screen shot 2018-03-27 at 05 22 27](https://user-images.githubusercontent.com/178003/37945171-2a6850e6-317f-11e8-9bbd-24995ba17a27.png)
+
+
 Provided Catalogue Entries:
 ---------------------------
 * InaSAFE Realtime
@@ -68,6 +71,9 @@ Once Rancher is installed, use the Admin -> Settings menu to
 add our Rancher catalogue using this URL:
 
 https://github.com/kartoza/kartoza-rancher-catalogue
+
+* Specify the ``master`` branch for production ready recipes
+* Specify the ``develop`` branch for in-development recipes
 
 Once your settings are saved open a Rancher environment and set up a 
 stack from the catalogue's 'Kartoza' section - you will see 
