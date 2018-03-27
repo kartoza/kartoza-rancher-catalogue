@@ -77,12 +77,13 @@ https://github.com/kartoza/kartoza-rancher-catalogue
 
 ![screen shot 2018-03-27 at 05 26 18](https://user-images.githubusercontent.com/178003/37945372-2a18004a-3180-11e8-9f3d-000b9f8c042b.png)
 
+**Note:** Typically you will add only one of catalogue entry - if unsure, use master.
 
 Once your settings are saved open a Rancher environment and set up a 
 stack from the catalogue's 'Kartoza' section - you will see 
 our recipes listed there.
 
-![screen shot 2017-10-23 at 17 04 52](https://user-images.githubusercontent.com/178003/31914192-02bae616-b84a-11e7-8265-abd92bcb2dee.png)
+![screen shot 2018-03-27 at 05 22 27](https://user-images.githubusercontent.com/178003/37945430-7a5bf106-3180-11e8-9d72-e781846bdc39.png)
 
 Now you can add items from the Kartoza catalogue to your stack.
 
