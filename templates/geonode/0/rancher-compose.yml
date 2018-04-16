@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "Kartoza Geonode"
   description: "Kartoza's spin of GeoNode with a QGIS backend."
-  version: 1
+  version: 0
   uuid: kartoza-geonode-0
   questions:
     - variable: QGIS_BACKEND_INSTANCE_COUNT
@@ -52,7 +52,7 @@ catalog:
       type: "int"
     - variable: DJANGO_ALLOWED_HOSTS
       label: "Django allowed hosts"
-      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed.""
+      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
       required: true
       default: ""
       type: "string"
