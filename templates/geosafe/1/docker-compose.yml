@@ -23,7 +23,7 @@ services:
     image: rabbitmq
 
   postgis:
-    image: kartoza/geonode_db
+    image: kartoza/postgis:9.6-2.4
     volumes:
       - 'postgis-data:/var/lib/postgresql'
     environment:
@@ -118,10 +118,9 @@ services:
 
   smtp:
     image: catatnight/postfix
-    hostname: postfix
     environment:
       # You could change this to something more suitable
-      - maildomain=${SITE_URL}
+      - maildomain=${MAIL_DOMAIN}
       - smtp_user=noreply:docker
     restart: unless-stopped
 
@@ -141,7 +140,7 @@ services:
       - GEOSERVER_BASE_URL=http://geoserver:8080/geoserver/
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
-      - ADMIN=tim@kartoza.com
+      - ADMIN=${ADMIN_EMAIL}
       - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
       - DEBUG=False
       - PYTHONPATH=/usr/src:/usr/src/app/
@@ -159,8 +158,8 @@ services:
       - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
       - INASAFE_IMPACT_BASE_URL=/output/
       - USE_LAYER_HTTP_ACCESS=False
-      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
-      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
+      - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
     restart: unless-stopped
     links:
       - postgis
@@ -209,8 +208,8 @@ services:
       - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
       - INASAFE_IMPACT_BASE_URL=/output/
       - USE_LAYER_HTTP_ACCESS=False
-      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=600
-      - INASAFE_ANALYSIS_AREA_LIMIT=1000000000
+      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
+      - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
     command: celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
     links:
       - rabbitmq
@@ -267,23 +266,25 @@ services:
       - django
   btsync-data:
     # BTSync backups for database dumps
-    image: kartoza/btsync
+    image: kartoza/btsync:rancher
     hostname: btsync-data
     restart: unless-stopped
     volumes:
       - postgis-history-data:/web:rw
     environment:
       - SECRET=${BTSYNC_DB_SECRET}
-      - DEVICE=ProjectaDatabase
+      - DEVICE=${BTSYNC_DB_DEVICE}
+      - STANDBY_MODE=TRUE
      
   btsync-media:
     # BTSync backups for django media
-    image: kartoza/btsync
+    image: kartoza/btsync:rancher
     hostname: btsync-logs
     restart: unless-stopped
     volumes:
       - django-media-history-data:/web:rw
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
-      - DEVICE=OsmReporterLogs
+      - DEVICE=${BTSYNC_MEDIA_SECRET}
+      - STANDBY_MODE=TRUE
 
