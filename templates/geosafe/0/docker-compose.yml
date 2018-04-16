@@ -141,7 +141,7 @@ services:
       - GEOSERVER_BASE_URL=http://geoserver:8080/geoserver/
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
-      - ADMIN=tim@kartoza.com
+      - ADMIN=${ADMIN_EMAIL}
       - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
       - DEBUG=False
       - PYTHONPATH=/usr/src:/usr/src/app/
@@ -275,7 +275,7 @@ services:
     environment:
       - SECRET=${BTSYNC_DB_SECRET}
       - DEVICE=ProjectaDatabase
-     
+
   btsync-media:
     # BTSync backups for django media
     image: kartoza/btsync

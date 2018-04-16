@@ -40,7 +40,7 @@ catalog:
       type: "string"
     - variable: SITE_URL
       label: "Site URL"
-      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /). Also do not use quotes."
       required: true
       default: ""
       type: "string"
@@ -60,13 +60,13 @@ catalog:
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
       required: false
-      default: 
+      default:
       type: "string"
     - variable: BTSYNC_MEDIA_SECRET
       label: "Media backups key"
       description: "Resilio sync read/write key for syncing geonode media backups"
       required: false
-      default: 
+      default:
       type: "string"
 services:
   qgis-server:
