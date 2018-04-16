@@ -53,7 +53,7 @@ catalog:
     - variable: DJANGO_ALLOWED_HOSTS
       label: "Django allowed hosts"
       description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
-      required: true
+      required: false
       default: ""
       type: "string"
     - variable: BTSYNC_DB_SECRET
