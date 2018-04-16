@@ -116,7 +116,7 @@ services:
     restart: unless-stopped
 
   django:
-    image: kartoza/geonode_django_qgis-server
+    image: kartoza/geonode_django_geosafe:qgis-server-2.7-stable-1.0
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'django-static-data:/usr/src/app/geonode/static_root'
@@ -129,12 +129,13 @@ services:
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
-      - ALLOWED_HOSTS=['django','localhost',${DJANGO_ALLOWED_HOSTS}]
+      - ADMIN=${ADMIN_EMAIL}
+      - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
       - DEBUG=False
       - PYTHONPATH=/usr/src:/usr/src/app/
       - DJANGO_SETTINGS_MODULE=core.settings
       - ROOT_URLCONF=core.urls
-      - SITEURL=${SITE_URL}
+      - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       - USE_GEOSAFE=False
@@ -158,7 +159,7 @@ services:
     restart: unless-stopped
 
   celery:
-    image: kartoza/geonode_django_qgis-server
+    image: kartoza/geonode_django_geosafe:qgis-server-2.7-stable-1.0
     restart: on-failure
     working_dir: /usr/src/app
     volumes:
@@ -168,13 +169,13 @@ services:
     environment:
       - DEBUG=False
       - C_FORCE_ROOT=True
-      - ALLOWED_HOSTS=['django','localhost',${DJANGO_ALLOWED_HOSTS}]
+      - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgis:5432/gis
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - PYTHONPATH=/usr/src:/usr/src/app/
       - DJANGO_SETTINGS_MODULE=core.settings
       - ROOT_URLCONF=core.urls
-      - SITEURL=${SITE_URL}
+      - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       - USE_GEOSAFE=False
