@@ -98,7 +98,7 @@ services:
       USER: rabbit_user
     restart: unless-stopped
 
-  db:
+  db: &db
     image: kartoza/geonode_db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -123,6 +123,19 @@ services:
     volumes:
       - db-backups:/backups
     restart: unless-stopped
+
+  dbrestore:
+    # This container will just run, a database restore on the latest database backup
+    # and then exit. Restart it again in rancher to
+    # rerun another database restore
+    # Inherit from the db container
+    <<: *db
+    command: bash -c "su - postgres -c \"dropdb gis\"; createdb -O ${POSTGRES_USER} -T template_postgis gis; pg_restore /backups/latest.dmp | psql gis"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
 
   mediabackup:
     image: kartoza/sftp-backup:1.0
