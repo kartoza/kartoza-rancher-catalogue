@@ -65,7 +65,7 @@ services:
 
   collectstatic:
     # This container will just run, collect static 
-    # and then exit. Run it again in rancher to
+    # and then exit. Restart it again in rancher to
     # re-collect static resources.
     # Inherit from the uwsgi container
     <<: *uwsgi
@@ -74,6 +74,20 @@ services:
       io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
     restart: unless-stopped
+
+  migrate:
+    # This container will just run, migrations 
+    # and then exit. Restart it again in rancher to
+    # rerun migrations.
+    # Inherit from the uwsgi container
+	# We need to migrate accounts (auth) first as it has a reference to user model
+    <<: *uwsgi
+    command: bash -c "python manage.py migrate auth;python manage.py migrate"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
 
   rabbitmq:
     image: library/rabbitmq
