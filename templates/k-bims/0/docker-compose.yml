@@ -1,0 +1,117 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  postgis-data:
+  db-backups:
+  django-media:
+  django-media-backups:
+  django-static:
+  django-reports:
+  django-logs:
+  nginx-logs:
+
+services:
+
+  smtp:
+    image: catatnight/postfix
+    hostname: postfix
+    environment:
+      maildomain: kartoza.com
+      smtp_user: noreply:docker
+    restart: unless-stopped
+
+  web:
+    image: dimasciput/healthyrivers_nginx:latest
+    hostname: nginx
+    volumes:
+    - django-static:/home/web/static:ro
+    - django-media:/home/web/media:ro
+    - nginx-logs:/var/log/nginx
+    ports:
+    - 80:8080/tcp
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  uwsgi:
+    image: dimasciput/docker-healthyrivers-uwsgi:latest
+    hostname: uwsgi
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: gis
+      DATABASE_PASSWORD: docker
+      DATABASE_USERNAME: docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      RABBITMQ_HOST: rabbitmq
+      VIRTUAL_HOST: healthyrivers.kartoza.com
+      VIRTUAL_PORT: '8080'
+    entrypoint:
+    - /entry-point.sh
+    volumes:
+    - django-static:/home/web/static:rw
+    - django-media:/home/web/media:rw
+    - django-reports:/home/web/reports
+    - django-logs:/var/log/
+    user: root
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  rabbitmq:
+    image: library/rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_NODENAME: rabbit
+      RABBIT_PASSWORD: rabbit_test_password
+      USER: rabbit_user
+    restart: unless-stopped
+
+  db:
+    image: kartoza/geonode_db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    volumes:
+      - db-backups:/backups
+      - postgis-data:/sql
+    restart: unless-stopped
+
+  dbbackups:
+    image: kartoza/pg-backup:9.4
+    hostname: pg-backups
+    environment:
+      DUMPPREFIX: PG_bims
+      PGDATABASE: gis
+      PGHOST: db
+      PGPASSWORD: docker
+      PGPORT: '5432'
+      PGUSER: docker
+    volumes:
+      - db-backups:/backups
+    restart: unless-stopped
+
+  mediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - django-media-backups:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - django-media:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_bims
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+    restart: unless-stopped
