@@ -84,3 +84,13 @@ services:
   mediabackup:
     scale: 1
     start_on_create: true
+  dbrestore:
+    scale: 1
+    # We don't want to run until explicitly requested by the user
+    start_on_create: false
+  collectstatic:
+    scale: 1
+    start_on_create: true
+  migrate:
+    scale: 1
+    start_on_create: false
