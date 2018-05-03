@@ -64,7 +64,7 @@ services:
     restart: unless-stopped
 
   collectstatic:
-    # This container will just run, collect static 
+    # This container will just run, collect static
     # and then exit. Restart it again in rancher to
     # re-collect static resources.
     # Inherit from the uwsgi container
@@ -76,11 +76,11 @@ services:
     restart: unless-stopped
 
   migrate:
-    # This container will just run, migrations 
+    # This container will just run, migrations
     # and then exit. Restart it again in rancher to
     # rerun migrations.
     # Inherit from the uwsgi container
-	# We need to migrate accounts (auth) first as it has a reference to user model
+    # We need to migrate accounts (auth) first as it has a reference to user model
     <<: *uwsgi
     command: bash -c "python manage.py migrate auth;python manage.py migrate"
     labels:
