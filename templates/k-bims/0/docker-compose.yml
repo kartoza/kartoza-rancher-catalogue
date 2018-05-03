@@ -39,7 +39,7 @@ services:
       io.rancher.container.pull_image: always
     restart: unless-stopped
 
-  uwsgi:
+  uwsgi: &uwsgi
     image: dimasciput/docker-healthyrivers-uwsgi:latest
     hostname: uwsgi
     environment:
@@ -61,6 +61,18 @@ services:
     user: root
     labels:
       io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  collectstatic:
+    # This container will just run, collect static 
+    # and then exit. Run it again in rancher to
+    # re-collect static resources.
+    # Inherit from the uwsgi container
+    <<: *uwsgi
+    command: python manage.py collectstatic --noinput
+    labels:
+      - io.rancher.container.pull_image: always
+      - io.rancher.container.start_once: true
     restart: unless-stopped
 
   rabbitmq:
