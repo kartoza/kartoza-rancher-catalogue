@@ -6,7 +6,7 @@ catalog:
   uuid: kartoza-geonode-0
   questions:
     - variable: SMB_PATH
-      label: SMB/CIFS network file share path.
+      label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
       required: true
       default: gis
       type: "string"
