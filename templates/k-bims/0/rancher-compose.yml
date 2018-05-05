@@ -5,6 +5,21 @@ catalog:
   version: 0
   uuid: kartoza-geonode-0
   questions:
+    - variable: SMB_PATH
+      label: SMB/CIFS network file share path.
+      required: true
+      default: gis
+      type: "string"
+    - variable: SMB_USER
+      label: SMB/CIFS network file share username.
+      required: true
+      default: docker
+      type: "string"
+    - variable: SMB_PASSWORD
+      label: SMB/CIFS network file share password.
+      required: true
+      default: docker
+      type: "string"
     - variable: POSTGRES_DB
       label: PostgreSQL db to create.
       required: true
