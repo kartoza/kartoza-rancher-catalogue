@@ -9,29 +9,29 @@ version: '2'
 volumes:
   postgis-data:
   db-backups:
-    driver: local
-    driver_opts:
-      type: cifs
-      o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
-      device: "${SMB_PATH}/k-bims/db-backups/"
+    #driver: local
+    #driver_opts:
+    #  type: cifs
+    #  o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #  device: "${SMB_PATH}/k-bims/db-backups/"
   django-media:
-      driver: local
-      driver_opts:
-        type: cifs
-        o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
-        device: "${SMB_PATH}/k-bims/media/"
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/media/"
   django-media-backups:
-      driver: local
-      driver_opts:
-        type: cifs
-        o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
-        device: "${SMB_PATH}/k-bims/media-backups/"
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/media-backups/"
   django-static:
-      driver: local
-      driver_opts:
-        type: cifs
-        o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
-        device: "${SMB_PATH}/k-bims/static/"
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/static/"
   django-reports:
   django-logs:
   nginx-logs:
