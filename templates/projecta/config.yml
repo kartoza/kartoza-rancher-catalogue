@@ -1,7 +1,0 @@
-name: Projecta
-description: "Projecta is a tool for you to manage community and information about your software project. It supports publishing changelogs, team decisions, a project landing page, sponsorship management, certification management and more."
-version: 1
-category: Software
-maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
-license: GPL v3
-projectURL: https://github.com/kartoza/projecta
