@@ -214,7 +214,7 @@ services:
     ports:
     - ${WEBSERVER_PORT}:8080/tcp
   indicator-worker:
-    image: kartoza/inasafe-django_uwsgi:v3.5
+    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -273,7 +273,7 @@ services:
     links:
     - db:db
   uwsgi:
-    image: kartoza/inasafe-django_uwsgi:v3.5
+    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -303,7 +303,7 @@ services:
     labels:
       io.rancher.container.pull_image: always
   inasafe-worker:
-    image: kartoza/inasafe-django_uwsgi:v3.5
+    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
