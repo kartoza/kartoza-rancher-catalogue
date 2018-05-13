@@ -97,6 +97,21 @@ catalog:
       required: true
       default: 80
       type: "int"
+    - variable: USE_SSL
+      label: "Webserver SSL Flag"
+      description: "Set to True to use SSL Certificate for webserver."
+      default: false
+      type: "boolean"
+    - variable: RANCHER_SECRET_SSL_CERT
+      label: "Rancher Secret name for SSL Certificate"
+      description: "Certificate to use for webserver"
+      default:
+      type: "string"
+    - variable: RANCHER_SECRET_SSL_CERT_KEY
+      label: "Rancher Secret name for SSL Certificate Key"
+      description: "Certificate key (decrypted) to use for webserver"
+      default:
+      type: "string"
 
     - variable: ENABLE_SENTRY
       label: "Enable sentry report"
@@ -165,13 +180,3 @@ services:
   web:
     scale: 1
     start_on_create: true
-    health_check:
-      response_timeout: 2000
-      healthy_threshold: 2
-      port: 8080
-      unhealthy_threshold: 3
-      initializing_timeout: 60000
-      interval: 2000
-      strategy: recreate
-      request_line: 'GET "/realtime/" "HTTP/1.1\r\nHost: testing.realtime.inasafe.org"'
-      reinitializing_timeout: 60000

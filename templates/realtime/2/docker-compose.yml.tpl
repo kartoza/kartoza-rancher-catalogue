@@ -42,6 +42,10 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
+  sftpbackup-analysis-context-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
   hazard-drop-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
@@ -98,6 +102,8 @@ volumes:
   sftp-ssh-config-data:
     driver: ${VOLUME_DRIVER}
   analysis-context-data:
+    driver: ${VOLUME_DRIVER}
+  sftpbackup-analysis-context-data:
     driver: ${VOLUME_DRIVER}
   hazard-drop-data:
     driver: ${VOLUME_DRIVER}
@@ -211,8 +217,32 @@ services:
     - django-media-data:/home/web/media:ro
     links:
     - uwsgi:uwsgi
+    environment:
+      SOURCE_PORT: 8080
+      TARGET_PORT: 8080
+      SERVER_NAME: _
+{{- if eq .Values.USE_SSL "true" }}
+      SSL: True
+      CERT_LOCATION: /run/secrets/${RANCHER_SECRET_SSL_CERT}
+      CERT_KEY_LOCATION: /run/secrets/${RANCHER_SECRET_SSL_CERT_KEY}
+{{- end}}
     ports:
     - ${WEBSERVER_PORT}:8080/tcp
+{{- if eq .Values.USE_SSL "true" }}
+    secrets:
+    - mode: '0444'
+      uid: '0'
+      gid: '0'
+      source: ${RANCHER_SECRET_SSL_CERT}
+      target: ''
+    - mode: '0444'
+      uid: '0'
+      gid: '0'
+      source: ${RANCHER_SECRET_SSL_CERT_KEY}
+      target: ''
+{{- end}}
+    labels:
+      io.rancher.container.pull_image: always
 
   indicator-worker:
     image: kartoza/inasafe-django_uwsgi:develop_v4
@@ -572,6 +602,25 @@ services:
       STANDBY_MODE: 'TRUE'
     volumes:
     - analysis-context-data:/web
+
+  analysis-context-data-backup:
+    image: kartoza/sftp-backup:1.0
+    environment:
+      DAILY: '7'
+      DUMPPREFIX: ARC_analysiscontextdata
+      MONTHLY: '12'
+      SFTP_DIR: /
+      SFTP_HOST: 192.168.1.5
+      SFTP_PASSWORD: password
+      SFTP_USER: user
+      TARGET_FOLDER: /target
+      USE_SFTP_BACKUP: 'False'
+      YEARLY: '3'
+    volumes:
+    - sftpbackup-analysis-context-data:/backups
+    - analysis-context-data:/target
+    links:
+    - analysis-context-data-sync
 
   report-template-sync:
     image: alpine/git
