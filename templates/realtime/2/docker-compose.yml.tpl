@@ -489,6 +489,7 @@ services:
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps
+      QGIS_DEBUG: 0
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
@@ -532,6 +533,7 @@ services:
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps-corrected
+      QGIS_DEBUG: 0
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
@@ -574,6 +576,7 @@ services:
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
       PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps
+      QGIS_DEBUG: 0
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
@@ -666,6 +669,7 @@ services:
       INASAFE_HEADLESS_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_WORK_DIR: /home/headless
       INASAFE_OUTPUT_DIR: /home/headless/outputs
+      QGIS_DEBUG: 0
 
 {{- if eq .Values.ENABLE_SENTRY "true"}}
       INASAFE_SENTRY: 1
