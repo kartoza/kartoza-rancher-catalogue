@@ -416,7 +416,7 @@ services:
       cron.action: restart
 
   rabbitmq:
-    image: library/rabbitmq
+    image: library/rabbitmq:3.6
     labels:
       io.rancher.container.pull_image: always
 
