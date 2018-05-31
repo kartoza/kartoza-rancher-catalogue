@@ -221,28 +221,20 @@ services:
       SOURCE_PORT: 8080
       TARGET_PORT: 8080
       SERVER_NAME: _
-{{- if eq .Values.USE_SSL "true" }}
-      SSL: True
-      CERT_LOCATION: /run/secrets/${RANCHER_SECRET_SSL_CERT}
-      CERT_KEY_LOCATION: /run/secrets/${RANCHER_SECRET_SSL_CERT_KEY}
-{{- end}}
-    ports:
-    - ${WEBSERVER_PORT}:8080/tcp
-{{- if eq .Values.USE_SSL "true" }}
-    secrets:
-    - mode: '0444'
-      uid: '0'
-      gid: '0'
-      source: ${RANCHER_SECRET_SSL_CERT}
-      target: ''
-    - mode: '0444'
-      uid: '0'
-      gid: '0'
-      source: ${RANCHER_SECRET_SSL_CERT_KEY}
-      target: ''
-{{- end}}
     labels:
       io.rancher.container.pull_image: always
+
+  inasafe-realtime-lb:
+    image: rancher/lb-service-haproxy:v0.7.15
+    ports:
+    - 80:80/tcp
+{{- if eq .Values.USE_SSL "true" }}
+    - 443:443/tcp
+{{- end}}
+    labels:
+      io.rancher.container.agent.role: environmentAdmin,agent
+      io.rancher.container.agent_service.drain_provider: 'true'
+      io.rancher.container.create_agent: 'true'
 
   indicator-worker:
     image: kartoza/inasafe-django_uwsgi:develop_v4

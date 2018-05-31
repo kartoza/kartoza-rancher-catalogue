@@ -51,6 +51,12 @@ catalog:
       required: true
       default: http://realtime.inasafe.org/
       type: "string"
+    - variable: SITE_HOST_NAME
+      label: InaSAFE Realtime Site Host Name Only
+      description: Host name only without http://
+      required: true
+      default: realtime.inasafe.org
+      type: "string"
 
     - variable: POSTGRES_DB
       label: PostgreSQL db to create.
@@ -102,6 +108,11 @@ catalog:
       description: "Set to True to use SSL Certificate for webserver."
       default: false
       type: "boolean"
+    - variable: RANCHER_SSL_CERT
+      label: "Rancher SSL Certificate Name saved on Rancher Certificate"
+      description: "Certificate to use for webserver"
+      default: domain-cert
+      type: "string"
     - variable: RANCHER_SECRET_SSL_CERT
       label: "Rancher Secret name for SSL Certificate"
       description: "Certificate to use for webserver"
@@ -180,3 +191,42 @@ services:
   web:
     scale: 1
     start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 8080
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_HOST_NAME}"'
+      reinitializing_timeout: 60000
+  inasafe-realtime-lb:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      default_cert: ${RANCHER_SSL_CERT}
+      port_rules:
+      - hostname: ${SITE_HOST_NAME}
+        path: ''
+        priority: 1
+        protocol: http
+        service: web
+        source_port: 80
+        target_port: 80
+      - hostname: ${SITE_HOST_NAME}
+        path: ''
+        priority: 2
+        protocol: https
+        service: web
+        source_port: 443
+        target_port: 8080
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
