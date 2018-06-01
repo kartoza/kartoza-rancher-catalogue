@@ -23,7 +23,7 @@ services:
 
   django:
     restart: unless-stopped
-    image: kartoza/geonode_generic:master
+    image: kartoza/geonode-generic:master
 #    build: ../../../.
     # image: geonode/geonode:latest
     container_name: django4${COMPOSE_PROJECT_NAME}
