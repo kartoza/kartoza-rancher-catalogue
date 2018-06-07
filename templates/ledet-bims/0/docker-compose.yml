@@ -1,0 +1,201 @@
+# Base docker-compose file for rancher in staging environment
+# This file has some specific tweaks for staging environment
+# You can copy this file and paste it when creating a new stack in rancher
+# It will try to sync related files
+
+# Rancher currently only supports up to version 2
+# If you want to use docker-swarm, create another orchestration with version 3
+version: '2'
+volumes:
+  postgis-data:
+  db-backups:
+    #driver: local
+    #driver_opts:
+    #  type: cifs
+    #  o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #  device: "${SMB_PATH}/k-bims/db-backups/"
+  django-media:
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/media/"
+  django-media-backups:
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/media-backups/"
+  django-static:
+    #  driver: local
+    #  driver_opts:
+    #    type: cifs
+    #    o: vers=3.02,mfsymlinks,username=${SMB_USER},password=${SMB_PASSWORD}
+    #    device: "${SMB_PATH}/k-bims/static/"
+  django-reports:
+  django-logs:
+  nginx-logs:
+
+services:
+
+  smtp:
+    image: catatnight/postfix
+    hostname: postfix
+    environment:
+      maildomain: kartoza.com
+      smtp_user: noreply:docker
+    restart: unless-stopped
+
+  web:
+    image: dimasciput/kartoza_nginx:latest
+    hostname: nginx
+    volumes:
+    - django-static:/home/web/static:ro
+    - django-media:/home/web/media:ro
+    - nginx-logs:/var/log/nginx
+    ports:
+    - ${WEBSERVER_PORT}:8080/tcp
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    command: sh /update-nginx-conf.sh
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  uwsgi: &uwsgi
+    image: dimasciput/docker-limpopobims-uwsgi:stable
+    hostname: uwsgi
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: gis
+      DATABASE_PASSWORD: docker
+      DATABASE_USERNAME: docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      RABBITMQ_HOST: rabbitmq
+      VIRTUAL_HOST: staging.limpopobims.kartoza.com
+      VIRTUAL_PORT: '8080'
+    entrypoint:
+    - /entry-point.sh
+    volumes:
+    - django-static:/home/web/static:rw
+    - django-media:/home/web/media:rw
+    - django-reports:/home/web/reports
+    - django-logs:/var/log/
+    user: root
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  collectstatic:
+    # This container will just run, collect static
+    # and then exit. Restart it again in rancher to
+    # re-collect static resources.
+    # Inherit from the uwsgi container
+    <<: *uwsgi
+    command: python manage.py collectstatic --noinput
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
+  migrate:
+    # This container will just run, migrations
+    # and then exit. Restart it again in rancher to
+    # rerun migrations.
+    # Inherit from the uwsgi container
+    # We need to migrate accounts (auth) first as it has a reference to user model
+    <<: *uwsgi
+    command: bash -c "python manage.py migrate auth;python manage.py migrate"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
+
+  rabbitmq:
+    image: library/rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_NODENAME: rabbit
+      RABBIT_PASSWORD: rabbit_test_password
+      USER: rabbit_user
+    restart: unless-stopped
+
+  db: &db
+    image: kartoza/geonode_db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    volumes:
+      - db-backups:/backups
+      - postgis-data:/sql
+    restart: unless-stopped
+
+  dbbackups:
+    image: kartoza/pg-backup:9.4
+    hostname: pg-backups
+    environment:
+      DUMPPREFIX: PG_bims
+      PGDATABASE: gis
+      PGHOST: db
+      PGPASSWORD: docker
+      PGPORT: '5432'
+      PGUSER: docker
+    volumes:
+      - db-backups:/backups
+    restart: unless-stopped
+
+  dbrestore:
+    # This container will just run, a database restore on the latest database backup
+    # and then exit. Restart it again in rancher to
+    # rerun another database restore
+    # Inherit from the db container
+    <<: *db
+    command: bash -c "su - postgres -c 'dropdb gis'; createdb -O ${POSTGRES_USER} -T template_postgis gis; pg_restore /backups/latest.dmp | psql gis"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
+
+  mediabackup:
+    image: kartoza/sftp-backup:1.0
+    volumes:
+      # this folder is used to store local backups from django media
+      - django-media-backups:/backups
+      # this folder is used as target folder/source where the backup comes from
+      # this backup comes from django media
+      - django-media:/media_backup
+    environment:
+      - DUMPPREFIX=MEDIA_bims
+      # reduce frequency because the dump is really big
+      - DAILY=3
+      - MONTHLY=2
+      - YEARLY=1
+      - TARGET_FOLDER=/media_backup
+      - USE_SFTP_BACKUP=False
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - db-backups:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=BimsDatabase
+
+  btsync-media:
+    # BTSync backups for django media
+    image: kartoza/btsync
+    hostname: btsync-media
+    restart: unless-stopped
+    volumes:
+      - django-media:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=BimsMedia
