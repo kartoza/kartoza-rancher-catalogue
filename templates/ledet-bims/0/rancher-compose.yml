@@ -65,12 +65,6 @@ catalog:
       required: false
       default: ""
       type: "string"
-    - variable: SERVER_NAME
-      label: "Server name"
-      description: "Domain name of the server e.g. 'staging.kartoza.com'."
-      required: true
-      default: ""
-      type: "string"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
