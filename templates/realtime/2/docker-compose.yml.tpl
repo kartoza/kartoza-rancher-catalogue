@@ -210,7 +210,7 @@ services:
     - uwsgi:uwsgi
 
   web:
-    image: kartoza/inasafe-django_nginx:develop_v4
+    image: kartoza/inasafe-django_nginx:v4.0-18.06.14
     command: prod
     volumes:
     - django-static-data:/home/web/static:ro
@@ -237,7 +237,7 @@ services:
       io.rancher.container.create_agent: 'true'
 
   indicator-worker:
-    image: kartoza/inasafe-django_uwsgi:develop_v4
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -309,7 +309,7 @@ services:
     - db:db
 
   uwsgi:
-    image: kartoza/inasafe-django_uwsgi:develop_v4
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -352,7 +352,7 @@ services:
       io.rancher.container.pull_image: always
 
   django-worker:
-    image: kartoza/inasafe-django_uwsgi:develop_v4
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -460,9 +460,8 @@ services:
     - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
 
   shakemap-monitor:
-    image: inasafe/realtime_hazard-processor:latest
+    image: inasafe/realtime_hazard-processor:v4.0.0
     command:
-    - /docker-entrypoint.sh
     - prod
     - inasafe-realtime-monitor
     environment:
@@ -503,9 +502,8 @@ services:
       cron.action: restart
 
   shakemap-corrected-monitor:
-    image: inasafe/realtime_hazard-processor:latest
+    image: inasafe/realtime_hazard-processor:v4.0.0
     command:
-    - /docker-entrypoint.sh
     - prod
     - inasafe-realtime-monitor
     environment:
@@ -547,9 +545,8 @@ services:
       cron.action: restart
 
   realtime-worker:
-    image: inasafe/realtime_hazard-processor:latest
+    image: inasafe/realtime_hazard-processor:v4.0.0
     command:
-    - /docker-entrypoint.sh
     - prod
     - inasafe-realtime-worker
     environment:
@@ -635,9 +632,8 @@ services:
       cron.action: restart
 
   headless-worker:
-    image: inasafe/headless_processor:latest
+    image: inasafe/headless_processor:v4.4.0
     command:
-    - /docker-entrypoint.sh
     - prod
     - inasafe-headless-worker
     links:
