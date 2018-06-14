@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "InaSAFE Realtime v4"
   description: "InaSAFE Realtime using InaSAFE core v4"
-  version: v4.0-rc-1
+  version: v4.0
   uuid: inasafe-realtime-v4-2
   minimum_rancher_version: v1.6.12
   questions:
@@ -213,14 +213,7 @@ services:
         priority: 1
         protocol: http
         service: web
-        source_port: 80
-        target_port: 80
-      - hostname: ${SITE_HOST_NAME}
-        path: ''
-        priority: 2
-        protocol: https
-        service: web
-        source_port: 443
+        source_port: ${WEBSERVER_PORT}
         target_port: 8080
     health_check:
       healthy_threshold: 2
