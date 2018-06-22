@@ -38,23 +38,15 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  shakemaps-corrected-data:
+  analysis-context-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  shakemaps-extracted-data:
+  sftpbackup-analysis-context-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  floodmaps-data:
-    driver: ${VOLUME_DRIVER}
-    driver_opts:
-      onRemove: retain
-  analysis-data:
-    driver: ${VOLUME_DRIVER}
-    driver_opts:
-      onRemove: retain
-  shakemaps-corrected-extracted-data:
+  hazard-drop-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
@@ -62,11 +54,15 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  shakemaps-bnpb-data:
+  floodmaps-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
-  shakemaps-bmkg-data:
+  shakemaps-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+  shakemaps-corrected-data:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
@@ -79,7 +75,13 @@ volumes:
     driver: ${VOLUME_DRIVER}
     driver_opts:
       onRemove: retain
+  headless-output-data:
+    driver: ${VOLUME_DRIVER}
+    driver_opts:
+      onRemove: retain
+
 {{- else}}
+
   django-static-data:
     driver: ${VOLUME_DRIVER}
   django-postgis-data:
@@ -99,26 +101,26 @@ volumes:
 
   sftp-ssh-config-data:
     driver: ${VOLUME_DRIVER}
-  shakemaps-corrected-data:
+  analysis-context-data:
     driver: ${VOLUME_DRIVER}
-  shakemaps-extracted-data:
+  sftpbackup-analysis-context-data:
     driver: ${VOLUME_DRIVER}
-  floodmaps-data:
-    driver: ${VOLUME_DRIVER}
-  analysis-data:
-    driver: ${VOLUME_DRIVER}
-  shakemaps-corrected-extracted-data:
+  hazard-drop-data:
     driver: ${VOLUME_DRIVER}
   ashmaps-data:
     driver: ${VOLUME_DRIVER}
-  shakemaps-bnpb-data:
+  floodmaps-data:
     driver: ${VOLUME_DRIVER}
-  shakemaps-bmkg-data:
+  shakemaps-data:
+    driver: ${VOLUME_DRIVER}
+  shakemaps-corrected-data:
     driver: ${VOLUME_DRIVER}
   sftp-ssh-data:
     driver: ${VOLUME_DRIVER}
 
   report-template-data:
+    driver: ${VOLUME_DRIVER}
+  headless-output-data:
     driver: ${VOLUME_DRIVER}
 {{- end}}
 services:
@@ -181,11 +183,13 @@ services:
     - sftpbackup-postgis-target-data:/pg_backup
     links:
     - db:db
+
   smtp:
     image: catatnight/postfix
     environment:
       maildomain: kartoza.com
       smtp_user: noreply:docker
+
   sftpmediabackup:
     image: kartoza/sftp-backup:1.0
     environment:
@@ -204,17 +208,36 @@ services:
     - django-media-data:/media_backup
     links:
     - uwsgi:uwsgi
+
   web:
-    image: kartoza/inasafe-django_nginx:v3.5
+    image: kartoza/inasafe-django_nginx:v4.0-18.06.14
+    command: prod
     volumes:
     - django-static-data:/home/web/static:ro
     - django-media-data:/home/web/media:ro
     links:
     - uwsgi:uwsgi
+    environment:
+      SOURCE_PORT: 8080
+      TARGET_PORT: 8080
+      SERVER_NAME: _
+    labels:
+      io.rancher.container.pull_image: always
+
+  inasafe-realtime-lb:
+    image: rancher/lb-service-haproxy:v0.7.15
     ports:
-    - ${WEBSERVER_PORT}:8080/tcp
+    - 80:80/tcp
+{{- if eq .Values.USE_SSL "true" }}
+    - 443:443/tcp
+{{- end}}
+    labels:
+      io.rancher.container.agent.role: environmentAdmin,agent
+      io.rancher.container.agent_service.drain_provider: 'true'
+      io.rancher.container.create_agent: 'true'
+
   indicator-worker:
-    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -224,10 +247,13 @@ services:
       DATABASE_USERNAME: ${POSTGRES_USER}
       DJANGO_SETTINGS_MODULE: core.settings.prod_docker
       INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_HEADLESS_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_OUTPUT_DIR: /home/headless/outputs
       INAWARE_HOST: ${INAWARE_HOST}
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
-      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_HANDLER: console
+      LOGGING_DEFAULT_LOG_LEVEL: INFO
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
@@ -239,6 +265,14 @@ services:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
@@ -256,8 +290,9 @@ services:
     - indicator.%h
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
+
   dbbackup:
     image: kartoza/inasafe-django_dbbackup:v3.4.1
     environment:
@@ -272,8 +307,9 @@ services:
     - sftpbackup-postgis-target-data:/pg_backup
     links:
     - db:db
+
   uwsgi:
-    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -283,27 +319,40 @@ services:
       DATABASE_USERNAME: ${POSTGRES_USER}
       DJANGO_SETTINGS_MODULE: core.settings.prod_docker
       INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_HEADLESS_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_OUTPUT_DIR: /home/headless/outputs
       INAWARE_HOST: ${INAWARE_HOST}
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
       LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_LOG_LEVEL: ERROR
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
+      PYTHONPATH: /home/web/django_project
       SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
       SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
     volumes:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
     - smtp:smtp
     labels:
       io.rancher.container.pull_image: always
-  inasafe-worker:
-    image: kartoza/inasafe-django_uwsgi:v3.5-18.05.11
+
+  django-worker:
+    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -313,10 +362,13 @@ services:
       DATABASE_USERNAME: ${POSTGRES_USER}
       DJANGO_SETTINGS_MODULE: core.settings.prod_docker
       INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_HEADLESS_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_OUTPUT_DIR: /home/headless/outputs
       INAWARE_HOST: ${INAWARE_HOST}
       INAWARE_PASS: ${INAWARE_PASS}
       INAWARE_USER: ${INAWARE_USER}
-      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_HANDLER: console
+      LOGGING_DEFAULT_LOG_LEVEL: INFO
       LOGGING_MAIL_ADMINS: 'False'
       LOGGING_SENTRY: 'False'
       MAPQUEST_MAP_KEY: ''
@@ -328,6 +380,14 @@ services:
     - django-static-data:/home/web/static
     - django-media-data:/home/web/media
     - django-realtime-indicator:/home/web/django_project/.run
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
     links:
     - rabbitmq:rabbitmq
     - db:db
@@ -344,12 +404,14 @@ services:
     - inasafe-django.%h
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
+
   rabbitmq:
-    image: library/rabbitmq
+    image: library/rabbitmq:3.6
     labels:
       io.rancher.container.pull_image: always
+
   db:
     image: kartoza/postgis:9.6-2.4
     environment:
@@ -373,18 +435,8 @@ services:
       SECRET: ${BMKG_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
-    - shakemaps-bmkg-data:/web
+    - shakemaps-data:/web
 {{- end}}
-
-  sftp:
-    image: kartoza/realtime-orchestration_sftp:v3.1
-    volumes:
-    - sftp-ssh-data:/home/realtime/.ssh
-    - sftp-ssh-config-data:/etc/ssh
-    - shakemaps-bmkg-data:/home/realtime/shakemaps
-    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
-    ports:
-    - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
 
 {{- if eq .Values.SHAKEMAPS_CORRECTED_ALLOW_SYNC "true" }}
   shakemaps-corrected-sync:
@@ -397,22 +449,28 @@ services:
     - shakemaps-corrected-data:/web
 {{- end}}
 
-  inasafe-shakemap-monitor:
-    image: kartoza/realtime-orchestration_inasafe:v3.2.0
+  sftp:
+    image: kartoza/realtime-orchestration_sftp:v3.1
+    volumes:
+    - sftp-ssh-data:/home/realtime/.ssh
+    - sftp-ssh-config-data:/etc/ssh
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    ports:
+    - ${SHAKEMAP_DROP_EXPOSE_PORT}:22/tcp
+
+  shakemap-monitor:
+    image: inasafe/realtime_hazard-processor:v4.0.0
+    command:
+    - prod
+    - inasafe-realtime-monitor
     environment:
       ASHMAPS_DIR: /home/realtime/ashmaps
       C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
       FLOODMAPS_DIR: /home/realtime/floodmaps
-      GEONAMES_SQLITE_PATH: /home/realtime/analysis_data/indonesia.sqlite
-      INASAFE_ASH_AIRPORT_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Airport_OpenFlights_WGS84.shp
-      INASAFE_ASH_CITIES_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Capital_City_Point_WGS84.shp
-      INASAFE_ASH_HIGHLIGHT_BASE_PATH: /home/realtime/analysis_data/ash/srtm_indo_hillshade.tif
-      INASAFE_ASH_LANDCOVER_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Landcover_250K_WGS84.shp
-      INASAFE_ASH_OVERVIEW_PATH: /home/realtime/analysis_data/ash/overview.shp
-      INASAFE_ASH_POPULATION_PATH: /home/realtime/analysis_data/ash/exposure/WorldPop_200m.tif
-      INASAFE_ASH_VOLCANO_PATH: /home/realtime/analysis_data/ash/exposure/home/realtime/analysis_data/ash/exposure/GVP_Volcano_List_Darwin_VAAC_AOR_final.shp
-      INASAFE_FLOOD_POPULATION_PATH: /home/realtime/analysis_data/exposure/DKI_Jakarta_Population_Dukcapil_Ages_WGS84.shp
-      INASAFE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
+      INASAFE_LOCALE: id
       INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
       INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
@@ -420,50 +478,42 @@ services:
       INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
       INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
-      INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
-      INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
-      INASAFE_SHAKE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
-      INASAFE_SOURCE_DIR: /home/realtime/src/inasafe
+      PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
       SHAKEMAPS_DIR: /home/realtime/shakemaps
-      SHAKEMAPS_EXTRACT_DIR: /home/realtime/shakemaps-extracted
-      WEB_DIR: /var/www
-      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
-      INASAFE_LOCALE: id
-      INASAFE_ASH_TEMPLATE_PATH: /home/realtime/report-template/ash/realtime-ash.qpt
-    working_dir: /home/realtime/src/inasafe
+      QGIS_DEBUG: 0
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
+{{- end}}
+
     volumes:
-    - analysis-data:/home/realtime/analysis_data
-    - shakemaps-bmkg-data:/home/realtime/shakemaps
-    - shakemaps-extracted-data:/home/realtime/shakemaps-extracted
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
-    - report-template-data:/home/realtime/report-template
     links:
     - rabbitmq:rabbitmq
     - sftp:sftp
-    command:
-    - /entry-point.sh
-    - shakemaps-monitor
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
-  inasafe-worker:
-    image: kartoza/realtime-orchestration_inasafe:v3.2.0
+
+  shakemap-corrected-monitor:
+    image: inasafe/realtime_hazard-processor:v4.0.0
+    command:
+    - prod
+    - inasafe-realtime-monitor
     environment:
       ASHMAPS_DIR: /home/realtime/ashmaps
       C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
       FLOODMAPS_DIR: /home/realtime/floodmaps
-      GEONAMES_SQLITE_PATH: /home/realtime/analysis_data/indonesia.sqlite
-      INASAFE_ASH_AIRPORT_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Airport_OpenFlights_WGS84.shp
-      INASAFE_ASH_CITIES_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Capital_City_Point_WGS84.shp
-      INASAFE_ASH_HIGHLIGHT_BASE_PATH: /home/realtime/analysis_data/ash/srtm_indo_hillshade.tif
-      INASAFE_ASH_LANDCOVER_PATH: /home/realtime/analysis_data/ash/exposure/IDN_Landcover_250K_WGS84.shp
-      INASAFE_ASH_OVERVIEW_PATH: /home/realtime/analysis_data/ash/overview.shp
-      INASAFE_ASH_POPULATION_PATH: /home/realtime/analysis_data/ash/exposure/WorldPop_200m.tif
-      INASAFE_ASH_VOLCANO_PATH: /home/realtime/analysis_data/ash/exposure/home/realtime/analysis_data/ash/exposure/GVP_Volcano_List_Darwin_VAAC_AOR_final.shp
-      INASAFE_FLOOD_POPULATION_PATH: /home/realtime/analysis_data/exposure/DKI_Jakarta_Population_Dukcapil_Ages_WGS84.shp
-      INASAFE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
+      EQ_GRID_SOURCE_TYPE: corrected
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})([\d_-]*)(/output)?/grid\.xml$$
+      INASAFE_LOCALE: id
       INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
       INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
       INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
@@ -471,47 +521,150 @@ services:
       INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
       INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
       INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
-      INASAFE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
-      INASAFE_SHAKE_POPULATION_PATH: /home/realtime/analysis_data/exposure/population.tif
-      INASAFE_SHAKE_REALTIME_TEMPLATE: /home/realtime/analysis_data/realtime-template.qpt
-      INASAFE_SOURCE_DIR: /home/realtime/src/inasafe
-      SHAKEMAPS_DIR: /home/realtime/shakemaps
-      SHAKEMAPS_EXTRACT_DIR: /home/realtime/shakemaps-extracted
-      WEB_DIR: /var/www
-      INASAFE_LOCALE: id
-      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
-      INASAFE_ASH_TEMPLATE_PATH: /home/realtime/report-template/ash/realtime-ash.qpt
-    working_dir: /home/realtime/src/inasafe
+      PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
+      SHAKEMAPS_DIR: /home/realtime/shakemaps-corrected
+      QGIS_DEBUG: 0
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
+{{- end}}
+
     volumes:
-    - analysis-data:/home/realtime/analysis_data
-    - shakemaps-bmkg-data:/home/realtime/shakemaps
-    - shakemaps-extracted-data:/home/realtime/shakemaps-extracted
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
     - floodmaps-data:/home/realtime/floodmaps
     - ashmaps-data:/home/realtime/ashmaps
-    - report-template-data:/home/realtime/report-template
     links:
     - rabbitmq:rabbitmq
     - sftp:sftp
-    command:
-    - /entry-point.sh
-    - celery-workers
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: "0 0 * * * ?"
       cron.action: restart
-  analysis-data-sync:
+
+  realtime-worker:
+    image: inasafe/realtime_hazard-processor:v4.0.0
+    command:
+    - prod
+    - inasafe-realtime-worker
+    environment:
+      ASHMAPS_DIR: /home/realtime/ashmaps
+      C_FORCE_ROOT: 'True'
+      DISPLAY: ':99'
+      FLOODMAPS_DIR: /home/realtime/floodmaps
+      GRID_FILE_PATTERN: (?P<shake_id>\d{14})/grid\.xml$$
+      INASAFE_LOCALE: id
+      INASAFE_REALTIME_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_REALTIME_PROJECT: /home/realtime/analysis_data/realtime.qgs
+      INASAFE_REALTIME_REST_LOGIN_URL: http://web:8080/realtime/api-auth/login/
+      INASAFE_REALTIME_REST_PASSWORD: ${INASAFE_REALTIME_REST_PASSWORD}
+      INASAFE_REALTIME_REST_URL: http://web:8080/realtime/api/v1/
+      INASAFE_REALTIME_REST_USER: ${INASAFE_REALTIME_REST_USER}
+      INASAFE_REALTIME_SHAKEMAP_HOOK_URL: http://web:8080/realtime/api/v1/indicator/notify_shakemap_push
+      PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
+      SHAKEMAPS_DIR: /home/realtime/shakemaps
+      QGIS_DEBUG: 0
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
+{{- end}}
+
+    volumes:
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    links:
+    - rabbitmq:rabbitmq
+    - sftp:sftp
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: "0 0 * * * ?"
+      cron.action: restart
+
+  analysis-context-data-sync:
     image: kartoza/btsync:rancher
     environment:
-      DEVICE: ${SYNC_DEVICE_PREFIX} - Analysis Data
-      SECRET: ${ANALYSIS_DATA_SYNC}
+      DEVICE: ${SYNC_DEVICE_PREFIX} - Analysis Contexts Data
+      SECRET: ${ANALYSIS_CONTEXT_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
-    - analysis-data:/web
+    - analysis-context-data:/web
+
+  analysis-context-data-backup:
+    image: kartoza/sftp-backup:1.0
+    environment:
+      DAILY: '7'
+      DUMPPREFIX: ARC_analysiscontextdata
+      MONTHLY: '12'
+      SFTP_DIR: /
+      SFTP_HOST: 192.168.1.5
+      SFTP_PASSWORD: password
+      SFTP_USER: user
+      TARGET_FOLDER: /target
+      USE_SFTP_BACKUP: 'False'
+      YEARLY: '3'
+    volumes:
+    - sftpbackup-analysis-context-data:/backups
+    - analysis-context-data:/target
+    links:
+    - analysis-context-data-sync
+
   report-template-sync:
-    image: kartoza/btsync:rancher
+    image: alpine/git
+    entrypoint: /bin/sh
+    working_dir: /web
+    command:
+      - -c
+      - "git pull origin master && git log HEAD^..HEAD && tail -f /dev/null"
     environment:
       DEVICE: ${SYNC_DEVICE_PREFIX} - Report Template
       SECRET: ${REPORT_TEMPLATE_SYNC}
       STANDBY_MODE: 'TRUE'
     volumes:
-      - report-template-data:/web
+    - report-template-data:/web
+    labels:
+      cron.schedule: "*/5 * * * * ?"
+      cron.action: restart
+
+  headless-worker:
+    image: inasafe/headless_processor:v4.4.0
+    command:
+    - prod
+    - inasafe-headless-worker
+    links:
+    - rabbitmq:rabbitmq
+    - analysis-context-data-sync:analysis-context-data-sync
+    - report-template-sync:report-template-sync
+    volumes:
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    environment:
+      PYTHONPATH: /usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe:/home/app
+      DISPLAY: ':99'
+      C_FORCE_ROOT: 'True'
+      INASAFE_LOCALE: id
+      INASAFE_HEADLESS_BROKER_HOST: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_WORK_DIR: /home/headless
+      INASAFE_OUTPUT_DIR: /home/headless/outputs
+      QGIS_DEBUG: 0
+
+{{- if eq .Values.ENABLE_SENTRY "true"}}
+      INASAFE_SENTRY: 1
+      HOSTNAME_SENTRY: "${SITE_DOMAIN_NAME}"
+{{- end}}
+
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: "0 0 * * * ?"
+      cron.action: restart

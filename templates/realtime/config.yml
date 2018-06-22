@@ -1,6 +1,6 @@
-name: InaSAFE Realtime v3.5
-description: InaSAFE Realtime server using InaSAFE v3.5
-version: 3.5
+name: InaSAFE Realtime
+description: InaSAFE Realtime server
+version: 4.0
 category: GIS
 maintainer: Kartoza (Pty) Ltd. - Rizky Maulana Nugraha, rizky@kartoza.com
 license: GPL v3
