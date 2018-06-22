@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "LEDET BIMS"
   description: "LEDET's Biodiversity Information Management System."
-  version: 0
+  version: ledet
   uuid: kartoza-geonode-0
   questions:
     #- variable: SMB_PATH

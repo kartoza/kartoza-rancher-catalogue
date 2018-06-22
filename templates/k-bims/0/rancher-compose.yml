@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "Healthyriver BIMS"
   description: "Healthyriver's Biodiversity Information Management System."
-  version: 0
+  version: healthyriver
   uuid: kartoza-geonode-0
   questions:
     #- variable: SMB_PATH
