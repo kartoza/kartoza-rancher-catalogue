@@ -188,6 +188,9 @@ services:
     environment:
       - SECRET=${BTSYNC_DB_SECRET}
       - DEVICE=BimsDatabase
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
 
   btsync-media:
     # BTSync backups for django media
@@ -199,3 +202,6 @@ services:
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
       - DEVICE=BimsMedia
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true

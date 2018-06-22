@@ -1,7 +1,7 @@
 version: '2'
 catalog:
-  name: "Kartoza BIMS"
-  description: "Kartoza's Biodiversity Information Management System."
+  name: "Healthyriver BIMS"
+  description: "Healthyriver's Biodiversity Information Management System."
   version: 0
   uuid: kartoza-geonode-0
   questions:
