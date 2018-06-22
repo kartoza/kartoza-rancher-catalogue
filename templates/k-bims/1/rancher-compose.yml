@@ -77,6 +77,18 @@ catalog:
       required: false
       default:
       type: "string"
+    - variable: GEOCONTEXT_URL
+      label: "Geocontext URL"
+      description: "URL for Geocontext site"
+      required: true
+      default: "http://geocontext.kartoza.com"
+      type: "string"
+    - variable: CONTACT_US_EMAIL
+      label: "Contact Us email"
+      description: "Email for contact us"
+      required: true
+      default:
+      type: "string"
 services:
   smtp:
     scale: 1
@@ -107,5 +119,8 @@ services:
     scale: 1
     start_on_create: true
   migrate:
+    scale: 1
+    start_on_create: false
+  elasticsearch:
     scale: 1
     start_on_create: false
