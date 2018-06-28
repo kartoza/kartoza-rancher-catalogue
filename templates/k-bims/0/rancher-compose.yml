@@ -83,6 +83,36 @@ catalog:
       required: false
       default:
       type: "string"
+    - variable: GEOCONTEXT_URL
+      label: "Geocontext URL"
+      description: "URL for Geocontext site"
+      required: true
+      default: "http://geocontext.kartoza.com"
+      type: "string"
+    - variable: CONTACT_US_EMAIL
+      label: "Contact Us email"
+      description: "Email for contact us"
+      required: true
+      default:
+      type: "string"
+    - variable: IUCN_API_KEY
+      label: "IUCN Api Key"
+      description: "IUCN Api Key"
+      required: false
+      default: ""
+      type: "string"
+    - variable: BING_MAP_KEY
+      label: "Bing Map Key"
+      description: "Token key for bing map"
+      required: false
+      default: ""
+      type: "string"
+    - variable: MAP_TILER_KEY
+      label: "Map Tiler Key"
+      description: "Key for map tiler"
+      required: false
+      default: ""
+      type: "string"
 services:
   smtp:
     scale: 1

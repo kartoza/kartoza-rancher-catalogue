@@ -46,6 +46,17 @@ services:
       smtp_user: noreply:docker
     restart: unless-stopped
 
+  elasticsearch:
+    image: elasticsearch:2.4.2
+    environment:
+      cluster.name: docker-cluster
+      bootstrap.memory_lock: 'true'
+    stdin_open: true
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
   web:
     image: dimasciput/kartoza_nginx:latest
     hostname: nginx
@@ -74,6 +85,12 @@ services:
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: healthyrivers.kartoza.com
       VIRTUAL_PORT: '8080'
+      HAYSTACK_HOST: elasticsearch
+      GEOCONTEXT_URL: ${GEOCONTEXT_URL}
+      CONTACT_US_EMAIL: ${CONTACT_US_EMAIL}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
     entrypoint:
     - /entry-point.sh
     volumes:
@@ -81,6 +98,8 @@ services:
     - django-media:/home/web/media:rw
     - django-reports:/home/web/reports
     - django-logs:/var/log/
+    links:
+    - elasticsearch:elasticsearch
     user: root
     labels:
       io.rancher.container.pull_image: always
