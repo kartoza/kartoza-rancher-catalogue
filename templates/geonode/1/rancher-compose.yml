@@ -1,0 +1,150 @@
+version: '2'
+catalog:
+  name: "Kartoza Geonode"
+  description: "Kartoza's spin of GeoNode with a QGIS backend."
+  version: 2.7.6
+  uuid: kartoza-geonode-qgis-server-2.7.6
+  questions:
+    - variable: QGIS_BACKEND_INSTANCE_COUNT
+      label: "QGIS backend instance count"
+      description: "How many QGIS backend rendering instances to start with."
+      required: true
+      default: 4
+      type: "int"
+    - variable: POSTGRES_DB
+      label: PostgreSQL db to create.
+      required: true
+      default: gis
+      type: "string"
+    - variable: POSTGRES_USER
+      label: PostgrsSQL superuser account to create.
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_PASS
+      label: PostgreSQL superuser password to create.
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+      required: true
+      default: 0.0.0.0/0
+      type: "string"
+    - variable: ADMIN_EMAIL
+      label: "Administrator email"
+      description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      required: true
+      default: ""
+      type: "string"
+    - variable: SITE_URL
+      label: "Site URL"
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /). Also do not use quotes."
+      required: true
+      default: ""
+      type: "string"
+    - variable: WEBSERVER_PORT
+      description: "Website port"
+      label: "Port on which the site should be served. Typically 80"
+      required: true
+      default: 80
+      type: "int"
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Django allowed hosts"
+      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
+      required: false
+      default: ""
+      type: "string"
+    - variable: BTSYNC_DB_SECRET
+      label: "Database backups key"
+      description: "Resilio sync read/write key for syncing database backups"
+      required: false
+      default:
+      type: "string"
+    - variable: BTSYNC_MEDIA_SECRET
+      label: "Media backups key"
+      description: "Resilio sync read/write key for syncing geonode media backups"
+      required: false
+      default:
+      type: "string"
+services:
+  qgis-server:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: qgis-server
+        priority: 1
+        protocol: http
+        service: qgis-server-backend
+        source_port: 80
+        target_port: 80
+      health_check:
+        healthy_threshold: 2
+        response_timeout: 2000
+        port: 42
+        unhealthy_threshold: 3
+        initializing_timeout: 60000
+        interval: 2000
+        reinitializing_timeout: 60000
+  celery:
+    scale: 1
+    start_on_create: true
+  django:
+    scale: 1
+    start_on_create: true
+  nginx:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
+  geonode-lb:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: ${SITE_URL}
+        path: ''
+        priority: 1
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 80
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
+  rabbitmq:
+    scale: 1
+    start_on_create: true
+  qgis-server-backend:
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: qgis-server-backend"'
+      reinitializing_timeout: 60000
+  postgis:
+    scale: 1
+    start_on_create: true

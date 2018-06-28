@@ -7,11 +7,14 @@ open source community.
 Provided Catalogue Entries:
 ---------------------------
 * InaSAFE Realtime
+* GeoNode Generic - see
+  [README](./templates/geonode-generic/README.md)
 * GeoNode with QGIS Backend (Kartoza extensions to http://geonode.org) - see
   [README](./templates/geonode/README.md)
 * GeoSAFE based on GeoNode with QGIS Backend (Kartoza build of InaSAFE for the web) - see
   [README](./templates/geosafe/README.md)  
 * GeoServer (http://geoserver.org) - see [README](./templates/geoserver/README.md)
+* GisQuick (http://gisquick.org/) - see [README](./templates/gisquick/README.md)
 * OSM-Reporter - see [README](./templates/osm-reporter/README.md) 
 * PostgreSQL 9.6 with PostGIS 2.4 (enterprise geodatabase) - see
   [README](./templates/postgis-9.6-2.4/README.md)  
