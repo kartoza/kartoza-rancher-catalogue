@@ -1,0 +1,179 @@
+# Rancher specific docker compose that uses image for django_project
+# and no local storage
+version: "2.2"
+
+volumes:
+  # Use a project specific prefix because if you name the same volume in
+  # two different docker compose instances running on the
+  # same host, they will use the same data volume!
+  feti-pg-data-volume:
+  feti-pg-setup-volume:
+  feti-pg-backups-volume:
+  feti-media-backups-volume:
+  feti-media-volume:
+  feti-reports-volume:
+  feti-static-volume:
+  feti-logs-volume:
+  feti-django-project-volume:
+  feti-nginx-volume:
+
+services:
+  # This is normally the main entry point for a production server
+  web:
+    # read_only: true
+    restart: unless-stopped
+    image: nginx
+    hostname: nginx
+    volumes:
+      # still need to get rid of this external file requirement
+      # we can ship it in the django volume and reference it there
+      # this way we avoid having to make a customised nginx for every
+      # project
+      - feti-nginx-volume:/etc/nginx/conf.d
+      #- /home/feti/deployment/sites-enabled:/etc/nginx/conf.d:ro
+      - feti-static-volume:/home/web/static
+      - feti-media-volume:/home/web/media
+      - feti-logs-volume:/var/log/nginx
+    depends_on:
+      - uwsgi
+      - smtp
+      - db
+      - rabbitmq
+      - worker
+      - elasticsearch
+      - dbbackups
+    links:
+      - uwsgi:uwsgi
+    ports:
+      - "80:8080"
+
+  smtp:
+    restart: unless-stopped
+    #  read_only: true
+    image: catatnight/postfix
+    hostname: postfix
+    environment:
+      # You could change this to something more suitable
+      - maildomain=kartoza.com
+      - smtp_user=noreply:docker
+
+  elasticsearch:
+    restart: unless-stopped
+    #  read_only: true
+    image: elasticsearch:2.4.2
+    hostname: elasticsearch
+    environment:
+      - HAYSTACK_PORT=9200
+
+  db:
+    restart: unless-stopped
+    image: kartoza/postgis:9.6-2.4
+    volumes:
+      - feti-pg-data-volume:/var/lib/postgresql
+      - feti-pg-setup-volume:/home/setup
+      - feti-pg-backups-volume:/backups
+    environment:
+      - USERNAME=docker
+      - PASS=docker
+
+  dbbackups:
+    restart: unless-stopped
+    image: kartoza/pg-backup:9.6
+    hostname: pg-backups
+    volumes:
+      - feti-pg-backups-volume:/backups
+    links:
+      - db:db
+    depends_on:
+      - db
+    environment:
+      - DUMPPREFIX=PG_FETI
+      # These are all defaults anyway, but setting explicitly in
+      # case we ever want to ever use different credentials
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGPORT=5432
+      - PGHOST=db
+      - PGDATABASE=gis
+
+  rabbitmq:
+    image: library/rabbitmq
+    hostname: rabbitmq
+    environment:
+       - RABBIT_PASSWORD=rabbit_test_password
+       - USER=rabbit_user
+       - RABBITMQ_NODENAME=rabbit
+
+  worker:
+    # Change this to kartoza after testing
+    image: timlinux/feti:latest
+    hostname: worker
+    depends_on:
+      - db
+      - rabbitmq
+      - elasticsearch
+    command: celery worker -A feti.celery -l info  --beat
+    environment:
+      - DATABASE_NAME=gis
+      - DATABASE_USERNAME=docker
+      - DATABASE_PASSWORD=docker
+      - DATABASE_HOST=db
+      - DATABASE_QGIS_HOST=db_gis
+      - RABBITMQ_HOST=rabbitmq
+      - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
+      - VIRTUAL_HOST=staging.feti.kartoza.com
+      - VIRTUAL_PORT=8080
+      - C_FORCE_ROOT=true
+      - HAYSTACK_HOST=elasticsearch
+    volumes:
+      - feti-static-volume:/home/web/static:ro
+      - feti-media-volume:/home/web/media
+      - feti-logs-volume:/var/log/nginx
+      - feti-reports-volume:/home/web/reports
+    links:
+      - smtp:smtp
+      - db:db
+      - elasticsearch:elasticsearch
+      - rabbitmq:rabbitmq
+
+  uwsgi:
+    restart: unless-stopped
+    # Change this to kartoza after testing
+    image: timlinux/feti:latest
+    hostname: uwsgi
+    depends_on:
+      - smtp
+      - db
+      - rabbitmq
+      - worker
+      - elasticsearch
+      - dbbackups
+    environment:
+      - DATABASE_NAME=gis
+      - DATABASE_USERNAME=docker
+      - DATABASE_PASSWORD=docker
+      - DATABASE_HOST=db
+      - RABBITMQ_HOST=rabbitmq
+      - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
+      - VIRTUAL_HOST=users.inasafe.org
+      - VIRTUAL_PORT=8080
+      - HAYSTACK_HOST=elasticsearch
+    volumes:
+      # This ships in the feti image, we want to share it with other services
+      - feti-nginx-volume:/etc/nginx/conf.d:ro
+      # Setup data was copied into the image at docker build time
+      - feti-pg-setup-volume:/home/setup
+      # These volumes are created via docker / rancher
+      - feti-static-volume:/home/web/static:ro
+      - feti-media-volume:/home/web/media
+      - feti-logs-volume:/var/log
+      # I wonder why these are here and not in nginx ....
+      #- /home/feti/deployment/webroot-path:/var/www/webroot
+      # Not used yet
+      #- /etc/letsencrypt:/etc/letsencrypt
+    links:
+      - smtp:smtp
+      - db:db
+      - elasticsearch:elasticsearch
+      - rabbitmq:rabbitmq
+      - worker:worker

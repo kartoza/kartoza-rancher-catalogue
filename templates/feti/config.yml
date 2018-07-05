@@ -1,0 +1,7 @@
+name: FETI
+description: A project
+version: 1
+category: GIS
+maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
+license: GPL v3
+projectURL: https://github.com/kartoza/osm-reporter
