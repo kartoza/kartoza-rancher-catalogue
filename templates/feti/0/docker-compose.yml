@@ -1,6 +1,6 @@
 # Rancher specific docker compose that uses image for django_project
 # and no local storage
-version: '2.2'
+version: '2'
 
 volumes:
   # Use a project specific prefix because if you name the same volume in
