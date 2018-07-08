@@ -1,46 +1,111 @@
+version: '2'
 catalog:
-  name: "FETI"
-  description: "Helping South African youth find tertiary education opportunities"
-  version: 1
-  uuid: kartoza-feti-1
+  name: "Kartoza FETI"
+  description: "Helping South African youth find tertiary education opportunities."
+  version: 0
+  uuid: kartoza-feti-0
   questions:
-    - variable: REPORTER_BACKEND_INSTANCE_COUNT
-      label: "Backend instance count"
-      description: "How many instances to start with."
+    #- variable: SMB_PATH
+    #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
+    #  required: true
+    #  default:
+    #  type: "string"
+    #- variable: SMB_USER
+    #  label: SMB/CIFS network file share username.
+    #  required: true
+    #  default: docker
+    #  type: "string"
+    #- variable: SMB_PASSWORD
+    #  label: SMB/CIFS network file share password.
+    #  required: true
+    #  default: docker
+    #  type: "password"
+    - variable: POSTGRES_DB
+      label: PostgreSQL db to create.
       required: true
-      default: 1
+      default: gis
+      type: "string"
+    - variable: POSTGRES_USER
+      label: PostgrsSQL superuser account to create.
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_PASS
+      label: PostgreSQL superuser password to create.
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+      required: true
+      default: 10.42.0.0/16
+      type: "string"
+    - variable: ADMIN_EMAIL
+      label: "Administrator email"
+      description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      required: true
+      default: ""
+      type: "string"
+    - variable: SITE_URL
+      label: "Site URL"
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /). Also do not use quotes."
+      required: true
+      default: ""
+      type: "string"
+    - variable: WEBSERVER_PORT
+      description: "Website port"
+      label: "Port on which the site should be served. Typically 80"
+      required: true
+      default: 80
       type: "int"
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Django allowed hosts"
+      description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
+      required: false
+      default: ""
+      type: "string"
+    - variable: BTSYNC_DB_SECRET
+      label: "Database backups key"
+      description: "Resilio sync read/write key for syncing database backups"
+      required: false
+      default:
+      type: "string"
     - variable: BTSYNC_MEDIA_SECRET
-      label: "Logs key"
-      description: "Resilio sync read/write key for syncing activity logs"
+      label: "Media backups key"
+      description: "Resilio sync read/write key for syncing geonode media backups"
       required: false
       default:
       type: "string"
 services:
-  web-lb:
+  smtp:
     scale: 1
     start_on_create: true
-    lb_config:
-      certs: []
-      port_rules:
-      - hostname: web-lb
-        priority: 1
-        # we are forwarding to port 8080 so we need to use tcp not http
-        protocol: tcp
-        service: web
-        source_port: 80
-        target_port: 8080
-      health_check:
-        healthy_threshold: 2
-        response_timeout: 2000
-        port: 42
-        unhealthy_threshold: 3
-        initializing_timeout: 60000
-        interval: 2000
-        reinitializing_timeout: 60000
   web:
-    scale: ${BACKEND_INSTANCE_COUNT}
+    scale: 1
+    start_on_create: true
+  uwsgi:
+    scale: 1
+    start_on_create: true
+  rabbitmq:
+    scale: 1
     start_on_create: true
   db:
-    scale: ${BACKEND_INSTANCE_COUNT}
+    scale: 1
     start_on_create: true
+  dbbackups:
+    scale: 1
+    start_on_create: true
+  mediabackup:
+    scale: 1
+    start_on_create: true
+  dbrestore:
+    scale: 1
+    # We don't want to run until explicitly requested by the user
+    start_on_create: false
+  collectstatic:
+    scale: 1
+    start_on_create: true
+  migrate:
+    scale: 1
+    start_on_create: false
