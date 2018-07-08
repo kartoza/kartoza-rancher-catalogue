@@ -65,7 +65,7 @@ services:
     environment:
       - HAYSTACK_PORT=9200
 
-  db:
+  db: &db
     restart: unless-stopped
     image: kartoza/postgis:9.6-2.4
     volumes:
@@ -136,7 +136,7 @@ services:
       - elasticsearch:elasticsearch
       - rabbitmq:rabbitmq
 
-  uwsgi:
+  uwsgi: &uwsgi
     restart: unless-stopped
     # Change this to kartoza after testing
     image: timlinux/feti:latest
@@ -177,3 +177,43 @@ services:
       - elasticsearch:elasticsearch
       - rabbitmq:rabbitmq
       - worker:worker
+
+  #
+  # Run-once services for system management
+  #
+  dbrestore:
+    # This container will just run, a database restore on the latest database backup
+    # and then exit. Restart it again in rancher to
+    # rerun another database restore
+    # Inherit from the db container
+    <<: *db
+    command: bash -c "su - postgres -c 'dropdb gis'; createdb -O ${POSTGRES_USER} -T template_postgis gis; pg_restore /backups/latest.dmp | psql gis"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
+  collectstatic:
+    # This container will just run, collect static
+    # and then exit. Restart it again in rancher to
+    # re-collect static resources.
+    # Inherit from the uwsgi container
+    <<: *uwsgi
+    command: python manage.py collectstatic --noinput
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
+
+  migrate:
+    # This container will just run, migrations
+    # and then exit. Restart it again in rancher to
+    # rerun migrations.
+    # Inherit from the uwsgi container
+    # We need to migrate accounts (auth) first as it has a reference to user model
+    <<: *uwsgi
+    command: bash -c "python manage.py migrate auth;python manage.py migrate"
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
