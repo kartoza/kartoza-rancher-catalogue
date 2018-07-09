@@ -202,6 +202,10 @@ services:
     # re-collect static resources.
     # Inherit from the uwsgi container
     <<: *uwsgi
+    volumes:
+      # override the volumes from uwsgi service because
+      # static needs to be writable here
+      - feti-static-volume:/home/web/static
     command: python manage.py collectstatic --noinput
     labels:
       io.rancher.container.pull_image: always
