@@ -18,6 +18,50 @@ volumes:
   feti-nginx-volume:
 
 services:
+  # This must come first so that the nginx conf gets mounted into
+  # the named volume volume otherwise the default one in the 
+  # nginx container will overwrite it.
+  uwsgi: &uwsgi
+    restart: unless-stopped
+    # Change this to kartoza after testing
+    image: timlinux/feti:latest
+    hostname: uwsgi
+    depends_on:
+      - smtp
+      - db
+      - rabbitmq
+      - worker
+      - elasticsearch
+      - dbbackups
+    environment:
+      - DATABASE_NAME=gis
+      - DATABASE_USERNAME=docker
+      - DATABASE_PASSWORD=docker
+      - DATABASE_HOST=db
+      - RABBITMQ_HOST=rabbitmq
+      - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
+      - VIRTUAL_HOST=users.inasafe.org
+      - VIRTUAL_PORT=8080
+      - HAYSTACK_HOST=elasticsearch
+    volumes:
+      # This ships in the feti image, we want to share it with other services
+      - feti-nginx-volume:/etc/nginx/conf.d:ro
+      # Setup data was copied into the image at docker build time
+      - feti-pg-setup-volume:/home/setup
+      # These volumes are created via docker / rancher
+      - feti-static-volume:/home/web/static:ro
+      - feti-media-volume:/home/web/media
+      - feti-logs-volume:/var/log
+      # I wonder why these are here and not in nginx ....
+      #- /home/feti/deployment/webroot-path:/var/www/webroot
+      # Not used yet
+      #- /etc/letsencrypt:/etc/letsencrypt
+    links:
+      - smtp:smtp
+      - db:db
+      - elasticsearch:elasticsearch
+      - rabbitmq:rabbitmq
+      - worker:worker
   # This is normally the main entry point for a production server
   web:
     # read_only: true
@@ -136,47 +180,6 @@ services:
       - elasticsearch:elasticsearch
       - rabbitmq:rabbitmq
 
-  uwsgi: &uwsgi
-    restart: unless-stopped
-    # Change this to kartoza after testing
-    image: timlinux/feti:latest
-    hostname: uwsgi
-    depends_on:
-      - smtp
-      - db
-      - rabbitmq
-      - worker
-      - elasticsearch
-      - dbbackups
-    environment:
-      - DATABASE_NAME=gis
-      - DATABASE_USERNAME=docker
-      - DATABASE_PASSWORD=docker
-      - DATABASE_HOST=db
-      - RABBITMQ_HOST=rabbitmq
-      - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
-      - VIRTUAL_HOST=users.inasafe.org
-      - VIRTUAL_PORT=8080
-      - HAYSTACK_HOST=elasticsearch
-    volumes:
-      # This ships in the feti image, we want to share it with other services
-      - feti-nginx-volume:/etc/nginx/conf.d:ro
-      # Setup data was copied into the image at docker build time
-      - feti-pg-setup-volume:/home/setup
-      # These volumes are created via docker / rancher
-      - feti-static-volume:/home/web/static:ro
-      - feti-media-volume:/home/web/media
-      - feti-logs-volume:/var/log
-      # I wonder why these are here and not in nginx ....
-      #- /home/feti/deployment/webroot-path:/var/www/webroot
-      # Not used yet
-      #- /etc/letsencrypt:/etc/letsencrypt
-    links:
-      - smtp:smtp
-      - db:db
-      - elasticsearch:elasticsearch
-      - rabbitmq:rabbitmq
-      - worker:worker
 
   #
   # Run-once services for system management
