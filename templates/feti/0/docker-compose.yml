@@ -19,7 +19,7 @@ volumes:
 
 services:
   # This must come first so that the nginx conf gets mounted into
-  # the named volume volume otherwise the default one in the 
+  # the named volume volume otherwise the default one in the
   # nginx container will overwrite it.
   uwsgi: &uwsgi
     restart: unless-stopped
@@ -34,9 +34,15 @@ services:
       - elasticsearch
       - dbbackups
     environment:
-      - DATABASE_NAME=gis
-      - DATABASE_USERNAME=docker
-      - DATABASE_PASSWORD=docker
+      ###### Rancher configurable options
+      - ADMIN=${ADMIN_EMAIL}
+      - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
+      - SITEURL=http://${SITE_URL}/
+      #######
+      - DEBUG=False
+      - DATABASE_NAME=${POSTGRES_DB}
+      - DATABASE_USERNAME=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASS}
       - DATABASE_HOST=db
       - RABBITMQ_HOST=rabbitmq
       - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
@@ -89,7 +95,7 @@ services:
     links:
       - uwsgi:uwsgi
     ports:
-      - "80:8080"
+      - ${WEBSERVER_PORT}:8080
 
   smtp:
     restart: unless-stopped
@@ -98,7 +104,7 @@ services:
     hostname: postfix
     environment:
       # You could change this to something more suitable
-      - maildomain=kartoza.com
+      - maildomain=${SITE_URL}
       - smtp_user=noreply:docker
 
   elasticsearch:
@@ -117,8 +123,10 @@ services:
       - feti-pg-setup-volume:/home/setup
       - feti-pg-backups-volume:/backups
     environment:
-      - USERNAME=docker
-      - PASS=docker
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
 
   dbbackups:
     restart: unless-stopped
@@ -134,11 +142,11 @@ services:
       - DUMPPREFIX=PG_FETI
       # These are all defaults anyway, but setting explicitly in
       # case we ever want to ever use different credentials
-      - PGUSER=docker
-      - PGPASSWORD=docker
-      - PGPORT=5432
+      - PGDATABASE=${POSTGRES_DB}
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASS}
       - PGHOST=db
-      - PGDATABASE=gis
+      - PGPORT=5432
 
   rabbitmq:
     image: library/rabbitmq
@@ -158,10 +166,11 @@ services:
       - elasticsearch
     command: celery worker -A feti.celery -l info  --beat
     environment:
-      - DATABASE_NAME=gis
-      - DATABASE_USERNAME=docker
-      - DATABASE_PASSWORD=docker
+      - DATABASE_NAME=${POSTGRES_DB}
+      - DATABASE_USERNAME=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASS}
       - DATABASE_HOST=db
+      # next line looks like a copy paste artifact? TS
       - DATABASE_QGIS_HOST=db_gis
       - RABBITMQ_HOST=rabbitmq
       - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
@@ -179,7 +188,30 @@ services:
       - db:db
       - elasticsearch:elasticsearch
       - rabbitmq:rabbitmq
+  #
+  # Backups via btsync
+  #
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - feti-pg-backups-volume:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=FetiDatabase
 
+  btsync-media:
+    # BTSync backups for django media
+    image: kartoza/btsync
+    hostname: btsync-logs
+    restart: unless-stopped
+    volumes:
+      - feti-media-backups-volume:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=FetiLogs
 
   #
   # Run-once services for system management
