@@ -274,7 +274,7 @@ services:
       - postgis-history-data:/web:rw
     environment:
       - SECRET=${BTSYNC_DB_SECRET}
-      - DEVICE=ProjectaDatabase
+      - DEVICE=GeosafeDatabase
 
   btsync-media:
     # BTSync backups for django media
@@ -285,5 +285,5 @@ services:
       - django-media-history-data:/web:rw
     environment:
       - SECRET=${BTSYNC_MEDIA_SECRET}
-      - DEVICE=OsmReporterLogs
+      - DEVICE=GeosafeMedia
 
