@@ -31,6 +31,7 @@ services:
       io.rancher.container.pull_image: always
     depends_on:
       - db
+      - restore
     command: uwsgi --ini /usr/src/app/uwsgi.ini
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -70,7 +71,7 @@ services:
        DOCKER_API_VERSION: "1.24"
 
   geoserver:
-    image: geosolutionsit/geoserver-docker:2.12.x
+    image: geosolutionsit/geoserver-docker:2.13.x
     restart: unless-stopped
     container_name: geoserver4${COMPOSE_PROJECT_NAME}
     stdin_open: true
@@ -82,6 +83,7 @@ services:
     depends_on:
       - db
       - data-dir-conf
+      - restore
     volumes:
       - geoserver-data-dir:/geoserver_data/data
     environment:
@@ -104,6 +106,7 @@ services:
     depends_on:
       - django
       - geoserver
+      - restore
     ports:
       - "${NGINX_PORT_MAPPING}"
     volumes:
@@ -111,7 +114,7 @@ services:
 
 
   data-dir-conf:
-    image: geosolutionsit/geoserver_data:2.12.x
+    image: geosolutionsit/geoserver_data:2.13.x
     restart: on-failure
     container_name: gsconf4${COMPOSE_PROJECT_NAME}
     labels:
@@ -145,6 +148,30 @@ services:
       RANCHER_ENV: {{ .Environment.Name }}
       PGUSER: postgres
       PGHOST: db
+
+  restore:
+    image: geosolutionsit/geonode-restore:latest
+    restart: unless-stopped
+    container_name: restore4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+        org.geonode.component: restore
+        org.geonode.instance.name: geonode
+    depends_on:
+      - db
+      - data-dir-conf
+    volumes:
+      - statics:/mnt/volumes/statics/
+      - geoserver-data-dir:/mnt/volumes/data/
+      - dbbackups:/mnt/volumes/backups/
+    environment:
+      # mind that following lines are rancher-specific
+      RANCHER_STACK: {{ .Stack.Name }}
+      RANCHER_ENV: {{ .Environment.Name }}
+      PGUSER: postgres
+      PGHOST: db
+
 
 volumes:
   geoserver-data-dir:
