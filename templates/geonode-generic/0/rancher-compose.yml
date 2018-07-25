@@ -3,7 +3,7 @@ version: '2'
 catalog:
     name: "GeoNode generic"
     version: "v1.0"
-    description: "Generic GeoNode deployment"
+    description: "Generic GeoNode deployment - Kartoza Fork"
     uuid: geonode-generic-0
     minimum_rancher_version: 'v1.6'
 

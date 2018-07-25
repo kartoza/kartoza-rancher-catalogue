@@ -1,6 +1,6 @@
 name: "Generic GeoNode"
 description: |
-    Generic GeoNode deployment
+    Generic GeoNode deployment - Kartoza Fork.
 version: "v1"
 category: "GIS"
 maintainer: "Geo-Solutions.it (Kartoza fork)"

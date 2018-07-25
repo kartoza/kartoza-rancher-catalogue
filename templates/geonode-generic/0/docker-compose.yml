@@ -21,7 +21,10 @@ services:
 
   django:
     restart: unless-stopped
-    image: geosolutionsit/geonode-generic:1.0
+    # built on hub as an autobuild against our fork
+    # see https://github.com/kartoza/geonode-generic
+    # and https://hub.docker.com/r/kartoza/geonode-generic
+    image: kartoza/geonode-generic:1.0
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
