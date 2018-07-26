@@ -88,6 +88,26 @@ catalog:
       required: false
       default:
       type: "string"
+    - variable: BING_MAP_KEY
+      label: "Bing Map Key (Optional)"
+      required: false
+      default: ''
+      type: "string"
+    - variable: IUCN_API_KEY
+      label: "IUCN API Key (Optional)"
+      required: false
+      default: ''
+      type: "string"
+    - variable: MAP_TILER_KEY
+      label: "Map Tiler Key (Optional)"
+      required: false
+      default: ''
+      type: "string"
+    - variable: SENTRY_KEY
+      label: "Sentry DSN Key (Optional)"
+      required: false
+      default: ''
+      type: "string"
 services:
   smtp:
     scale: 1
@@ -95,6 +115,16 @@ services:
   web:
     scale: 1
     start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
   uwsgi:
     scale: 1
     start_on_create: true
