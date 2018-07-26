@@ -48,10 +48,14 @@ services:
     restart: unless-stopped
 
   nginx-conf-data:
-    image: kartoza/ledet_nginx_conf
+    image: kartoza/ledet_nginx_conf:latest
     restart: unless-stopped
     labels:
+      io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
+    environment:
+      ALWAYS_INIT: 'True'
+      TARGET: '/etc/nginx/sites-available'
     volumes:
       - nginx-conf-data:/etc/nginx/sites-available
 
@@ -72,8 +76,10 @@ services:
     - nginx-conf-data:/etc/nginx/sites-available
     - nginx-logs:/var/log/nginx
     entrypoint: /etc/nginx/sites-available/docker-entrypoint.sh
+    environment:
+      GEOSERVER_FORWARD: 'True'
     links:
-      - uwsgi:uwsgi
+      - uwsgi:django
       - geoserver:geoserver
     command: prod
     labels:
@@ -81,7 +87,7 @@ services:
     restart: unless-stopped
 
   data-dir-conf:
-    image: geosolutionsit/geoserver_data:2.13.x
+    image: geosolutionsit/geoserver_data:2.12.x
     restart: unless-stopped
     labels:
       io.rancher.container.start_once: true
@@ -89,7 +95,7 @@ services:
       - geoserver-data-dir:/geoserver_data/data
 
   geoserver:
-    image: geosolutionsit/geoserver-docker:2.13.x
+    image: geosolutionsit/geoserver-docker:2.12.x
     restart: unless-stopped
     links:
       - db:db
@@ -117,15 +123,17 @@ services:
       DATABASE_USERNAME: docker
       DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
-      VIRTUAL_HOST: healthyrivers.kartoza.com
-      VIRTUAL_PORT: '8080'
+      VIRTUAL_HOST: ${SITE_URL}
+      VIRTUAL_PORT: '8000'
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
       ROOT_URLCONF: ledet_core.urls
+      # In this setting, we access GeoServer using Rancher Load Balancer, so
+      # it will be available from public internet
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
       STATIC_ROOT: /home/web/static
       GEONODE_DATABASE: gis
@@ -139,11 +147,17 @@ services:
       DEFAULT_BACKEND_DATASTORE: datastore
       IS_CELERY: 'False'
       ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
+      # In this setting, GeoNode needs to access GeoServer from internal network
+      # we use geoserver host name provided by rancher internal dns resolver
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
+      SENTRY_KEY: ${SENTRY_KEY}
     entrypoint: /bin/sh
     command: -c "uwsgi --ini /usr/src/ledet/uwsgi.conf"
     volumes:
@@ -172,11 +186,11 @@ services:
       DATABASE_USERNAME: docker
       DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
-      VIRTUAL_HOST: healthyrivers.kartoza.com
-      VIRTUAL_PORT: '8080'
+      VIRTUAL_HOST: ${SITE_URL}
+      VIRTUAL_PORT: '8000'
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
@@ -199,6 +213,10 @@ services:
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
+      SENTRY_KEY: ${SENTRY_KEY}
     entrypoint: /bin/sh
     command: -c "python manage.py collectstatic --noinput -i geoexplorer"
     volumes:
@@ -229,11 +247,11 @@ services:
       DATABASE_USERNAME: docker
       DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
-      VIRTUAL_HOST: healthyrivers.kartoza.com
-      VIRTUAL_PORT: '8080'
+      VIRTUAL_HOST: ${SITE_URL}
+      VIRTUAL_PORT: '8000'
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
@@ -256,6 +274,10 @@ services:
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
+      SENTRY_KEY: ${SENTRY_KEY}
     entrypoint: /bin/sh
     command: -c "python manage.py makemigrations --noinput;python manage.py migrate auth;python manage.py migrate"
     volumes:
