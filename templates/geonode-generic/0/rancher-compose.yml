@@ -95,6 +95,14 @@ catalog:
           required: true
           type: boolean
           default: false
+
+        - variable: BTSYNC_DATA_SECRET
+          label: "Data backups key"
+          description: "Resilio sync read/write key for syncing database backups"
+          required: false
+          default: ""
+          type: "string"
+
 services:
     db:
         scale: 1
