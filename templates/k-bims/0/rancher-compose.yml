@@ -77,6 +77,18 @@ catalog:
       required: false
       default:
       type: "string"
+    - variable: GEOCONTEXT_URL
+       label: "GeoContext URL"
+       description: "Full URL for GeoContext service (include http:// and ends with /)."
+       required: true
+       default: "https://geocontext.kartoza.com"
+       type: "string"
+     - variable: GEOCONTEXT_COLLECTION_KEY
+       label: "GeoContext Collection Key"
+       description: "A key to specify which collection that wants to be retrieved from GeoContext."
+       required: true
+       default: "climate"
+       type: "string"
 services:
   smtp:
     scale: 1
