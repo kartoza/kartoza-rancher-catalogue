@@ -177,6 +177,7 @@ services:
       PGUSER: postgres
       PGHOST: db
 
+
   btsync-data:
     # BTSync backups for database dumps
     image: kartoza/btsync
@@ -186,7 +187,19 @@ services:
       - dbbackups:/web:rw
     environment:
       - SECRET=${BTSYNC_DATA_SECRET}
-      - DEVICE=GeonodeGeneric-{{ .Stack.Name }}
+      - DEVICE=GeonodeGenericBackups-{{ .Stack.Name }}
+
+  btsync-templates:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - statics:/web:rw
+    environment:
+      - SECRET=${BTSYNC_TEMPLATES_SECRET}
+      - DEVICE=GeonodeGenericTemplates-{{ .Stack.Name }}
+
 
 volumes:
   geoserver-data-dir:

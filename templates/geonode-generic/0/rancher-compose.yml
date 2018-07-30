@@ -96,6 +96,13 @@ catalog:
           type: boolean
           default: false
 
+        - variable: BTSYNC_TEMPLATES_SECRET
+          label: "Templates backups key"
+          description: "Resilio sync read/write key for syncing geonode-generic  templates"
+          required: false
+          default: ""
+          type: "string"
+
         - variable: BTSYNC_DATA_SECRET
           label: "Data backups key"
           description: "Resilio sync read/write key for syncing database backups"
