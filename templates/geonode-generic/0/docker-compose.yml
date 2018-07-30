@@ -39,6 +39,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - statics:/mnt/volumes/statics
+      # See btsync and volume notes below for details on this
+      - templates:/usr/src/app/geonode_generic/templates
     environment:
        GEONODE_INSTANCE_NAME: geonode
        GEONODE_LB_HOST_IP:
@@ -191,11 +193,19 @@ services:
 
   btsync-templates:
     # BTSync backups for database dumps
+    # for templates generated on the fly by django
+    # so that we can customise them and have them 
+    # persist between upgrades. Use the Django admin
+    # Home › GeoNode Client Library › Themes
+    # to generate an initial one, then customise
+    # via btsync in this folder the generated theme
+    # (avoid regenerating the template in django admin 
+    # after that).
     image: kartoza/btsync
     hostname: btsync-data
     restart: unless-stopped
     volumes:
-      - statics:/web:rw
+      - templates:/web:rw
     environment:
       - SECRET=${BTSYNC_TEMPLATES_SECRET}
       - DEVICE=GeonodeGenericTemplates-{{ .Stack.Name }}
@@ -212,3 +222,12 @@ volumes:
 #    name: ${COMPOSE_PROJECT_NAME}-dbbackups
   statics:
 #    name: ${COMPOSE_PROJECT_NAME}-statics
+  # for templates generated on the fly by django
+  # so that we can customise them and have them 
+  # persist between upgrades. Use the Django admin
+  # Home › GeoNode Client Library › Themes
+  # to generate an initial one, then customise
+  # via btsync in this folder the generated theme
+  # (avoid regenerating the template in django admin 
+  # after that).
+  statics:
