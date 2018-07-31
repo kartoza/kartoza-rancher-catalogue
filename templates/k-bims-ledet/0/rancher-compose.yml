@@ -62,8 +62,14 @@ catalog:
       label: "GeoContext URL"
       description: "Full URL for GeoContext service (include http:// and ends with /)."
       required: true
-      default: "http://foo.bar/"
+      default: "https://geocontext.kartoza.com"
       type: "string"
+    - variable: GEOCONTEXT_COLLECTION_KEY
+      label: "GeoContext Collection Key"
+      description: "A key to specify which collection that wants to be retrieved from GeoContext."
+      required: true
+      default: "climate"
+      type: "string"  
     - variable: WEBSERVER_PORT
       description: "Website port"
       label: "Port on which the site should be served. Typically 80"
