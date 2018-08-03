@@ -56,12 +56,6 @@ catalog:
       required: false
       default: ""
       type: "string"
-    - variable: VOLUME_DRIVER
-      label: "Storage volume driver"
-      description: "Storage volume driver, can be local or rancher-nfs, etc"
-      required: true
-      default: local
-      type: "string"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"

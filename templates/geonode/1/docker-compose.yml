@@ -8,18 +8,12 @@
 version: '2'
 volumes:
   postgis-data:
-    driver: ${VOLUME_DRIVER}
   postgis-history-data:
-    driver: ${VOLUME_DRIVER}
   django-media-data:
-    driver: ${VOLUME_DRIVER}
   django-media-history-data:
-    driver: ${VOLUME_DRIVER}
   django-static-data:
   qgis-server-qgis-layer-data:
-    driver: ${VOLUME_DRIVER}
   qgis-server-qgis-layer-history-data:
-    driver: ${VOLUME_DRIVER}
   qgis-server-qgis-cache-data:
 
 services:
