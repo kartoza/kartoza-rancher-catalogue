@@ -4,24 +4,13 @@
   version: 1
   uuid: kartoza-postgis-replicant-1
   questions:
-  - variable: POSTGRES_DUMP_PREFIX
-    label: Database dump prefix.
-    label: Prefix to use in the name of database dumps made by the backup container.
-    required: true
-    default: "postgis"
-    type: "string"
-  - variable: POSTGRES_DB
-    label: PostgreSQL db to create.
-    required: true
-    default: gis
-    type: "string"
   - variable: POSTGRES_USER
-    label: PostgrsSQL superuser account to create.
+    label: PostgrsSQL superuser on master.
     required: true
     default: docker
     type: "string"
   - variable: POSTGRES_PASS
-    label: PostgreSQL superuser password to create.
+    label: PostgreSQL superuser on master.
     required: true
     default: docker
     type: "string"
@@ -52,11 +41,11 @@
     description: "Enter 'False' to prevent the replicant from destroying it's database on restart"
     label: "Destroy on restart"
     required: true
-    default: False
+    default: "False"
     type: "string"
   - variable: PROMOTE_TO_MASTER
     description: "Enter 'True' to convert current replicant into a writable state. Useful if master is down and the current replicant needs to be promoted until manual recovery."
     label: "Promote to master"
     required: true
-    default: False
+    default: "False"
     type: "string"

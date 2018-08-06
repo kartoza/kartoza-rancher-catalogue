@@ -50,8 +50,8 @@ services:
       # For now we don't support different credentials for replication
       # so we use the same credentials as master's superuser, or anything that
       # have replication role.
-      POSTGRES_USER=${POSTGRES_USER}
-      POSTGRES_PASS=${POSTGRES_PASS}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASS: ${POSTGRES_PASS}
     # You can expose the port to observe it in your local machine
     # For this sample, it was disabled by default to allow scaling test
     ports:
