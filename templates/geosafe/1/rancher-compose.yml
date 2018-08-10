@@ -2,8 +2,8 @@ version: '2'
 catalog:
   name: "Kartoza GeoSAFE"
   description: "Kartoza's spin of GeoNode with a QGIS backend and GeoSAFE."
-  version: 2
-  uuid: kartoza-geonode-0
+  version: 2.8.x-qgis_server-geosafe-beta
+  uuid: kartoza-geosafe-2.8.x-qgis_server
   questions:
     - variable: QGIS_BACKEND_INSTANCE_COUNT
       label: "QGIS backend instance count"
@@ -15,11 +15,6 @@ catalog:
       label: PostgreSQL db to create.
       required: true
       default: gis
-      type: "string"
-    - variable: POSTGRES_USER
-      label: PostgrsSQL superuser account to create.
-      required: true
-      default: docker
       type: "string"
     - variable: POSTGRES_PASS
       label: PostgreSQL superuser password to create.
@@ -130,9 +125,27 @@ services:
       strategy: recreate
       request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
       reinitializing_timeout: 60000
-  inasafe-headless-analysis:
-    scale: 4
+  geonode-lb:
+    scale: 1
     start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: ${SITE_URL}
+        path: ''
+        priority: 1
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 80
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
   inasafe-headless:
     scale: 4
     start_on_create: true
