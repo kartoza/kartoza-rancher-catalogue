@@ -153,6 +153,7 @@ services:
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       - USE_GEOSAFE=False
+      - CELERY_TASK_ALWAYS_EAGER=False
       # GeoNode docker specific settings
       - GEONODE_LB_HOST_IP=${SITE_URL}
       - GEONODE_LB_PORT=80
@@ -226,6 +227,7 @@ services:
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
       - USE_GEOSAFE=False
+      - CELERY_TASK_ALWAYS_EAGER=False
       # GeoNode docker specific settings
       - GEONODE_LB_HOST_IP=${SITE_URL}
       - GEONODE_LB_PORT=80
