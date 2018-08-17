@@ -18,14 +18,10 @@ services:
       GEONODE_DATABASE_PASSWORD: geonode
       GEONODE_GEODATABASE: geonode_data
       GEONODE_GEODATABASE_PASSWORD: geonode_data
-#    env_file:
-#      - ../../../scripts/docker/env/production/db.env
 
   django:
     restart: unless-stopped
-    image: kartoza/geonode-generic:master
-#    build: ../../../.
-    # image: geonode/geonode:latest
+    image: geosolutionsit/geonode-generic:1.0
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -39,10 +35,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - statics:/mnt/volumes/statics
-
-    #env_file:
-    #  - ../../../scripts/docker/env/production/django.env
-
     environment:
        GEONODE_INSTANCE_NAME: geonode
        GEONODE_LB_HOST_IP:
@@ -98,8 +90,6 @@ services:
       DOCKER_HOST_IP:
       GEONODE_HOST_IP:
       NGINX_BASE_URL: ${SITEURL}
-#    env_file:
-#      - ../../../scripts/docker/env/production/django.env
 
   geonode:
     # Based on Kartoza geoserver image. Will change name of image to kartoza when I have permissions
@@ -154,7 +144,7 @@ services:
       # mind that following lines are rancher-specific
       RANCHER_STACK: {{ .Stack.Name }}
       RANCHER_ENV: {{ .Environment.Name }}
-      PGUSER: postgresql
+      PGUSER: postgres
       PGHOST: db
 
 volumes:
