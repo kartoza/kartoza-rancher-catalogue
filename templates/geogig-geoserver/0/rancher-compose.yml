@@ -1,0 +1,70 @@
+.catalog:
+  name: Kartoza Geoserver
+  description: "This is GeoServer (http://geoserver.org) with Geogig (http://geogig.org/), PostGIS and Resilio sync all set up and ready to go in Rancher."
+  version: v2.10.5
+  uuid: kartoza-geoserver-geogig-0
+  questions:
+  - variable: POSTGRES_DB
+    label: PostgreSQL db to create.
+    required: true
+    default: gis
+    type: "string"
+  - variable: POSTGRES_USER
+    label: PostgrsSQL superuser account to create.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_PASS
+    label: PostgreSQL superuser password to create.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_HBA_RANGE
+    label: "Database allowed hosts"
+    description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+    required: true
+    default: 10.42.0.0/16
+    type: "string"
+  - variable: BTSYNC_DB_SECRET
+    label: "Database backups key"
+    description: "Resilio sync read/write key for syncing database backups"
+    required: true
+    default: 
+    type: "string"
+  - variable: BTSYNC_MEDIA_SECRET
+    label: "Media backups key"
+    description: "Resilio sync read/write key for syncing geonode media backups"
+    required: true
+    default: 
+    type: "string"
+  - variable: JSONP_VALUES
+      label: "JSON P Values"
+      description: "Geoserver wms output format - JSONP"
+      required: true
+      default: true
+      type: "string"
+  - variable: FILTER_RULES
+      label: "Filter rules for Geoserver"
+      description: "Control rendering rules in Geoserver"
+      required: true
+      default: true
+      type: "string"
+  - variable: LINE_WIDTH
+      label: "Line width for Geoserver"
+      description: "Control stroke width in Geoserver styles"
+      required: true
+      default: 20
+      type: "integer"
+  - variable: GEOGIG_EMAIL_ADD
+      label: "Email address for Geogig"
+      description: "Geogig user email for configs"
+      required: true
+      default:
+      type: "string"
+
+  - variable: GEOGIG_USER
+      label: "Geogig username"
+      description: "Geogig user for config"
+      required: true
+      default:
+      type: "string"
