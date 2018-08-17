@@ -1,7 +1,7 @@
 .catalog:
   name: Kartoza Geoserver
   description: "This is GeoServer (http://geoserver.org) with Geogig (http://geogig.org/), PostGIS and Resilio sync all set up and ready to go in Rancher."
-  version: v2.10.5
+  version: v2.13.0
   uuid: kartoza-geoserver-geogig-0
   questions:
   - variable: POSTGRES_DB
