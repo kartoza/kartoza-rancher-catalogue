@@ -1,9 +1,9 @@
 version: '2'
 catalog:
-  name: "Kartoza BIMS"
-  description: "Kartoza's Biodiversity Information Management System."
+  name: "Kartoza FETI"
+  description: "Helping South African youth find tertiary education opportunities."
   version: 0
-  uuid: kartoza-geonode-0
+  uuid: kartoza-feti-0
   questions:
     #- variable: SMB_PATH
     #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
@@ -77,29 +77,14 @@ catalog:
       required: false
       default:
       type: "string"
-    - variable: GEOCONTEXT_URL
-       label: "GeoContext URL"
-       description: "Full URL for GeoContext service (include http:// and ends with /)."
-       required: true
-       default: "https://geocontext.kartoza.com"
-       type: "string"
-     - variable: GEOCONTEXT_COLLECTION_KEY
-       label: "GeoContext Collection Key"
-       description: "A key to specify which collection that wants to be retrieved from GeoContext."
-       required: true
-       default: "climate"
-       type: "string"
 services:
-  smtp:
-    scale: 1
-    start_on_create: true
   web:
     scale: 1
     start_on_create: true
-  uwsgi:
+  smtp:
     scale: 1
     start_on_create: true
-  rabbitmq:
+  elasticsearch:
     scale: 1
     start_on_create: true
   db:
@@ -108,9 +93,14 @@ services:
   dbbackups:
     scale: 1
     start_on_create: true
-  mediabackup:
+  rabbitmq:
     scale: 1
     start_on_create: true
+  worker:
+    scale: 1
+    start_on_create: true
+  # The next services are all intended to br run-start_once
+  # management commands....
   dbrestore:
     scale: 1
     # We don't want to run until explicitly requested by the user

@@ -1,34 +1,20 @@
 version: '2'
 catalog:
-  name: "Kartoza BIMS"
-  description: "Kartoza's Biodiversity Information Management System."
-  version: 0
-  uuid: kartoza-geonode-0
+  name: "Kartoza Geonode"
+  description: "Kartoza's spin of GeoNode with a QGIS backend."
+  version: 2.8.x-qgis_server-beta
+  uuid: kartoza-geonode-qgis-server-2.8.x-qgis_server
   questions:
-    #- variable: SMB_PATH
-    #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
-    #  required: true
-    #  default:
-    #  type: "string"
-    #- variable: SMB_USER
-    #  label: SMB/CIFS network file share username.
-    #  required: true
-    #  default: docker
-    #  type: "string"
-    #- variable: SMB_PASSWORD
-    #  label: SMB/CIFS network file share password.
-    #  required: true
-    #  default: docker
-    #  type: "password"
+    - variable: QGIS_BACKEND_INSTANCE_COUNT
+      label: "QGIS backend instance count"
+      description: "How many QGIS backend rendering instances to start with."
+      required: true
+      default: 4
+      type: "int"
     - variable: POSTGRES_DB
       label: PostgreSQL db to create.
       required: true
       default: gis
-      type: "string"
-    - variable: POSTGRES_USER
-      label: PostgrsSQL superuser account to create.
-      required: true
-      default: docker
       type: "string"
     - variable: POSTGRES_PASS
       label: PostgreSQL superuser password to create.
@@ -39,7 +25,7 @@ catalog:
       label: "Database allowed hosts"
       description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
       required: true
-      default: 10.42.0.0/16
+      default: 0.0.0.0/0
       type: "string"
     - variable: ADMIN_EMAIL
       label: "Administrator email"
@@ -63,7 +49,13 @@ catalog:
       label: "Django allowed hosts"
       description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
       required: false
-      default: ""
+      default: "'localhost'"
+      type: "string"
+    - variable: VOLUME_DRIVER
+      label: "Storage volume driver"
+      description: "Storage volume driver, can be local or rancher-nfs, etc"
+      required: true
+      default: local
       type: "string"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
@@ -77,47 +69,83 @@ catalog:
       required: false
       default:
       type: "string"
-    - variable: GEOCONTEXT_URL
-       label: "GeoContext URL"
-       description: "Full URL for GeoContext service (include http:// and ends with /)."
-       required: true
-       default: "https://geocontext.kartoza.com"
-       type: "string"
-     - variable: GEOCONTEXT_COLLECTION_KEY
-       label: "GeoContext Collection Key"
-       description: "A key to specify which collection that wants to be retrieved from GeoContext."
-       required: true
-       default: "climate"
-       type: "string"
 services:
-  smtp:
+  qgis-server:
     scale: 1
     start_on_create: true
-  web:
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: qgis-server
+        priority: 1
+        protocol: http
+        service: qgis-server-backend
+        source_port: 80
+        target_port: 80
+      health_check:
+        healthy_threshold: 2
+        response_timeout: 2000
+        port: 42
+        unhealthy_threshold: 3
+        initializing_timeout: 60000
+        interval: 2000
+        reinitializing_timeout: 60000
+  celery:
     scale: 1
     start_on_create: true
-  uwsgi:
+  django:
     scale: 1
     start_on_create: true
+  nginx:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
+  geonode-lb:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: ${SITE_URL}
+        path: ''
+        priority: 1
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 80
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
   rabbitmq:
     scale: 1
     start_on_create: true
-  db:
+  qgis-server-backend:
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: qgis-server-backend"'
+      reinitializing_timeout: 60000
+  postgis:
     scale: 1
     start_on_create: true
-  dbbackups:
-    scale: 1
-    start_on_create: true
-  mediabackup:
-    scale: 1
-    start_on_create: true
-  dbrestore:
-    scale: 1
-    # We don't want to run until explicitly requested by the user
-    start_on_create: false
-  collectstatic:
-    scale: 1
-    start_on_create: true
-  migrate:
-    scale: 1
-    start_on_create: false

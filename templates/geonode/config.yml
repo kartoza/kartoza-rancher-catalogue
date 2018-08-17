@@ -1,6 +1,6 @@
 name: Geonode with QGIS Backend
 description: Geonode with QGIS backend and backups via resilio sync
-version: 1
+version: 3
 category: GIS
 maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
 license: GPL v3

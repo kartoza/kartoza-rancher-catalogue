@@ -1,0 +1,51 @@
+.catalog:
+  name: "Kartoza PostGIS Replicant 9.6-2.4"
+  description: "This is replicant for [PostGIS](http://postgis.org) 2.4 running on PostgreSQL 9.6 all set up and ready to go in Rancher."
+  version: 1
+  uuid: kartoza-postgis-replicant-1
+  questions:
+  - variable: POSTGRES_USER
+    label: PostgrsSQL superuser on master.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_PASS
+    label: PostgreSQL superuser on master.
+    required: true
+    default: docker
+    type: "string"
+  - variable: POSTGRES_HBA_RANGE
+    label: "Database allowed hosts"
+    description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
+    required: true
+    default: 0.0.0.0/0
+    type: "string"
+  - variable: POSTGRES_PORT
+    description: "Postgres port"
+    label: "Port on which the database should be served. Typically 5432"
+    required: true
+    default: 5432
+    type: "int"
+  - variable: POSTGRES_MASTER_HOST
+    label: "Master database address"
+    description: "Domain-name or IP address of master database to replicate from"
+    required: true
+    type: "string"
+  - variable: POSTGRES_MASTER_PORT
+    description: "Postgres master  port"
+    label: "Port on which the MASTER  database should be accessed. Typically 5432"
+    required: true
+    default: 5432
+    type: "int"
+  - variable: DESTROY_ON_RESTART
+    description: "Enter 'False' to prevent the replicant from destroying it's database on restart"
+    label: "Destroy on restart"
+    required: true
+    default: "False"
+    type: "string"
+  - variable: PROMOTE_TO_MASTER
+    description: "Enter 'True' to convert current replicant into a writable state. Useful if master is down and the current replicant needs to be promoted until manual recovery."
+    label: "Promote to master"
+    required: true
+    default: "False"
+    type: "string"
