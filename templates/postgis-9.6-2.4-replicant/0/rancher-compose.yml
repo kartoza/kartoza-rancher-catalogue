@@ -10,7 +10,7 @@
     default: docker
     type: "string"
   - variable: POSTGRES_PASS
-    label: PostgreSQL superuser on master.
+    label: PostgreSQL superuser password on master.
     required: true
     default: docker
     type: "string"
