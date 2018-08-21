@@ -168,7 +168,7 @@ services:
   sftppgbackup:
     image: kartoza/sftp-backup:1.0
     environment:
-      DAILY: '14'
+      DAILY: '2'
       DUMPPREFIX: PG_inasafedjango
       MONTHLY: '12'
       SFTP_DIR: /
@@ -210,7 +210,7 @@ services:
     - uwsgi:uwsgi
 
   web:
-    image: kartoza/inasafe-django_nginx:v4.0-18.06.14
+    image: inasafe/inasafe-django_nginx:v4.0.1-18.08.21
     command: prod
     volumes:
     - django-static-data:/home/web/static:ro
@@ -237,7 +237,7 @@ services:
       io.rancher.container.create_agent: 'true'
 
   indicator-worker:
-    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
+    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -308,8 +308,33 @@ services:
     links:
     - db:db
 
+  dbbackup-cleanup:
+    image: kartoza/inasafe-django_dbbackup:v3.4.1
+    environment:
+      DUMPPREFIX: PG_inasafedjango
+      PGDATABASE: ${POSTGRES_DB}
+      PGHOST: db
+      PGPASSWORD: ${POSTGRES_PASS}
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER}
+    entrypoint:
+    - /bin/bash
+    volumes:
+    - django-postgis-dbbackup-data:/backups
+    - sftpbackup-postgis-target-data:/pg_backup
+    links:
+    - db:db
+    command:
+    - -c
+    - rm -rf /backups/*
+    labels:
+      io.rancher.container.start_once: 'true'
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 12 2 * * ?
+      cron.action: restart
+
   uwsgi:
-    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
+    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -351,8 +376,59 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
+  checkprocessedeq:
+    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      C_FORCE_ROOT: 'true'
+      DATABASE_HOST: db
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_PASSWORD: ${POSTGRES_PASS}
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      INASAFE_REALTIME_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_HEADLESS_BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      INASAFE_OUTPUT_DIR: /home/headless/outputs
+      INAWARE_HOST: ${INAWARE_HOST}
+      INAWARE_PASS: ${INAWARE_PASS}
+      INAWARE_USER: ${INAWARE_USER}
+      LOGGING_DEFAULT_HANDLER: logfile
+      LOGGING_DEFAULT_LOG_LEVEL: ERROR
+      LOGGING_MAIL_ADMINS: 'False'
+      LOGGING_SENTRY: 'False'
+      MAPQUEST_MAP_KEY: ''
+      PYTHONPATH: /home/web/django_project
+      SECRET_KEY: +pf&)&(+gqk+w)1szqvqd33=$$&dd4+t$$34+2ka=ct1zas5ddv%
+      SITE_DOMAIN_NAME: ${SITE_DOMAIN_NAME}
+    volumes:
+    - django-static-data:/home/web/static
+    - django-media-data:/home/web/media
+    - django-realtime-indicator:/home/web/django_project/.run
+    - hazard-drop-data:/home/realtime/hazard-drop
+    - shakemaps-data:/home/realtime/shakemaps
+    - shakemaps-corrected-data:/home/realtime/shakemaps-corrected
+    - floodmaps-data:/home/realtime/floodmaps
+    - ashmaps-data:/home/realtime/ashmaps
+    - headless-output-data:/home/headless/outputs
+    - analysis-context-data:/home/headless/contexts
+    - report-template-data:/home/headless/qgis-templates
+    links:
+    - rabbitmq:rabbitmq
+    - db:db
+    - smtp:smtp
+    command:
+    - ./manage.py
+    - checkprocessedeq
+    - --since
+    - 2018/07/01
+    labels:
+      io.rancher.container.start_once: 'true'
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
+
   django-worker:
-    image: kartoza/inasafe-django_uwsgi:v4.0-18.06.14
+    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -598,7 +674,7 @@ services:
   analysis-context-data-backup:
     image: kartoza/sftp-backup:1.0
     environment:
-      DAILY: '7'
+      DAILY: '2'
       DUMPPREFIX: ARC_analysiscontextdata
       MONTHLY: '12'
       SFTP_DIR: /
@@ -628,7 +704,7 @@ services:
     volumes:
     - report-template-data:/web
     labels:
-      cron.schedule: "*/5 * * * * ?"
+      cron.schedule: "0 */5 * * * ?"
       cron.action: restart
 
   headless-worker:
