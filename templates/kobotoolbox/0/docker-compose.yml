@@ -1,0 +1,399 @@
+# For public, HTTPS servers.
+version: '2'
+volumes:
+  vols-db:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/db'
+  vols-mongo:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/mongo'
+  vols-static-kobocat:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/static/kobocat'
+  vols-static-kpi:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/static/kpi'
+  vols-kobocatmedia:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/kobocat_media_uploads'
+  vols-kpimedia:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/kpi_media'
+  vols-whoosh:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/whoosh'
+  vols-redismaindata:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/vols/redis_main_data'
+  backups-postgres:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/backups/postgres'
+  backups-mongo:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/backups/mongo'
+  backups-kobocat:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/backups/kobocat'
+  log-rabbitmq:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/log/rabbitmq'
+  log-kobocat:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/log/kobocat'
+  log-kpi:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/log/kpi'
+  log-nginx:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/log/nginx'
+  secrets:
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: '$PWD/secrets/'
+services:
+  rabbit:
+    image: kartoza/kobotoolbox_rabbit:latest
+    environment:
+      - RABBITMQ_LOG_BASE=/var/log/rabbitmq
+    volumes:
+      - log-rabbitmq:/var/log/rabbitmq
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  postgres:
+    image: kartoza/kobotoolbox_postgres:latest
+    environment:
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+    volumes:
+      - vols-db:/srv/db
+      - backups-postgres:/srv/backups
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  mongo:
+    image: kartoza/kobotoolbox_mongo:latest
+    environment:
+      - MONGO_DATA=/srv/db
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+    volumes:
+      - vols-mongo:/srv/db
+      - backups-mongo:/srv/backups
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  kobocat:
+    image: kartoza/kobotoolbox_kobocat:2.018.31
+    environment:
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+
+      - KOBOCAT_DJANGO_DEBUG=False
+      - TEMPLATE_DEBUG=False
+      - DJANGO_SETTINGS_MODULE=onadata.settings.kc_environ
+      - ENKETO_VERSION=Express
+      - DATABASE_URL=postgis://kobo:kobo@postgres:5432/kobotoolbox
+      - KOBO_POSTGRES_DB_NAME=kobotoolbox
+      - KOBO_POSTGRES_USER=kobo
+      - KOBOCAT_BROKER_URL=amqp://kobocat:kobocat@rabbit:5672/kobocat
+
+      - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_STATIC_FILES_SERVER=Nginx
+      - KPI_STATIC_FILES_SERVER=Nginx
+
+      - ENKETO_PROTOCOL=${KOBOTOOLBOX_PROTOCOL}
+    volumes:
+      - vols-static-kobocat:/srv/static
+      - vols-kobocatmedia:/srv/src/kobocat/media
+      - backups-kobocat:/srv/backups
+      - log-kobocat:/srv/logs
+    links:
+      - rabbit
+      - mongo
+      - postgres
+      - kpi
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  kpi:
+    image: kartoza/kobotoolbox_kpi:2.018.32
+    environment:
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+
+      - KPI_DJANGO_DEBUG=False
+      - TEMPLATE_DEBUG=False
+      - ENKETO_VERSION=Express
+      - KPI_PREFIX=/
+      - KPI_BROKER_URL=amqp://kpi:kpi@rabbit:5672/kpi
+      - DATABASE_URL=postgres://kobo:kobo@postgres:5432/kobotoolbox
+      - DJANGO_LANGUAGE_CODES=en fr es ar zh-hans hi ku
+
+      - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_STATIC_FILES_SERVER=Nginx
+      - KPI_STATIC_FILES_SERVER=Nginx
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO, ${KOBOTOOLBOX_PROTOCOL}
+
+      {{- end }}
+    volumes:
+      - vols-static-kpi:/srv/static
+      - vols-kpimedia:/srv/src/kpi/media
+      # The Whoosh search index needs persistent storage
+      - vols-whoosh:/srv/whoosh
+      - log-kpi:/srv/logs
+      - vols-kobocatmedia:/srv/src/kobocat/media
+    links:
+      - postgres
+      - rabbit
+      - mongo
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  nginx:
+    image: kartoza/kobotoolbox_nginx:latest
+    environment:
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+
+      - KOBOCAT_DJANGO_DEBUG=False
+      - DJANGO_SETTINGS_MODULE=onadata.settings.kc_environ
+      - KOBO_POSTGRES_DB_NAME=kobotoolbox
+      - KOBO_POSTGRES_USER=kobo
+      - KOBOCAT_BROKER_URL=amqp://kobocat:kobocat@rabbit:5672/kobocat
+
+      - KPI_DJANGO_DEBUG=False
+      - TEMPLATE_DEBUG=False
+      - ENKETO_VERSION=Express
+      - KPI_PREFIX=/
+      - KPI_BROKER_URL=amqp://kpi:kpi@rabbit:5672/kpi
+      - DATABASE_URL=postgres://kobo:kobo@postgres:5432/kobotoolbox
+      - DJANGO_LANGUAGE_CODES=en fr es ar zh-hans hi ku
+
+      - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_WEB_SERVER=${PROXY_WEB_SERVER}
+      - KOBOCAT_STATIC_FILES_SERVER=Nginx
+      - KPI_STATIC_FILES_SERVER=Nginx
+
+      - NGINX_CONFIG_FILE_NAME=nginx_site_${KOBOTOOLBOX_PROTOCOL}.conf
+      - TEMPLATED_VAR_REFS=$${PUBLIC_DOMAIN_NAME} $${KOBOFORM_PUBLIC_SUBDOMAIN} $${KOBOCAT_PUBLIC_SUBDOMAIN} $${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+    volumes:
+        - vols-static-kobocat:/srv/www/kobocat
+        - vols-static-kpi:/srv/www/kpi
+        # get the logs out of glusterfs!
+        - log-nginx:/var/log/nginx
+        - secrets:/tmp/kobo_toolbox_secrets/
+    links:
+      - kobocat
+      - kpi
+      - enketo-express:enketo_express
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  web-lb:
+    image: rancher/lb-service-haproxy:v0.9.1
+    ports:
+      - ${WEBSERVER_PORT}:80
+    labels:
+      io.rancher.container.agent.role: environmentAdmin,agent
+      io.rancher.container.agent_service.drain_provider: 'true'
+      io.rancher.container.create_agent: 'true'
+
+  # Adapted from https://github.com/${REPO_NAME}/${REPO_PREFIX}_enketo-express/blob/docker/docker-compose.yml.
+  enketo-express:
+    image: kartoza/kobotoolbox_enketo_express:1.70.1
+    environment:
+      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
+      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
+      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
+      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
+      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
+
+      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
+      - KPI_PUBLIC_PORT=9000
+      - KOBOCAT_PUBLIC_PORT=9001
+      - ENKETO_EXPRESS_PUBLIC_PORT=9005
+
+      {{- end }}
+
+      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
+
+      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
+      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
+      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
+      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
+
+      {{- end }}
+    links:
+      - redis-main:redis_main
+      - redis-cache:redis_cache
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  # Adapted from https://github.com/${REPO_NAME}/${REPO_PREFIX}_enketo-express/blob/docker/docker-compose.yml.
+  redis-main:
+    image: kartoza/kobotoolbox_redis_main:2.6
+    # Map our "main" Redis config into the container.
+    volumes:
+      - vols-redismaindata:/data/
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  # Adapted from https://github.com/${REPO_NAME}/${REPO_PREFIX}_enketo-express/blob/docker/docker-compose.yml.
+  redis-cache:
+    image: kartoza/kobotoolbox_redis_cache:2.6
+    # Map our "cache" Redis config into the container.
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always

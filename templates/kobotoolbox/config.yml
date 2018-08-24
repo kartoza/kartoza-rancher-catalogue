@@ -1,0 +1,7 @@
+name: Kobotoolbox
+description: Kobotoolbox fork
+version: 1
+category: ODK
+maintainer: Kartoza (Pty) Ltd.
+license: GPL v3
+projectURL: https://github.com/kartoza/kobo-docker-builder
