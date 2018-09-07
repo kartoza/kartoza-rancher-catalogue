@@ -76,6 +76,48 @@ catalog:
       required: true
       default: "enketo"
       type: string
+
+    - variable: USE_ENV_VAR
+      label: "Use custom defined environment variable"
+      description: "Set this to true if you choose to define the rest of env var by yourself"
+      required: true
+      default: false
+      type: boolean
+
+    - variable: KOBOFORM_SERVER_NAME
+      label: "Full Server Name for Koboform"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "koboform.kobotoolbox.test"
+      type: string
+    - variable: KOBOCAT_SERVER_NAME
+      label: "Full Server Name for Kobocat"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "kobocat.kobotoolbox.test"
+      type: string
+    - variable: ENKETO_SERVER_NAME
+      label: "Full Server Name for Enketo express"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "enketo.kobotoolbox.test"
+      type: string
+
+    - variable: CSRF_COOKIE_DOMAIN
+      label: "Shared CSRF Cookie Domain"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: ".kobotoolbox.test"
+      type: string
+
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Shared Django Allowed hosts"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: ".kobotoolbox.test"
+      type: string
+
+
 services:
   nginx:
     scale: 1
