@@ -95,7 +95,7 @@ catalog:
 
     - variable: EMAIL_USE_TLS
       label: "Email TLS settings"
-      type: string
+      type: enum
       options:
         - True
         - False
