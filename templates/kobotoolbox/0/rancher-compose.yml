@@ -77,6 +77,29 @@ catalog:
       default: "enketo"
       type: string
 
+    - variable: EMAIL_HOST
+      label: "SMTP host to use"
+      type: string
+
+    - variable: EMAIL_PORT
+      label: "SMTP port to use"
+      type: string
+
+    - variable: EMAIL_HOST_USER
+      label: "SMTP host user"
+      type: string
+
+    - variable: EMAIL_HOST_PASSWORD
+      label: "Email host password"
+      type: string
+
+    - variable: EMAIL_USE_TLS
+      label: "Email TLS settings"
+      type: string
+      options:
+        - True
+        - False
+
     - variable: USE_ENV_VAR
       label: "Use custom defined environment variable"
       description: "Set this to true if you choose to define the rest of env var by yourself"

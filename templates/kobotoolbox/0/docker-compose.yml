@@ -243,6 +243,14 @@ services:
       - KPI_STATIC_FILES_SERVER=Nginx
 
       - ENKETO_PROTOCOL=${KOBOTOOLBOX_PROTOCOL}
+
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+      - DEFAULT_FROM_EMAIL=${KOBO_SUPPORT_EMAIL}
     volumes:
       - vols-static-kobocat:/srv/static
       - vols-kobocatmedia:/srv/src/kobocat/media
@@ -310,6 +318,14 @@ services:
       - KOBOCAT_WEB_SERVER=${PROXY_WEB_SERVER}
       - KOBOCAT_STATIC_FILES_SERVER=Nginx
       - KPI_STATIC_FILES_SERVER=Nginx
+
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+      - DEFAULT_FROM_EMAIL=${KOBO_SUPPORT_EMAIL}
 
       {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
 
