@@ -1,0 +1,7 @@
+name: "ScanWebGIS app"
+description: |
+    ScanWebGIS.
+version: "v1"
+category: "GIS"
+maintainer: "Kartoza.com"
+license: "GPL"

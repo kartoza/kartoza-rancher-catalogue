@@ -1,0 +1,278 @@
+version: '2'
+services:
+  db:
+    image: geosolutionsit/postgis-docker:9.6
+    restart: unless-stopped
+    container_name: db4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+      org.geonode.component: db
+      org.geonode.instance.name: geonode
+      io.rancher.container.pull_image: always
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - dbbackups:/pg_backups
+    environment:
+      GEONODE_DATABASE: geonode
+      GEONODE_DATABASE_PASSWORD: geonode
+      GEONODE_GEODATABASE: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: geonode_data
+
+  django:
+    restart: unless-stopped
+    # built on hub as an autobuild against our fork
+    # see https://github.com/kartoza/geonode-generic
+    # and https://hub.docker.com/r/kartoza/geonode-generic
+    image: kartoza/scanwebgis_geonode_generic:latest
+    container_name: django4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+      org.geonode.component: django
+      org.geonode.instance.name: geonode
+      io.rancher.container.pull_image: always
+    depends_on:
+      - db
+      - restore
+    command: uwsgi --ini /usr/src/app/uwsgi.ini
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - statics:/mnt/volumes/statics
+      # See btsync and volume notes below for details on this
+      - templates:/usr/src/app/geonode_generic/templates
+    environment:
+       GEONODE_PREFIX: "''"
+       ROOT_URLCONF: core.root_urls
+       PYTHONPATH: '/usr/src/scanwebgis-docker'
+       SCANWEBGIS_URL: ${SITEURL}scanwebgis/
+       GEONODE_INSTANCE_NAME: geonode
+       GEONODE_LB_HOST_IP:
+       GEONODE_LB_PORT:
+       # Database URL should be in the form:
+       # postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+#       DATABASE_URL: postgres://postgres:postgres@db:5432/geonode
+       DATABASE_HOST: db
+       DATABASE_USERNAME: postgres
+       DATABASE_PASSWORD: postgres
+       DATABASE_NAME: geonode
+       DEFAULT_BACKEND_DATASTORE: datastore
+       GEONODE_DATABASE: geonode
+       GEONODE_DATABASE_PASSWORD: geonode
+       GEONODE_GEODATABASE: geonode_data
+       GEONODE_GEODATABASE_PASSWORD: geonode_data
+       # BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+       DJANGO_SETTINGS_MODULE: core.settings.overrides
+       ALLOWED_HOSTS: []
+       DOCKER_ENV: production
+       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
+       IS_CELERY: False
+       C_FORCE_ROOT: 1
+       SITEURL: ${SITEURL}
+       # replaced with defaults in settings
+       GEOSERVER_PUBLIC_LOCATION: ${SITEURL}/geoserver/
+       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
+       STATIC_ROOT: /mnt/volumes/statics/static/
+       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
+       GEOIP_PATH: /mnt/volumes/statics/geoip.db
+       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+       ADMIN_EMAILS: ${ADMIN_EMAILS}
+       # mind that following lines are rancher-specific
+       RANCHER_STACK: {{ .Stack.Name }}
+       RANCHER_ENV: {{ .Environment.Name }}
+       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+       # See https://github.com/geosolutions-it/geonode-generic/issues/28
+       # to see why we force API version to 1.24
+       DOCKER_API_VERSION: "1.24"
+
+  geoserver:
+    image: geosolutionsit/geoserver-docker:2.13.x
+    restart: unless-stopped
+    container_name: geoserver4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+        org.geonode.component: geoserver
+        org.geonode.instance.name: geonode
+        io.rancher.container.pull_image: always
+    depends_on:
+      - db
+      - data-dir-conf
+      - restore
+    volumes:
+      - geoserver-data-dir:/geoserver_data/data
+    environment:
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      DOCKERHOST:
+      DOCKER_HOST_IP:
+      GEONODE_HOST_IP:
+      NGINX_BASE_URL: ${SITEURL}
+
+  geonode:
+    image: geosolutionsit/nginx-geonode:latest
+    restart: unless-stopped
+    container_name: nginx4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+        org.geonode.component: nginx
+        org.geonode.instance.name: geonode
+        io.rancher.container.pull_image: always
+    depends_on:
+      - django
+      - geoserver
+      - restore
+    ports:
+      - "${NGINX_PORT_MAPPING}"
+    volumes:
+      - statics:/mnt/volumes/statics
+
+
+  data-dir-conf:
+    image: geosolutionsit/geoserver_data:2.13.x
+    restart: on-failure
+    container_name: gsconf4${COMPOSE_PROJECT_NAME}
+    labels:
+        org.geonode.component: conf
+        org.geonode.instance.name: geonode
+        io.rancher.container.pull_image: always
+    command: /bin/true
+    volumes:
+      - geoserver-data-dir:/geoserver_data/data
+
+  backup:
+    image: geosolutionsit/geonode-backup:latest
+    restart: unless-stopped
+    container_name: backup4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+        org.geonode.component: backup
+        org.geonode.instance.name: geonode
+    depends_on:
+      - django
+      - geoserver
+      - db
+    volumes:
+      - statics:/mnt/volumes/statics/
+      - geoserver-data-dir:/mnt/volumes/data/
+      - dbbackups:/mnt/volumes/backups/
+    environment:
+      # mind that following lines are rancher-specific
+      RANCHER_STACK: {{ .Stack.Name }}
+      RANCHER_ENV: {{ .Environment.Name }}
+      PGUSER: postgres
+      PGHOST: db
+
+  restore:
+    image: geosolutionsit/geonode-restore:latest
+    restart: unless-stopped
+    container_name: restore4${COMPOSE_PROJECT_NAME}
+    stdin_open: true
+    # tty: true
+    labels:
+        org.geonode.component: restore
+        org.geonode.instance.name: geonode
+    depends_on:
+      - db
+      - data-dir-conf
+    volumes:
+      - statics:/mnt/volumes/statics/
+      - geoserver-data-dir:/mnt/volumes/data/
+      - dbbackups:/mnt/volumes/backups/
+    environment:
+      # mind that following lines are rancher-specific
+      RANCHER_STACK: {{ .Stack.Name }}
+      RANCHER_ENV: {{ .Environment.Name }}
+      PGUSER: postgres
+      PGHOST: db
+
+
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync:rancher
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - dbbackups:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DATA_SECRET}
+      - DEVICE=GeonodeGenericBackups-{{ .Stack.Name }}
+      - STANDBY_MODE=TRUE
+
+  btsync-templates:
+    # BTSync backups for database dumps
+    # for templates generated on the fly by django
+    # so that we can customise them and have them 
+    # persist between upgrades. Use the Django admin
+    # Home › GeoNode Client Library › Themes
+    # to generate an initial one, then customise
+    # via btsync in this folder the generated theme
+    # (avoid regenerating the template in django admin 
+    # after that).
+    image: kartoza/btsync:rancher
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - templates:/web:rw
+    environment:
+      - SECRET=${BTSYNC_TEMPLATES_SECRET}
+      - DEVICE=GeonodeGenericTemplates-{{ .Stack.Name }}
+      - STANDBY_MODE=TRUE
+
+  redis:
+    image: library/redis:4.0.11
+    volumes:
+      - scanwebgis-redis-data:/data/
+
+  scanwebgis:
+    image: kartoza/scanwebgis
+    working_dir: /home/web/extra_app
+    volumes:
+    - scanwebgis-statics:/home/web/static:rw
+    environment:
+      PYTHONPATH: '/home/web/extra_app'
+      URL_PREFIX: 'scanwebgis/'
+      ROOT_URLCONF: 'scanterra.root_urls'
+      DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
+      SITEURL: ${SITEURL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      STATIC_ROOT: /home/web/static
+      MEDIA_ROOT: /home/web/media
+      # Kobo API
+      KOBO_API_URL: ${KOBO_API_URL}
+      KOBO_API_CLIENTID: ${KOBO_API_CLIENTID}
+      KOBO_API_CLIENTSECRET: ${KOBO_API_CLIENTSECRET}
+      KOBO_API_USER: ${KOBO_API_USER}
+      KOBO_API_PASSWORD: ${KOBO_API_PASSWORD}
+      # Redis settings
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DEFAULT_DB: 1
+      REDIS_SESSION_DB: 2
+
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+volumes:
+  geoserver-data-dir:
+#    name: ${COMPOSE_PROJECT_NAME}-gsdatadir
+  dbdata:
+#    name: ${COMPOSE_PROJECT_NAME}-dbdata
+  dbbackups:
+     driver: ${BACKUPS_VOLUME_DRIVER}
+     external: {{ .Values.BACKUPS_VOLUME_EXTERNAL }}
+#    name: ${COMPOSE_PROJECT_NAME}-dbbackups
+  statics:
+#    name: ${COMPOSE_PROJECT_NAME}-statics
+  # for templates generated on the fly by django
+  # so that we can customise them and have them 
+  # persist between upgrades. Use the Django admin
+  # Home › GeoNode Client Library › Themes
+  # to generate an initial one, then customise
+  # via btsync in this folder the generated theme
+  # (avoid regenerating the template in django admin 
+  # after that).
+  scanwebgis-statics:
+  scanwebgis-redis-data:
