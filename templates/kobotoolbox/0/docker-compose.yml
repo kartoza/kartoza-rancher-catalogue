@@ -413,6 +413,7 @@ services:
     volumes:
         - vols-static-kobocat:/srv/www/kobocat
         - vols-static-kpi:/srv/www/kpi
+        - vols-kpimedia:/srv/src/kpi/media
         # get the logs out of glusterfs!
         - log-nginx:/var/log/nginx
         - secrets:/tmp/kobo_toolbox_secrets/
