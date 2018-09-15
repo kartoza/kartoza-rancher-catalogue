@@ -52,22 +52,26 @@
     db:
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
+        io.rancher.scheduler.global: "true"
     dbbackups:
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
+        io.rancher.scheduler.global: "true"
     btsync-data:
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
+        io.rancher.scheduler.global: "true"
     geoserver:
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
+        io.rancher.scheduler.global: "true"
     btsync-media:                                                                   
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-
+        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
+        io.rancher.scheduler.global: "true"
 
