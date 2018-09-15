@@ -65,10 +65,6 @@
       scale: 1
       labels:
         io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-    dbbackups:
-      scale: 1
-      labels:
-        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
     btsync-media:                                                                   
       scale: 1
       labels:
