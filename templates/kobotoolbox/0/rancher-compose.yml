@@ -100,6 +100,21 @@ catalog:
         - True
         - False
 
+    - variable: POSTGRES_BACKUP_SCHEDULE
+      label: "Cron schedule of Postgres backup."
+      type: string
+      default: '0 2 * * 0'
+
+    - variable: MONGO_BACKUP_SCHEDULE
+      label: "Cron schedule of Mongo db backup."
+      type: string
+      default: '0 1 * * 0'
+
+    - variable: KOBOCAT_MEDIA_BACKUP_SCHEDULE
+      label: "Cron schedule of KoboCat media backup."
+      type: string
+      default: '0 0 * * 0'
+
     - variable: USE_ENV_VAR
       label: "Use custom defined environment variable"
       description: "Set this to true if you choose to define the rest of env var by yourself"
