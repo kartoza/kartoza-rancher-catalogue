@@ -261,6 +261,8 @@ services:
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=${EMAIL_USE_TLS}
       - DEFAULT_FROM_EMAIL=${KOBO_SUPPORT_EMAIL}
+      - CELERYD_TASK_TIME_LIMIT=${TASK_TIMEOUT}
+      - CELERYD_TASK_SOFT_TIME_LIMIT=${TASK_SOFT_TIMEOUT}
     volumes:
       - vols-static-kobocat:/srv/static
       - vols-kobocatmedia:/srv/src/kobocat/media
@@ -343,6 +345,8 @@ services:
       - SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO, ${KOBOTOOLBOX_PROTOCOL}
 
       {{- end }}
+      - CELERYD_TASK_TIME_LIMIT=${TASK_TIMEOUT}
+      - CELERYD_TASK_SOFT_TIME_LIMIT=${TASK_SOFT_TIMEOUT}
     volumes:
       - vols-static-kpi:/srv/static
       - vols-kpimedia:/srv/src/kpi/media

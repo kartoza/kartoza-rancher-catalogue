@@ -155,6 +155,19 @@ catalog:
       default: ".kobotoolbox.test"
       type: string
 
+    - variable: TASK_SOFT_TIMEOUT
+      label: "Task Timeout in seconds"
+      description: "Celery task time limits in seconds"
+      required: true
+      default: 7200
+      type: int
+
+    - variable: TASK_TIMEOUT
+      label: "Task Timeout in seconds"
+      description: "Cut off time for celery waiting for a task to be done"
+      required: true
+      default: 9000
+      type: int
 
 services:
   nginx:
