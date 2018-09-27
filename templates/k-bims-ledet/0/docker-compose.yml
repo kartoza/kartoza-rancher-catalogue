@@ -47,6 +47,14 @@ services:
       smtp_user: noreply:docker
     restart: unless-stopped
 
+  cache:
+    image: memcached
+    entrypoint:
+      - memcached
+      - -m 64
+    labels:
+      io.rancher.container.pull_image: always
+
   nginx-conf-data:
     image: kartoza/ledet_nginx_conf:latest
     restart: unless-stopped
@@ -87,7 +95,7 @@ services:
     restart: unless-stopped
 
   data-dir-conf:
-    image: geosolutionsit/geoserver_data:2.12.x
+    image: geosolutionsit/geoserver_data:2.13.x
     restart: unless-stopped
     labels:
       io.rancher.container.start_once: true
@@ -95,11 +103,12 @@ services:
       - geoserver-data-dir:/geoserver_data/data
 
   geoserver:
-    image: geosolutionsit/geoserver-docker:2.12.x
+    image: geosolutionsit/geoserver-docker:2.13.x
     restart: unless-stopped
     links:
       - db:db
       - data-dir-conf:data-dir-conf
+      - geonode-db
     volumes:
       - geoserver-data-dir:/geoserver_data/data
     environment:
@@ -143,7 +152,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAIL}
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEOIP_PATH: /home/web/media/geoip.db
-      GEONODE_GEODATABASE_PASSWORD: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: docker
       GEONODE_INSTANCE_NAME: geonode
       DEFAULT_BACKEND_DATASTORE: datastore
       IS_CELERY: 'False'
@@ -159,6 +168,12 @@ services:
       IUCN_API_KEY: ${IUCN_API_KEY}
       MAP_TILER_KEY: ${MAP_TILER_KEY}
       SENTRY_KEY: ${SENTRY_KEY}
+      CENTER_POINT_MAP: 29.2566,-24.1066
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
+      GOOGLE_ANALYTIC_KEY: ${GOOGLE_ANALYTIC_KEY}
     entrypoint: /bin/sh
     command: -c "uwsgi --ini /usr/src/ledet/uwsgi.conf"
     volumes:
@@ -166,10 +181,148 @@ services:
     - django-media:/home/web/media:rw
     - django-reports:/home/web/reports
     - django-logs:/var/log/
+    - geoserver-data-dir:/usr/src/geonode/geoserver/data/data
     links:
+      - geoserver:geoserver
+      - worker:worker
+      - db:db
+      - geonode-db
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  messaging-worker:
+    image: kartoza/ledet_uwsgi:latest
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: gis
+      DATABASE_PASSWORD: docker
+      DATABASE_USERNAME: docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_worker
+      RABBITMQ_HOST: rabbitmq
+      VIRTUAL_HOST: ${SITE_URL}
+      VIRTUAL_PORT: '8000'
+      SITE_DOMAIN_NAME: http://${SITE_URL}
+      SITEURL: http://${SITE_URL}/
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
+      HAYSTACK_HOST: elasticsearch
+      GEOCONTEXT_URL: ${GEOCONTEXT_URL}
+      GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
+      CONTACT_US_EMAIL: ${ADMIN_EMAIL}
+      ROOT_URLCONF: ledet_core.urls
+      # In this setting, we access GeoServer using Rancher Load Balancer, so
+      # it will be available from public internet
+      GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
+      STATIC_ROOT: /home/web/static
+      GEONODE_DATABASE: gis
+      GEONODE_DATABASE_USER: docker
+      MEDIA_ROOT: /home/web/media
+      ADMIN_EMAILS: ${ADMIN_EMAIL}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEOIP_PATH: /home/web/media/geoip.db
+      GEONODE_GEODATABASE_PASSWORD: docker
+      GEONODE_INSTANCE_NAME: geonode
+      DEFAULT_BACKEND_DATASTORE: datastore
+      IS_CELERY: 'False'
+      ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
+      # In this setting, GeoNode needs to access GeoServer from internal network
+      # we use geoserver host name provided by rancher internal dns resolver
+      GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
+      GEONODE_GEODATABASE: geonode_data
+      GEONODE_DATABASE_PASSWORD: docker
+      C_FORCE_ROOT: 1
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
+      SENTRY_KEY: ${SENTRY_KEY}
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
+    entrypoint: /bin/sh
+    command: -c "/usr/local/bin/python manage.py runmessaging -i"
+    volumes:
+      - django-static:/home/web/static:rw
+      - django-media:/home/web/media:rw
+      - django-reports:/home/web/reports
+      - django-logs:/var/log/
+      - geoserver-data-dir:/usr/src/geonode/geoserver/data/data
+    links:
+      - cache:cache
       - geoserver:geoserver
       - rabbitmq:rabbitmq
       - db:db
+      - geonode-db
+      - uwsgi
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  worker:
+    image: kartoza/ledet_uwsgi:latest
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: gis
+      DATABASE_PASSWORD: docker
+      DATABASE_USERNAME: docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_worker
+      RABBITMQ_HOST: rabbitmq
+      VIRTUAL_HOST: ${SITE_URL}
+      VIRTUAL_PORT: '8000'
+      SITE_DOMAIN_NAME: http://${SITE_URL}
+      SITEURL: http://${SITE_URL}/
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
+      HAYSTACK_HOST: elasticsearch
+      GEOCONTEXT_URL: ${GEOCONTEXT_URL}
+      GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
+      CONTACT_US_EMAIL: ${ADMIN_EMAIL}
+      ROOT_URLCONF: ledet_core.urls
+      # In this setting, we access GeoServer using Rancher Load Balancer, so
+      # it will be available from public internet
+      GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
+      STATIC_ROOT: /home/web/static
+      GEONODE_DATABASE: gis
+      GEONODE_DATABASE_USER: docker
+      MEDIA_ROOT: /home/web/media
+      ADMIN_EMAILS: ${ADMIN_EMAIL}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEOIP_PATH: /home/web/media/geoip.db
+      GEONODE_GEODATABASE_PASSWORD: docker
+      GEONODE_INSTANCE_NAME: geonode
+      DEFAULT_BACKEND_DATASTORE: datastore
+      IS_CELERY: 'False'
+      ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
+      # In this setting, GeoNode needs to access GeoServer from internal network
+      # we use geoserver host name provided by rancher internal dns resolver
+      GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
+      GEONODE_GEODATABASE: geonode_data
+      GEONODE_DATABASE_PASSWORD: docker
+      C_FORCE_ROOT: 1
+      BING_MAP_KEY: ${BING_MAP_KEY}
+      IUCN_API_KEY: ${IUCN_API_KEY}
+      MAP_TILER_KEY: ${MAP_TILER_KEY}
+      SENTRY_KEY: ${SENTRY_KEY}
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
+    entrypoint: /bin/sh
+    command: -c "celery worker --app=bims.celery:app -B  -l DEBUG -Q default,geonode,cleanup,email,update"
+    volumes:
+      - django-static:/home/web/static:rw
+      - django-media:/home/web/media:rw
+      - django-reports:/home/web/reports
+      - django-logs:/var/log/
+      - geoserver-data-dir:/usr/src/geonode/geoserver/data/data
+    links:
+      - cache:cache
+      - geoserver:geoserver
+      - rabbitmq:rabbitmq
+      - db:db
+      - geonode-db
+      - uwsgi
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
@@ -205,7 +358,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAIL}
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEOIP_PATH: /home/web/media/geoip.db
-      GEONODE_GEODATABASE_PASSWORD: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: docker
       GEONODE_INSTANCE_NAME: geonode
       DEFAULT_BACKEND_DATASTORE: datastore
       IS_CELERY: 'False'
@@ -219,6 +372,10 @@ services:
       IUCN_API_KEY: ${IUCN_API_KEY}
       MAP_TILER_KEY: ${MAP_TILER_KEY}
       SENTRY_KEY: ${SENTRY_KEY}
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
     entrypoint: /bin/sh
     command: -c "python manage.py collectstatic --noinput -i geoexplorer"
     volumes:
@@ -230,6 +387,7 @@ services:
       - geoserver:geoserver
       - rabbitmq:rabbitmq
       - db:db
+      - geonode-db
     labels:
       io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
@@ -267,7 +425,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAIL}
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEOIP_PATH: /home/web/media/geoip.db
-      GEONODE_GEODATABASE_PASSWORD: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: docker
       GEONODE_INSTANCE_NAME: geonode
       DEFAULT_BACKEND_DATASTORE: datastore
       IS_CELERY: 'False'
@@ -281,6 +439,10 @@ services:
       IUCN_API_KEY: ${IUCN_API_KEY}
       MAP_TILER_KEY: ${MAP_TILER_KEY}
       SENTRY_KEY: ${SENTRY_KEY}
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
     entrypoint: /bin/sh
     command: -c "python manage.py makemigrations --noinput;python manage.py migrate auth;python manage.py migrate"
     volumes:
@@ -292,6 +454,7 @@ services:
       - geoserver:geoserver
       - rabbitmq:rabbitmq
       - db:db
+      - geonode-db
     labels:
       io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
@@ -327,7 +490,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAIL}
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEOIP_PATH: /home/web/media/geoip.db
-      GEONODE_GEODATABASE_PASSWORD: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: docker
       GEONODE_INSTANCE_NAME: geonode
       DEFAULT_BACKEND_DATASTORE: datastore
       IS_CELERY: 'False'
@@ -341,6 +504,10 @@ services:
       IUCN_API_KEY: ${IUCN_API_KEY}
       MAP_TILER_KEY: ${MAP_TILER_KEY}
       SENTRY_KEY: ${SENTRY_KEY}
+      GEONODE_GEODATABASE_USERNAME: docker
+      GEONODE_GEODATABASE_HOST: geonode-db
+      ASYNC_SIGNALS_GEONODE: True
+      INSTITUTION_ID_DEFAULT: LEDET
     entrypoint: /bin/sh
     command: -c "python manage.py update_location_context_documents"
     volumes:
@@ -352,6 +519,7 @@ services:
       - geoserver:geoserver
       - rabbitmq:rabbitmq
       - db:db
+      - geonode-db
     labels:
       io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
@@ -377,6 +545,20 @@ services:
       - postgis-data:/sql
     restart: unless-stopped
 
+  geonode-db:
+    image: kartoza/postgis:9.6-2.4
+    environment:
+      ALLOW_IP_RANGE: ${POSTGRES_HBA_RANGE}
+      POSTGRES_DB: geonode_data
+      POSTGRES_PASS: docker
+      POSTGRES_USER: docker
+    volumes:
+      - geonode-db-backups:/backups
+      - postgis-data:/sql
+      - sync-data:/raw
+      - pg-data:/var/lib/postgresql
+    restart: unless-stopped
+
   dbbackups:
     image: kartoza/pg-backup:9.6
     hostname: pg-backups
@@ -390,6 +572,22 @@ services:
     volumes:
       - db-backups:/backups
     restart: unless-stopped
+
+  geonode-db-backups:
+    image: kartoza/pg-backup:9.6
+    environment:
+      DUMPPREFIX: PG_bimsgeonode
+      PGDATABASE: geonode_data
+      PGHOST: geonode-db
+      PGPASSWORD: docker
+      PGPORT: '5432'
+      PGUSER: docker
+    volumes:
+      - geonode-db-backups:/backups
+    links:
+      - geonode-db
+    labels:
+      io.rancher.container.pull_image: always
 
   dbrestore:
     # This container will just run, a database restore on the latest database backup

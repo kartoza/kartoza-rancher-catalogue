@@ -2,8 +2,8 @@ version: '2'
 catalog:
   name: "Kartoza GeoSAFE"
   description: "Kartoza's spin of GeoNode with a QGIS backend and GeoSAFE."
-  version: 2
-  uuid: kartoza-geonode-0
+  version: 2.8.x-qgis_server-geosafe-beta
+  uuid: kartoza-geosafe-2.8.x-qgis_server
   questions:
     - variable: QGIS_BACKEND_INSTANCE_COUNT
       label: "QGIS backend instance count"
@@ -16,11 +16,6 @@ catalog:
       required: true
       default: gis
       type: "string"
-    - variable: POSTGRES_USER
-      label: PostgrsSQL superuser account to create.
-      required: true
-      default: docker
-      type: "string"
     - variable: POSTGRES_PASS
       label: PostgreSQL superuser password to create.
       required: true
@@ -30,12 +25,16 @@ catalog:
       label: "Database allowed hosts"
       description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
       required: true
-      default: 10.42.0.0/16
+      default: 0.0.0.0/0
+      type: "string"
+    - variable: MAIL_DOMAIN
+      label: "Email Domain"
+      description: "Configure email domain for this site."
+      default: ""
       type: "string"
     - variable: ADMIN_EMAIL
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
-      required: true
       default: ""
       type: "string"
     - variable: SITE_URL
@@ -56,17 +55,35 @@ catalog:
       required: false
       default: ""
       type: "string"
+    - variable: INASAFE_ANALYSIS_RUN_TIME_LIMIT
+      label: "InaSAFE Analysis Run time limit"
+      description: "InaSAFE Analysis Run time limit in seconds"
+      default: 600
+      type: "int"
+    - variable: INASAFE_ANALYSIS_AREA_LIMIT
+      label: "InaSAFE Analysis Area limit"
+      description: "InaSAFE Analysis Area limit in meter squared"
+      default: 1000000000
+      type: "int"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
       required: false
       default: 
       type: "string"
+    - variable: BTSYNC_DB_DEVICE
+      label: "BtSync DB device ID"
+      default: "GeoSAFE - Postgis Data"
+      type: "string"
     - variable: BTSYNC_MEDIA_SECRET
       label: "Media backups key"
       description: "Resilio sync read/write key for syncing geonode media backups"
       required: false
       default: 
+      type: "string"
+    - variable: BTSYNC_MEDIA_DEVICE
+      label: "BtSync MEDIA device ID"
+      default: "GeoSAFE - Media Data"
       type: "string"
 services:
   qgis-server:
@@ -98,9 +115,37 @@ services:
   nginx:
     scale: 1
     start_on_create: true
-  inasafe-headless-analysis:
-    scale: 4
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
+  geonode-lb:
+    scale: 1
     start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: ${SITE_URL}
+        path: ''
+        priority: 1
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 80
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
   inasafe-headless:
     scale: 4
     start_on_create: true

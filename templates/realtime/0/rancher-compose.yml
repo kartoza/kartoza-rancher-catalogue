@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "InaSAFE Realtime v3"
   description: "InaSAFE Realtime using InaSAFE core v3.5."
-  version: 1
+  version: v3.0
   uuid: inasafe-realtime-v3-0
   questions:
     - variable: VOLUME_DRIVER

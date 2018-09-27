@@ -2,8 +2,9 @@ version: '2'
 catalog:
   name: "InaSAFE Realtime v4"
   description: "InaSAFE Realtime using InaSAFE core v4"
-  version: 2
+  version: v4.0
   uuid: inasafe-realtime-v4-2
+  minimum_rancher_version: v1.6.12
   questions:
     - variable: VOLUME_DRIVER
       label: Storage driver
@@ -32,7 +33,7 @@ catalog:
     - variable: INASAFE_REALTIME_REST_USER
       label: InaSAFE Realtime REST Username
       description: Credentials User for Realtime REST API
-      default:
+      default: realtimepush@realtime.inasafe.org
       type: "string"
     - variable: INASAFE_REALTIME_REST_PASSWORD
       label: InaSAFE Realtime REST Password
@@ -43,12 +44,18 @@ catalog:
       label: SFTP Port for Shakemap drop
       description: This is SFTP exposed port into outside world
       default: 9222
-      type: "string"
+      type: "int"
     - variable: SITE_DOMAIN_NAME
       label: InaSAFE Realtime Site Domain Name
       description: Internet resolvable domain name for InaSAFE Realtime. Used for redirect from InAWARE to InaSAFE. Must start with http:// and ends with /
       required: true
       default: http://realtime.inasafe.org/
+      type: "string"
+    - variable: SITE_HOST_NAME
+      label: InaSAFE Realtime Site Host Name Only
+      description: Host name only without http://
+      required: true
+      default: realtime.inasafe.org
       type: "string"
 
     - variable: POSTGRES_DB
@@ -65,7 +72,7 @@ catalog:
       label: PostgreSQL superuser password to create.
       required: true
       default: docker
-      type: "string"
+      type: "password"
     - variable: REPLICATE_FROM
       description: Fill this if you need the initial db replicated from other sources
       label: Database replication master host
@@ -87,13 +94,7 @@ catalog:
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
       required: true
-      default: ""
-      type: "string"
-    - variable: SITE_URL
-      label: "Site URL"
-      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
-      required: true
-      default: ""
+      default: admin@realtime.inasafe.org
       type: "string"
 
     - variable: WEBSERVER_PORT
@@ -102,12 +103,39 @@ catalog:
       required: true
       default: 80
       type: "int"
+    - variable: USE_SSL
+      label: "Webserver SSL Flag"
+      description: "Set to True to use SSL Certificate for webserver."
+      default: false
+      type: "boolean"
+    - variable: RANCHER_SSL_CERT
+      label: "Rancher SSL Certificate Name saved on Rancher Certificate"
+      description: "Certificate to use for webserver"
+      default: domain-cert
+      type: "string"
+    - variable: RANCHER_SECRET_SSL_CERT
+      label: "Rancher Secret name for SSL Certificate"
+      description: "Certificate to use for webserver"
+      default:
+      type: "string"
+    - variable: RANCHER_SECRET_SSL_CERT_KEY
+      label: "Rancher Secret name for SSL Certificate Key"
+      description: "Certificate key (decrypted) to use for webserver"
+      default:
+      type: "string"
+
+    - variable: ENABLE_SENTRY
+      label: "Enable sentry report"
+      description: "Enable sentry report. Will be handled and interpreted differently by each service"
+      required: true
+      default: false
+      type: "boolean"
 
     - variable: SYNC_DEVICE_PREFIX
       label: "BtSync Device prefix"
       description: "Device prefix used by BtSync. Useful to differentiate sync devices."
       required: true
-      default:
+      default: "Device Prefix"
       type: "string"
 
     - variable: SSH_CONFIG_SYNC
@@ -118,9 +146,33 @@ catalog:
       label: "SSH Data Key"
       description: "BtSync Key for SSH Data"
       type: "string"
+    - variable: MEDIA_ALLOW_SYNC
+      description: "Allow Media folder to sync"
+      label: "Media Allow Sync"
+      type: "boolean"
+      default: true
     - variable: MEDIA_SYNC
       label: "Media Key"
       description: "BtSync Key for Media"
+      type: "string"
+
+    - variable: BMKG_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps to sync"
+      label: "BMKG Shakemaps Allow Sync"
+      type: "boolean"
+      default: true
+    - variable: BMKG_SYNC
+      description: "BtSync Key for BMKG Shakemaps"
+      label: "BMKG Shakemaps Key"
+      type: "string"
+    - variable: SHAKEMAPS_CORRECTED_ALLOW_SYNC
+      description: "Allow BMKG Shakemaps Corrected to sync"
+      label: "BMKG Shakemaps Corrected Allow Sync"
+      type: "boolean"
+      default: true
+    - variable: SHAKEMAPS_CORRECTED_SYNC
+      description: "BtSync Key for Shakemaps Corrected"
+      label: "Shakemaps Corrected Key"
       type: "string"
 
     - variable: ANALYSIS_CONTEXT_SYNC
@@ -132,52 +184,42 @@ catalog:
       description: "BtSync Key for Report Template"
       type: "string"
 services:
-  sftppgbackup:
-    scale: 1
-    start_on_create: true
-  smtp:
-    scale: 1
-    start_on_create: true
-  sftpmediabackup:
-    scale: 1
-    start_on_create: true
+  headless-worker:
+    scale: 4
+  django-worker:
+    scale: 2
   web:
     scale: 1
     start_on_create: true
-  indicator-worker:
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 8080
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_HOST_NAME}"'
+      reinitializing_timeout: 60000
+  inasafe-realtime-lb:
     scale: 1
     start_on_create: true
-  dbbackup:
-    scale: 1
-    start_on_create: true
-  uwsgi:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  db:
-    scale: 1
-    start_on_create: true
-
-  sftp:
-    scale: 1
-    start_on_create: true
-  inasafe-shakemap-monitor:
-    scale: 1
-    start_on_create: true
-  inasafe-worker:
-    scale: 1
-    start_on_create: true
-  rabbitmq:
-    scale: 1
-    start_on_create: true
-  analysis-context-sync:
-    scale: 1
-    start_on_create: true
-  report-template-sync:
-    scale: 1
-    start_on_create: true
+    lb_config:
+      certs: []
+      default_cert: ${RANCHER_SSL_CERT}
+      port_rules:
+      - hostname: ${SITE_HOST_NAME}
+        path: ''
+        priority: 1
+        protocol: http
+        service: web
+        source_port: ${WEBSERVER_PORT}
+        target_port: 8080
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000
