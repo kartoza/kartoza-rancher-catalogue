@@ -1,7 +1,7 @@
 version: '2'
 
 volumes:
-  web:
+  web-data:
   datadir:
   geoserver-data:
   sld:
@@ -23,8 +23,8 @@ services:
       QGIS_PROJECT_FILE: ''
     extra_hosts:
     - postgis.kartoza.com:postgis.kartoza.com
-    volumes_from:
-    - bstync-qgis-server
+    volumes:
+    - web-data:/web
     restart: on-failure
 
 
@@ -32,7 +32,7 @@ services:
   mapproxy:
     image: kartoza/mapproxy
     volumes:
-    - web:/web
+    - web-data:/web
     extra_hosts:
     - postgis.kartoza.com:postgis.kartoza.com
     links:
@@ -43,7 +43,7 @@ services:
   ngnix:
     image: nginx
     volumes:
-    - web:/web
+    - web-data:/web
     links:
     - geoserver:geoserver
     - mapproxy:mapproxy
@@ -57,7 +57,7 @@ services:
       DEVICE: prod-maps.kartoza.com
       SECRET: ${BTSYNC_QGIS_SECRET}
     volumes:
-    - web:/web:rw
+    - web-data:/web:rw
     restart: on-failure
 
 
@@ -67,7 +67,7 @@ services:
     environment:
       extra_hosts: postgis.kartoza.com
     volumes:
-    - web:/web
+    - web-data:/web
     - sld:/map/sld
 
     extra_hosts:
