@@ -1,0 +1,19 @@
+.catalog:
+  name: Kartoza Map Gallery
+  description: "This is collection of mapping utilities for creating maps to showcase the power of Open Source GIS Technologies. The stack includes GeoServer (http://geoserver.org) with  remote PostGIS, MapServer (https://mapserver.org)
+   ,Mapproxy (https://mapproxy.org) and Resilio sync all set up and ready to go in Rancher."
+  version: v2.10.5
+  uuid: maps.kartpza.com-0
+  questions:
+  - variable: BTSYNC_QGIS_SECRET
+    label: "QGIS Server volumes key"
+    description: "Resilio sync read/write key for syncing QGIS projects and data"
+    required: true
+    default: 
+    type: "string"
+  - variable: BTSYNC_GEOSERVER_SECRET
+    label: "Geoserver backups key"
+    description: "Resilio sync read/write key for syncing GeoServer backups"
+    required: true
+    default: 
+    type: "string"

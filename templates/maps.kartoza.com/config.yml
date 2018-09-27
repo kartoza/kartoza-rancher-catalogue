@@ -1,0 +1,7 @@
+name: Map Gallery
+description: Collection of mapping utilities for creating awesome maps.
+version: 1.0
+category: GIS
+maintainer: Kartoza (Pty) Ltd. - Tim Sutton, admire@kartoza.com
+license: GPL v3
+projectURL: https://github.com/kartoza/maps.kartoza.com

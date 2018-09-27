@@ -1,0 +1,95 @@
+version: '2'
+
+volumes:
+  web:
+  datadir:
+  geoserver-data:
+  sld:
+
+services:
+  geoserver:
+    image: kartoza/geoserver:2.13.0
+    stdin_open: true
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
+    volumes:
+    - geoserver-data:/opt/geoserver/data_dir
+    restart: on-failure
+
+  web:
+    image: kartoza/qgis-server:2.18
+    environment:
+      PGSERVICEFILE: /web/pg_service.conf
+      QGIS_PROJECT_FILE: ''
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
+    volumes_from:
+    - bstync-qgis-server
+    restart: on-failure
+
+
+
+  mapproxy:
+    image: kartoza/mapproxy
+    volumes:
+    - web:/web
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
+    links:
+    - geoserver:geoserver
+    - web:web
+    restart: on-failure
+
+  ngnix:
+    image: nginx
+    volumes:
+    - web:/web
+    links:
+    - geoserver:geoserver
+    - mapproxy:mapproxy
+    - web:web
+    - mapserver:mapserver
+    restart: on-failure
+
+  bstync-qgis-server:
+    image: kartoza/btsync
+    environment:
+      DEVICE: prod-maps.kartoza.com
+      SECRET: ${BTSYNC_QGIS_SECRET}
+    volumes:
+    - web:/web:rw
+    restart: on-failure
+
+
+
+  mapserver:
+    image: mazano/mapserver:dev
+    environment:
+      extra_hosts: postgis.kartoza.com
+    volumes:
+    - web:/web
+    - sld:/map/sld
+
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
+    restart: on-failure
+
+  btsync-geoserver-data-dir:
+    # BTSync backups for GeoServer data directory
+    image: kartoza/btsync
+    restart: on-failure
+    volumes:
+    # We mount RW so that we can use peers
+    # to push shapefiles etc. to the server
+    - geoserver-data:/web:rw
+    # Use this if you ARE orchestrating with Rancher
+    # and then see the accompanying rancher-compose.yml file
+    environment:
+    - SECRET=${BTSYNC_GEOSERVER_SECRET}
+    - DEVICE=geoserverdata.kartoza.com
+
+
+
+
+
+

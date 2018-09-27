@@ -92,7 +92,7 @@ services:
       - data-dir-conf
       - restore
     volumes:
-      - geoserver-data-dir:/geoserver_data/data
+      - geoserver-data-dir:/opt/geoserver/data_dir
     environment:
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       DOCKERHOST:
@@ -101,7 +101,8 @@ services:
       NGINX_BASE_URL: ${SITEURL}
 
   geonode:
-    image: geosolutionsit/nginx-geonode:latest
+    # Based on Kartoza geoserver image. Will change name of image to kartoza when I have permissions
+    image: mazano/geoserver-docker:2.12.x
     restart: unless-stopped
     container_name: nginx4${COMPOSE_PROJECT_NAME}
     stdin_open: true

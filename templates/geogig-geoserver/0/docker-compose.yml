@@ -1,0 +1,96 @@
+version: '2'
+
+  volumes:
+    geoserver-data:
+    db-backups:
+    geogig-db-data:
+    geo-db-data:
+
+  services:
+    geogig-db-dbbackups:
+      image=kartoza/pg-backup:9.6
+      environment:
+        - DUMPPREFIX=PG_geogig-db
+        - PGDATABASE=${POSTGRES_DB}
+        - PGHOST=geogig-db
+        - PGPASSWORD=${POSTGRES_PASS}
+        - PGPORT='5432'
+        - PGUSER=${POSTGRES_USER}
+      volumes:
+        - db-backups:/backups
+    geoserver:
+      image=kartoza/geoserver:2.13.0
+      environment:
+        - ENABLE_JSONP=${JSONP_VALUES}
+        - MAX_FILTER_RULES=${FILTER_RULES}
+        - OPTIMIZE_LINE_WIDTH=${LINE_WIDTH}
+      volumes:
+        - geoserver-data:/opt/geoserver/data_dir
+      ports:
+        - 8600:8080/tcp
+
+    db-dbbackups:
+      image=kartoza/pg-backup:9.6
+      environment:
+        - DUMPPREFIX=PG_db
+        - PGDATABASE=${POSTGRES_DB}
+        - PGHOST=db
+        - PGPASSWORD=${POSTGRES_PASS}
+        - PGPORT='5432'
+        - PGUSER=${POSTGRES_USER}
+      volumes:
+        - db-backups:/backups
+    geogig:
+      image=kartoza/geogig:latest
+      environment:
+        - EMAIL=${GEOGIG_EMAIL_ADD}
+        - GEOGIG_CACHE_MAX_SIZE='0.5'
+        - PGDATABASE=${POSTGRES_DB}
+        - PGHOST=geogig-db
+        - PGPASSWORD=${POSTGRES_PASS}
+        - PGPORT='5432'
+        - PGSCHEMA=public
+        - PGUSER=${POSTGRES_USER}
+        - USER_NAME=${GEOGIG_USER}
+      ports:
+        - 8182:8080/tcp
+    geogig-db:
+      image=kartoza/postgis:9.6-2.4
+      environment:
+        - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+        - PASS=${POSTGRES_PASS}
+        - USERNAME=${POSTGRES_USER}
+      volumes:
+        - geogig-db-data:/var/lib/postgresql
+    db:
+      image=kartoza/postgis:9.6-2.4
+      environment:
+        - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+        - PASS=${POSTGRES_PASS}
+        - USERNAME=${POSTGRES_USER}
+      volumes:
+        - geo-db-data:/var/lib/postgresql
+      ports:
+        - 25432:5432/tcp
+    btsync-data:
+       # BTSync backups for database dumps
+       image=kartoza/btsync
+       hostname=btsync-data
+       restart=on-failure
+       volumes:
+        - db-backups:/web:rw
+       environment:
+        - SECRET=${BTSYNC_DB_SECRET}
+        - DEVICE=GeoServerDatabase-geogig
+    btsync-media:
+      # BTSync backups for Geoserver raster and data directory
+      image=kartoza/btsync
+      hostname=btsync-media
+      restart=on-failure
+      volumes:
+        - geoserver-data:/web:rw
+      environment:
+        - SECRET=${BTSYNC_MEDIA_SECRET}
+        - DEVICE=GeoServer-Geogig-Media
+
+
