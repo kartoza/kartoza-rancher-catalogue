@@ -18,6 +18,12 @@ catalog:
           default: "80:80"
           required: true
           type: "string"
+
+        - variable: "SECRET_KEY"
+          label: "Django Secret Key"
+          type: string
+          default: "2510)aks1u*9mgjjss_+s1@rutm3v(sfv5hw8k#*t(jsdmg-"
+
         - variable: "ALLOWED_HOSTS"
           label: "List of allowed host header values"
           description: |
