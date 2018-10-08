@@ -5,6 +5,21 @@ catalog:
   version: 2.8.x-qgis_server-geosafe-beta
   uuid: kartoza-geosafe-2.8.x-qgis_server
   questions:
+    - variable: USE_THEME_APP
+      label: "Does this instance use specific GeoNode skin?"
+      required: true
+      default: "False"
+      type: "enum"
+      options:
+        - "True"
+        - "False"
+    - variable: THEME_APP_NAME
+      label: "The name of django app for the skin"
+      type: "string"
+    - variable: CUSTOM_THEME_APP_PIP_URL
+      label: "The django app PIP URL for installation"
+      description: "Example: git+https://github.com/user/repo.git@tag"
+      type: "string"
     - variable: QGIS_BACKEND_INSTANCE_COUNT
       label: "QGIS backend instance count"
       description: "How many QGIS backend rendering instances to start with."

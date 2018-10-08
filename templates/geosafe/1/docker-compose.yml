@@ -141,6 +141,7 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_DB}:${POSTGRES_PASS}@db:5432/gis
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
+      - CELERY_TASK_ALWAYS_EAGER=False
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
       - ADMIN=${ADMIN_EMAIL}
@@ -152,6 +153,14 @@ services:
       - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
+      # Skin settings
+      {{- if eq .Values.USE_THEME_APP "True" }}
+
+      - USE_THEME_APP=${USE_THEME_APP}
+      - THEME_APP_NAME=${THEME_APP_NAME}
+      - CUSTOM_THEME_APP_PIP_URL=${CUSTOM_THEME_APP_PIP_URL}
+
+      {{- end }}
       # GeoNode docker specific settings
       - GEONODE_LB_HOST_IP=${SITE_URL}
       - GEONODE_LB_PORT=80
@@ -225,6 +234,7 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_DB}:${POSTGRES_PASS}@db:5432/gis
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
+      - CELERY_TASK_ALWAYS_EAGER=False
       # Should be specified in docker-compose.override.yml. Because it depends on the
       # host
       - ADMIN=${ADMIN_EMAIL}
@@ -236,6 +246,14 @@ services:
       - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
+      # Skin settings
+      {{- if eq .Values.USE_THEME_APP "true" }}
+
+      - USE_THEME_APP=${USE_THEME_APP}
+      - THEME_APP_NAME=${THEME_APP_NAME}
+      - CUSTOM_THEME_APP_PIP_URL=${CUSTOM_THEME_APP_PIP_URL}
+
+      {{- end }}
       # GeoNode docker specific settings
       - GEONODE_LB_HOST_IP=${SITE_URL}
       - GEONODE_LB_PORT=80
