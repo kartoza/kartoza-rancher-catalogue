@@ -47,6 +47,11 @@ catalog:
       description: "Configure email domain for this site."
       default: ""
       type: "string"
+    - variable: DEFAULT_FROM_EMAIL
+      label: "From: address of default email sent from this site."
+      description: "Example: GeoNode <noreply@geonode.org>"
+      default: "GeoNode <noreply@geonode.org>"
+      type: "string"
     - variable: ADMIN_EMAIL
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
