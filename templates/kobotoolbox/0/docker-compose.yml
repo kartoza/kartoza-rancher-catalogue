@@ -82,6 +82,18 @@ volumes:
 #      o: bind
 #      device: '$PWD/secrets/'
 services:
+
+  {{- if eq .Values.USE_EXTERNAL_SMTP "false" }}
+  smtp:
+    image: catatnight/postfix
+    environment:
+    # You could change this to something more suitable
+    - maildomain=${PUBLIC_DOMAIN_NAME}
+    - smtp_user=noreply:docker
+    restart: on-failure
+
+  {{- end }}
+
   rabbit:
     image: kartoza/kobotoolbox_rabbit:latest
     environment:
@@ -255,12 +267,26 @@ services:
       - ENKETO_PROTOCOL=${KOBOTOOLBOX_PROTOCOL}
 
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
+      {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
+
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+
+      {{- else }}
+
+      - EMAIL_HOST=smtp
+      - EMAIL_PORT=25
+      - EMAIL_HOST_USER=noreply
+      - EMAIL_HOST_PASSWORD=docker
+      - EMAIL_USE_TLS=False
+
+      {{- end }}
       - DEFAULT_FROM_EMAIL=${KOBO_SUPPORT_EMAIL}
+
       - CELERYD_TASK_TIME_LIMIT=${TASK_TIMEOUT}
       - CELERYD_TASK_SOFT_TIME_LIMIT=${TASK_SOFT_TIMEOUT}
     volumes:
@@ -273,6 +299,9 @@ services:
       - mongo
       - postgres
       - kpi
+      {{- if eq .Values.USE_EXTERNAL_SMTP "false" }}
+      - smtp
+      {{- end }}
     restart: on-failure
     labels:
       io.rancher.container.pull_image: always
@@ -333,11 +362,24 @@ services:
       - KPI_STATIC_FILES_SERVER=Nginx
 
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
+      {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
+
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+
+      {{- else }}
+
+      - EMAIL_HOST=smtp
+      - EMAIL_PORT=25
+      - EMAIL_HOST_USER=noreply
+      - EMAIL_HOST_PASSWORD=docker
+      - EMAIL_USE_TLS=False
+
+      {{- end }}
       - DEFAULT_FROM_EMAIL=${KOBO_SUPPORT_EMAIL}
 
       {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
@@ -358,6 +400,9 @@ services:
       - postgres
       - rabbit
       - mongo
+      {{- if eq .Values.USE_EXTERNAL_SMTP "false" }}
+      - smtp
+      {{- end }}
     restart: on-failure
     labels:
       io.rancher.container.pull_image: always
@@ -426,12 +471,12 @@ services:
       - NGINX_CONFIG_FILE_NAME=nginx_site_http.conf
       - TEMPLATED_VAR_REFS=$${PUBLIC_DOMAIN_NAME} $${KOBOFORM_PUBLIC_SUBDOMAIN} $${KOBOCAT_PUBLIC_SUBDOMAIN} $${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
     volumes:
-        - vols-static-kobocat:/srv/www/kobocat
-        - vols-static-kpi:/srv/www/kpi
-        - vols-kpimedia:/srv/src/kpi/media
-        # get the logs out of glusterfs!
-        - log-nginx:/var/log/nginx
-        - secrets:/tmp/kobo_toolbox_secrets/
+      - vols-static-kobocat:/srv/www/kobocat
+      - vols-static-kpi:/srv/www/kpi
+      - vols-kpimedia:/srv/src/kpi/media
+      # get the logs out of glusterfs!
+      - log-nginx:/var/log/nginx
+      - secrets:/tmp/kobo_toolbox_secrets/
     links:
       - kobocat
       - kpi
