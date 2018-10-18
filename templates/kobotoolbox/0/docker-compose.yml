@@ -422,7 +422,8 @@ services:
       - KOBOCAT_STATIC_FILES_SERVER=Nginx
       - KPI_STATIC_FILES_SERVER=Nginx
 
-      - NGINX_CONFIG_FILE_NAME=nginx_site_${KOBOTOOLBOX_PROTOCOL}.conf
+      # We will use http protocol because https will be terminated by Rancher LB
+      - NGINX_CONFIG_FILE_NAME=nginx_site_http.conf
       - TEMPLATED_VAR_REFS=$${PUBLIC_DOMAIN_NAME} $${KOBOFORM_PUBLIC_SUBDOMAIN} $${KOBOCAT_PUBLIC_SUBDOMAIN} $${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
     volumes:
         - vols-static-kobocat:/srv/www/kobocat
