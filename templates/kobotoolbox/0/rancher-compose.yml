@@ -77,28 +77,39 @@ catalog:
       default: "enketo"
       type: string
 
+    - variable: USE_EXTERNAL_SMTP
+      label: "Use external SMTP host"
+      description: "Set to false to use local SMTP server for testing"
+      default: false
+      type: boolean
     - variable: EMAIL_HOST
       label: "SMTP host to use"
+      description: "Only used if using external SMTP"
       type: string
 
     - variable: EMAIL_PORT
       label: "SMTP port to use"
+      description: "Only used if using external SMTP"
       type: string
 
     - variable: EMAIL_HOST_USER
       label: "SMTP host user"
+      description: "Only used if using external SMTP"
       type: string
 
     - variable: EMAIL_HOST_PASSWORD
       label: "Email host password"
+      description: "Only used if using external SMTP"
       type: string
 
     - variable: EMAIL_USE_TLS
       label: "Email TLS settings"
+      description: "Only used if using external SMTP"
       type: enum
+      default: 'False'
       options:
-        - True
-        - False
+        - 'True'
+        - 'False'
 
     - variable: POSTGRES_BACKUP_SCHEDULE
       label: "Cron schedule of Postgres backup."
