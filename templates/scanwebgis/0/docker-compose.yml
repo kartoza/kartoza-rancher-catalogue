@@ -45,7 +45,7 @@ services:
        GEONODE_PREFIX: "''"
        ROOT_URLCONF: core.root_urls
        PYTHONPATH: '/usr/src/scanwebgis-docker'
-       SCANWEBGIS_URL: ${SITEURL}scanwebgis/
+       SCANWEBGIS_URL: ${SITEURL}${SCANWEBGIS_URL_PREFIX}
        GEONODE_INSTANCE_NAME: geonode
        GEONODE_LB_HOST_IP:
        GEONODE_LB_PORT:
@@ -234,7 +234,7 @@ services:
     environment:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
-      URL_PREFIX: 'scanwebgis/'
+      URL_PREFIX: ${SCANWEBGIS_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
       SITEURL: ${SITEURL}

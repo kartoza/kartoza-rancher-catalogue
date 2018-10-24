@@ -54,6 +54,15 @@ catalog:
           default: "GeoNode"
           type: string
 
+        - variable: "SCANWEBGIS_URL_PREFIX"
+          label: "URL prefix to be used to access Scanwebgis App"
+          description: |
+                Must start with alphanumeric, ends with slash and should be
+                a proper URL form. Example: 'scanagroempresa/'
+          required: true
+          default: "scanagroempresa/"
+          type: string
+
         - variable: "ADMIN_EMAILS"
           label: "List of admin emails"
           description: |
