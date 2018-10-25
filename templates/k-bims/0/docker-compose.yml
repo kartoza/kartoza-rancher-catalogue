@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: dimasciput/healthyrivers_nginx:latest
+    image: dimasciput/kartoza_nginx:latest
     hostname: nginx
     volumes:
     - django-static:/home/web/static:ro
@@ -55,6 +55,9 @@ services:
     - nginx-logs:/var/log/nginx
     ports:
     - ${WEBSERVER_PORT}:8080/tcp
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    command: sh /update-nginx-conf.sh
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
