@@ -264,7 +264,7 @@ services:
       - EMAIL_USE_TLS=False
       - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
       # Skin settings
-      {{- if eq .Values.USE_THEME_APP "true" }}
+      {{- if eq .Values.USE_THEME_APP "True" }}
 
       - USE_THEME_APP=${USE_THEME_APP}
       - THEME_APP_NAME=${THEME_APP_NAME}
@@ -290,8 +290,8 @@ services:
       - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
       - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
     entrypoint:
-      - /bin/sh
-    command: -c "celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B"
+      - /celery-entry-point.sh
+    command: /usr/local/bin/celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
     links:
       - smtp
       - rabbitmq
@@ -301,7 +301,7 @@ services:
       io.rancher.container.pull_image: always
 
   inasafe-headless:
-    image: inasafe/headless_processor:v4.4.0
+    image: inasafe/headless_processor:latest
     restart: on-failure
     environment:
       - C_FORCE_ROOT=True
