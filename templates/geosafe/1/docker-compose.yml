@@ -16,6 +16,7 @@ volumes:
   qgis-server-qgis-layer-history-data:
   qgis-server-qgis-cache-data:
   inasafe-headless-output-data:
+  inasafe-headless-settings-data:
 
 services:
 
@@ -133,6 +134,7 @@ services:
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
       - 'geonode-backup-data:/geonode_backup'
       - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
+      - 'inasafe-headless-settings-data:/home/headless/settings'
     entrypoint:
       - /entry-point.sh
     command:
@@ -189,6 +191,8 @@ services:
       - USE_LAYER_HTTP_ACCESS=False
       - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
       - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
+      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
+      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
     restart: unless-stopped
     links:
       - smtp
@@ -238,6 +242,7 @@ services:
       - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
       - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
+      - 'inasafe-headless-settings-data:/home/headless/settings'
     environment:
       - C_FORCE_ROOT=True
       - DATABASE_URL=postgres://${POSTGRES_DB}:${POSTGRES_PASS}@db:5432/gis
@@ -289,6 +294,8 @@ services:
       - USE_LAYER_HTTP_ACCESS=False
       - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
       - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
+      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
+      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
     entrypoint:
       - /celery-entry-point.sh
     command: /usr/local/bin/celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
@@ -312,12 +319,15 @@ services:
       - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
       - INASAFE_OUTPUT_DIR=/home/geosafe/impact_layers
       - INASAFE_WORK_DIR=/tmp/inasafe
+      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
+      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
       - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
       - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
       - QGIS_DEBUG=0
     volumes:
       - 'qgis-server-qgis-layer-data:/home/geosafe/media/'
       - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
+      - 'inasafe-headless-settings-data:/home/headless/settings'
     command: prod inasafe-headless-worker
     links:
       - rabbitmq
