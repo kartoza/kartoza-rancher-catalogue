@@ -174,7 +174,7 @@ services:
         health_check:
           response_timeout: 2000
           healthy_threshold: 2
-          port: 8080
+          port: 80
           unhealthy_threshold: 3
           initializing_timeout: 60000
           interval: 2000
