@@ -40,7 +40,8 @@ catalog:
           label: "Default URL for site"
           description: |
                 URL to default location of site. It will be used
-                to construct absolute urls. Do not add trailing slash. Example http://foo.org
+                to construct absolute urls. Without protocol string.
+                Do not add trailing slash. Example www.foo.org
           required: true
           type: 'string'
           default:

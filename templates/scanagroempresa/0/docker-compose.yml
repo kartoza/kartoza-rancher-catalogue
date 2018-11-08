@@ -45,7 +45,7 @@ services:
        GEONODE_PREFIX: "''"
        ROOT_URLCONF: core.root_urls
        PYTHONPATH: '/usr/src/scanagroempresa-docker'
-       SCANAGROEMPRESA_URL: ${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+       SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
        GEONODE_INSTANCE_NAME: geonode
        GEONODE_LB_HOST_IP:
        GEONODE_LB_PORT:
@@ -68,10 +68,10 @@ services:
        UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
        IS_CELERY: False
        C_FORCE_ROOT: 1
-       SITEURL: ${SITEURL}/
+       SITEURL: http://${SITEURL}/
        # replaced with defaults in settings
-       GEOSERVER_BASE_URL: ${SITEURL}/geoserver/
-       GEOSERVER_PUBLIC_LOCATION: ${SITEURL}/geoserver/
+       GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
+       GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
        GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
        STATIC_ROOT: /mnt/volumes/statics/static/
        MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -107,7 +107,7 @@ services:
       DOCKERHOST:
       DOCKER_HOST_IP:
       GEONODE_HOST_IP:
-      NGINX_BASE_URL: ${SITEURL}
+      NGINX_BASE_URL: http://${SITEURL}
 
   geonode:
     image: geosolutionsit/nginx-geonode:latest
@@ -237,7 +237,7 @@ services:
       URL_PREFIX: ${SCANAGROEMPRESA_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
-      SITEURL: ${SITEURL}
+      SITEURL: http://${SITEURL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       STATIC_ROOT: /home/web/static
       MEDIA_ROOT: /home/web/media
@@ -248,8 +248,8 @@ services:
       PGHOST: db
       PGPORT: 5432
       # For GeoNode
-      GEONODE_SERVER_HOST: ${SITEURL}
-      GEOSERVER_SERVER_HOST: ${SITEURL}/geoserver
+      GEONODE_SERVER_HOST: http://${SITEURL}
+      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KOBO_API_CLIENTID: ${KOBO_API_CLIENTID}
