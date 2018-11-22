@@ -252,19 +252,22 @@ services:
       DATA_PGPASSWORD: postgres
       DATA_PGHOST: db
       DATA_PGPORT: 5432
-      GEONODE_PGDATABASE: gis
+      GEONODE_PGDATABASE: geonode
       GEONODE_PGUSER: postgres
       GEONODE_PGPASSWORD: postgres
       GEONODE_PGHOST: db
       GEONODE_PGPORT: 5432
       KOBO_PGDATABASE: ${KOBO_PGDATABASE}
       KOBO_PGUSER: ${KOBO_PGUSER}
-      KOBO_PGASSWORD: ${KOBO_PGPASSWORD}
+      KOBO_PGPASSWORD: ${KOBO_PGPASSWORD}
       KOBO_PGHOST: ${KOBO_PGHOST}
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://${SITEURL}
       GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KOBO_API_CLIENTID: ${KOBO_API_CLIENTID}
@@ -289,14 +292,84 @@ services:
       io.rancher.container.pull_image: always
     restart: unless-stopped
 
+  kobo-geonode-integration:
+    image: kartoza/scanagroempresa:latest
+    command: -c 'python runSync.py'
+    entrypoint: /bin/sh
+    working_dir: /home/web/kobo_sync_service
+    volumes:
+      - scanagroempresa-statics:/home/web/static:rw
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      PYTHONPATH: '/home/web/extra_app'
+      URL_PREFIX: ${SCANAGROEMPRESA_URL_PREFIX}
+      ROOT_URLCONF: 'scanterra.root_urls'
+      DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
+      SITEURL: http://${SITEURL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      STATIC_ROOT: /home/web/static
+      MEDIA_ROOT: /home/web/media
+      # For database
+      PGDATABASE: scanweb
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: db
+      PGPORT: 5432
+      DATA_PGDATABASE: kobo_form_data
+      DATA_PGUSER: postgres
+      DATA_PGPASSWORD: postgres
+      DATA_PGHOST: db
+      DATA_PGPORT: 5432
+      GEONODE_PGDATABASE: geonode
+      GEONODE_PGUSER: postgres
+      GEONODE_PGPASSWORD: postgres
+      GEONODE_PGHOST: db
+      GEONODE_PGPORT: 5432
+      KOBO_PGDATABASE: ${KOBO_PGDATABASE}
+      KOBO_PGUSER: ${KOBO_PGUSER}
+      KOBO_PGPASSWORD: ${KOBO_PGPASSWORD}
+      KOBO_PGHOST: ${KOBO_PGHOST}
+      KOBO_PGPORT: ${KOBO_PGPORT}
+      # For GeoNode
+      GEONODE_SERVER_HOST: http://${SITEURL}
+      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      # Kobo API
+      KOBO_API_URL: ${KOBO_API_URL}
+      KOBO_API_CLIENTID: ${KOBO_API_CLIENTID}
+      KOBO_API_CLIENTSECRET: ${KOBO_API_CLIENTSECRET}
+      KOBO_API_USER: ${KOBO_API_USER}
+      KOBO_API_PASSWORD: ${KOBO_API_PASSWORD}
+      # Redis settings
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DEFAULT_DB: 1
+      REDIS_SESSION_DB: 2
+      # Skin settings
+      {{- if eq .Values.USE_THEME_APP "True" }}
+
+      - USE_THEME_APP=${USE_THEME_APP}
+      - THEME_APP_NAME=${THEME_APP_NAME}
+      - CUSTOM_THEME_APP_PIP_URL=${CUSTOM_THEME_APP_PIP_URL}
+
+      {{- end }}
+
+    labels:
+      io.rancher.container.start_once: 'true'
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 0 * * * ?
+      cron.action: restart
+
 volumes:
   geoserver-data-dir:
 #    name: ${COMPOSE_PROJECT_NAME}-gsdatadir
   dbdata:
 #    name: ${COMPOSE_PROJECT_NAME}-dbdata
   dbbackups:
-     driver: ${BACKUPS_VOLUME_DRIVER}
-     external: {{ .Values.BACKUPS_VOLUME_EXTERNAL }}
+    driver: ${BACKUPS_VOLUME_DRIVER}
+    external: {{ .Values.BACKUPS_VOLUME_EXTERNAL }}
 #    name: ${COMPOSE_PROJECT_NAME}-dbbackups
   statics:
 #    name: ${COMPOSE_PROJECT_NAME}-statics
