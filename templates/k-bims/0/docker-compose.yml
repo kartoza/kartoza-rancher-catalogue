@@ -170,7 +170,7 @@ services:
       CENTER_POINT_MAP: ${CENTER_POINT_MAP}
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
       GOOGLE_ANALYTIC_KEY: ${GOOGLE_ANALYTIC_KEY}
     entrypoint: /bin/sh
@@ -233,7 +233,7 @@ services:
       C_FORCE_ROOT: 1
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
     entrypoint: /bin/sh
     command: -c "/usr/local/bin/python manage.py runmessaging -i"
@@ -297,7 +297,7 @@ services:
       SENTRY_KEY: ${SENTRY_KEY}
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
     entrypoint: /bin/sh
     command: -c "celery worker --app=bims.celery:app -B  -l DEBUG -Q default,geonode,cleanup,email,update"
@@ -364,7 +364,7 @@ services:
       SENTRY_KEY: ${SENTRY_KEY}
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
     entrypoint: /bin/sh
     command: -c "python manage.py gruntserver"
@@ -431,7 +431,7 @@ services:
       SENTRY_KEY: ${SENTRY_KEY}
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
     entrypoint: /bin/sh
     command: -c "python manage.py makemigrations --noinput;python manage.py migrate auth;python manage.py migrate"
@@ -493,7 +493,7 @@ services:
       SENTRY_KEY: ${SENTRY_KEY}
       GEONODE_GEODATABASE_USERNAME: docker
       GEONODE_GEODATABASE_HOST: geonode-db
-      ASYNC_SIGNALS_GEONODE: True
+      ASYNC_SIGNALS_GEONODE: "True"
       INSTITUTION_ID_DEFAULT: Bims
     entrypoint: /bin/sh
     command: -c "python manage.py update_location_context_documents"
