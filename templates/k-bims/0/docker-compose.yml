@@ -64,7 +64,7 @@ services:
       ALWAYS_INIT: "True"
       TARGET: "/etc/nginx/sites-available"
     volumes:
-      - nginx-conf-data:/etc/nginx/sites-available
+      - nginx-conf-data:/config_source
 
   lb:
     image: rancher/lb-service-haproxy:v0.7.15
