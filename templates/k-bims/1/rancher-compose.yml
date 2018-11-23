@@ -1,9 +1,9 @@
 version: "2"
 catalog:
-  name: "Healthyrivers BIMS"
-  description: "Healthyriver's Biodiversity Information Management System."
-  version: healthyrivers
-  uuid: kartoza-djangobims-0
+  name: "LEDET BIMS"
+  description: "LEDET's Biodiversity Information Management System."
+  version: ledet
+  uuid: kartoza-djangobims-1
   questions:
     #- variable: SMB_PATH
     #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup

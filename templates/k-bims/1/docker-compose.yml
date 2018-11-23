@@ -129,18 +129,18 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       # In this setting, we access GeoServer using Rancher Load Balancer, so
       # it will be available from public internet
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
@@ -159,7 +159,7 @@ services:
       # In this setting, GeoNode needs to access GeoServer from internal network
       # we use geoserver host name provided by rancher internal dns resolver
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
@@ -174,7 +174,7 @@ services:
       INSTITUTION_ID_DEFAULT: Bims
       GOOGLE_ANALYTIC_KEY: ${GOOGLE_ANALYTIC_KEY}
     entrypoint: /bin/sh
-    command: -c "uwsgi --ini /usr/src/healthyrivers/uwsgi.conf"
+    command: -c "uwsgi --ini /usr/src/ledet/uwsgi.conf"
     volumes:
       - django-static:/home/web/static:rw
       - django-media:/home/web/media:rw
@@ -203,12 +203,12 @@ services:
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       # In this setting, we access GeoServer using Rancher Load Balancer, so
       # it will be available from public internet
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
@@ -227,7 +227,7 @@ services:
       # In this setting, GeoNode needs to access GeoServer from internal network
       # we use geoserver host name provided by rancher internal dns resolver
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
@@ -266,12 +266,12 @@ services:
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       # In this setting, we access GeoServer using Rancher Load Balancer, so
       # it will be available from public internet
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
@@ -290,7 +290,7 @@ services:
       # In this setting, GeoNode needs to access GeoServer from internal network
       # we use geoserver host name provided by rancher internal dns resolver
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
@@ -328,18 +328,18 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
       STATIC_ROOT: /home/web/static
       GEONODE_DATABASE: gis
@@ -354,7 +354,7 @@ services:
       IS_CELERY: "False"
       ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
@@ -395,18 +395,18 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
       STATIC_ROOT: /home/web/static
       GEONODE_DATABASE: gis
@@ -421,7 +421,7 @@ services:
       IS_CELERY: "False"
       ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
@@ -460,18 +460,18 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: ledet_core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
       SITE_DOMAIN_NAME: http://${SITE_URL}
       SITEURL: http://${SITE_URL}/
-      PYTHONPATH: /usr/src/healthyrivers:/usr/src/app:/usr/src/bims:/home/web/django_project
+      PYTHONPATH: /usr/src/ledet:/usr/src/app:/usr/src/bims:/home/web/django_project
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
       GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${ADMIN_EMAIL}
-      ROOT_URLCONF: healthyrivers_core.urls
+      ROOT_URLCONF: ledet_core.urls
       GEOSERVER_PUBLIC_LOCATION: http://${SITE_URL}/geoserver/
       STATIC_ROOT: /home/web/static
       GEONODE_DATABASE: gis
@@ -486,7 +486,7 @@ services:
       IS_CELERY: "False"
       ALLOWED_HOSTS: '["localhost","127.0.0.1","${SITE_URL}"]'
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
-      UWSGI_CMD: uwsgi --ini /usr/src/healthyrivers/uwsgi.conf
+      UWSGI_CMD: uwsgi --ini /usr/src/ledet/uwsgi.conf
       GEONODE_GEODATABASE: geonode_data
       GEONODE_DATABASE_PASSWORD: docker
       C_FORCE_ROOT: 1
