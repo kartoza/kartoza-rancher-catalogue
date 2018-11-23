@@ -52,6 +52,11 @@ catalog:
       required: true
       default: ""
       type: "string"
+    - variable: GEOSERVER_ADMIN_PASSWORD
+      label: GeoServer admin password to create.
+      required: true
+      default: admingeoserver
+      type: "string"
     - variable: SITE_URL
       label: "Site URL"
       description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /). Also do not use quotes."

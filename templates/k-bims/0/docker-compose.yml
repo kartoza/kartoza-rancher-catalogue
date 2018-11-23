@@ -197,7 +197,7 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_worker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
@@ -249,7 +249,6 @@ services:
       - rabbitmq:rabbitmq
       - db:db
       - geonode-db
-      - uwsgi
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
@@ -261,7 +260,7 @@ services:
       DATABASE_NAME: gis
       DATABASE_PASSWORD: docker
       DATABASE_USERNAME: docker
-      DJANGO_SETTINGS_MODULE: healthyrivers_core.settings.prod_docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_worker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: ${SITE_URL}
       VIRTUAL_PORT: "8000"
@@ -314,7 +313,6 @@ services:
       - rabbitmq:rabbitmq
       - db:db
       - geonode-db
-      - uwsgi
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
