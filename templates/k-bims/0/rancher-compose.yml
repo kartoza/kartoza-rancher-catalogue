@@ -1,9 +1,9 @@
 version: "2"
 catalog:
-  name: "Healthyriver BIMS"
+  name: "Healthyrivers BIMS"
   description: "Healthyriver's Biodiversity Information Management System."
-  version: healthyriver
-  uuid: kartoza-geonode-0
+  version: healthyrivers
+  uuid: kartoza-djangobims-0
   questions:
     #- variable: SMB_PATH
     #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
@@ -20,6 +20,11 @@ catalog:
     #  required: true
     #  default: docker
     #  type: "password"
+    - variable: UWSGI_IMAGE
+      label: Image used for UWSGI container e.g. kartoza/ledet_uwsgi:latest
+      required: true
+      default: ""
+      type: "string"
     - variable: POSTGRES_DB
       label: PostgreSQL db to create.
       required: true
@@ -95,12 +100,6 @@ catalog:
       required: true
       default: "climate"
       type: "string"
-    - variable: CONTACT_US_EMAIL
-      label: "Contact Us email"
-      description: "Email for contact us"
-      required: true
-      default:
-      type: "string"
     - variable: IUCN_API_KEY
       label: "IUCN Api Key"
       description: "IUCN Api Key"
@@ -119,6 +118,11 @@ catalog:
       required: false
       default: ""
       type: "string"
+    - variable: GOOGLE_ANALYTIC_KEY
+      label: "Google Analytic Key (Optional)"
+      required: false
+      default: ""
+      type: "string"
 services:
   smtp:
     scale: 1
@@ -126,6 +130,16 @@ services:
   web:
     scale: 1
     start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
   uwsgi:
     scale: 1
     start_on_create: true
@@ -133,6 +147,15 @@ services:
     scale: 1
     start_on_create: true
   db:
+    scale: 1
+    start_on_create: true
+  cache:
+    scale: 1
+    start_on_create: true
+  worker:
+    scale: 2
+    start_on_create: true
+  messaging-worker:
     scale: 1
     start_on_create: true
   dbbackups:
@@ -150,4 +173,10 @@ services:
     start_on_create: true
   migrate:
     scale: 1
-    start_on_create: false
+    start_on_create: true
+  geonode-db-backups:
+    scale: 1
+    start_on_create: true
+  ipt:
+    scale: 1
+    start_on_create: true

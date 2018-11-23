@@ -1,9 +1,9 @@
-version: '2'
+version: "2"
 catalog:
   name: "LEDET BIMS"
   description: "LEDET's Biodiversity Information Management System."
   version: ledet
-  uuid: kartoza-geonode-0
+  uuid: kartoza-djangobims-1
   questions:
     #- variable: SMB_PATH
     #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
