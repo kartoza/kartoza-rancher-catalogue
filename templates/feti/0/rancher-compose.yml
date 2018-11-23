@@ -1,9 +1,9 @@
-version: "2"
+version: '2'
 catalog:
-  name: "Healthyriver BIMS"
-  description: "Healthyriver's Biodiversity Information Management System."
-  version: healthyriver
-  uuid: kartoza-geonode-0
+  name: "Kartoza FETI"
+  description: "Helping South African youth find tertiary education opportunities."
+  version: 0
+  uuid: kartoza-feti-0
   questions:
     #- variable: SMB_PATH
     #  label: SMB/CIFS network file share path. e.g. //u1234562.your-storagebox.de/backup
@@ -65,12 +65,6 @@ catalog:
       required: false
       default: ""
       type: "string"
-    - variable: SERVER_NAME
-      label: "Server name"
-      description: "Domain name of the server e.g. 'staging.kartoza.com'."
-      required: true
-      default: ""
-      type: "string"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
@@ -83,53 +77,14 @@ catalog:
       required: false
       default:
       type: "string"
-    - variable: GEOCONTEXT_URL
-      label: "GeoContext URL"
-      description: "Full URL for GeoContext service (include http:// and ends with /)."
-      required: true
-      default: "https://geocontext.kartoza.com"
-      type: "string"
-    - variable: GEOCONTEXT_COLLECTION_KEY
-      label: "GeoContext Collection Key"
-      description: "A key to specify which collection that wants to be retrieved from GeoContext."
-      required: true
-      default: "climate"
-      type: "string"
-    - variable: CONTACT_US_EMAIL
-      label: "Contact Us email"
-      description: "Email for contact us"
-      required: true
-      default:
-      type: "string"
-    - variable: IUCN_API_KEY
-      label: "IUCN Api Key"
-      description: "IUCN Api Key"
-      required: false
-      default: ""
-      type: "string"
-    - variable: BING_MAP_KEY
-      label: "Bing Map Key"
-      description: "Token key for bing map"
-      required: false
-      default: ""
-      type: "string"
-    - variable: MAP_TILER_KEY
-      label: "Map Tiler Key"
-      description: "Key for map tiler"
-      required: false
-      default: ""
-      type: "string"
 services:
-  smtp:
-    scale: 1
-    start_on_create: true
   web:
     scale: 1
     start_on_create: true
-  uwsgi:
+  smtp:
     scale: 1
     start_on_create: true
-  rabbitmq:
+  elasticsearch:
     scale: 1
     start_on_create: true
   db:
@@ -138,9 +93,14 @@ services:
   dbbackups:
     scale: 1
     start_on_create: true
-  mediabackup:
+  rabbitmq:
     scale: 1
     start_on_create: true
+  worker:
+    scale: 1
+    start_on_create: true
+  # The next services are all intended to br run-start_once
+  # management commands....
   dbrestore:
     scale: 1
     # We don't want to run until explicitly requested by the user

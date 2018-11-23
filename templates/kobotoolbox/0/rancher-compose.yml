@@ -1,0 +1,238 @@
+version: '2'
+catalog:
+  name: "Kobotoolbox"
+  description: "Kobotoolbox fork"
+  version: 1
+  uuid: kartoza-kobotoolbox-0
+  questions:
+    - variable: ENKETO_API_TOKEN
+      label: "Enketo API Token"
+      description: "Can be initialized with random string."
+      required: true
+      default: enketoapitoken
+      type: string
+    - variable: DJANGO_SECRET_KEY
+      label: "Django Secret Key"
+      description: "Can be initialized with random string."
+      required: true
+      default: "nhjh^gy1l@w4*#l)v5-v&rx0g5zgx!-9uygf786u!f6k9hs6+2"
+      type: string
+    - variable: KOBO_SUPERUSER_USERNAME
+      label: "Superuser username"
+      required: true
+      default: "kobo_superadmin"
+      type: string
+    - variable: KOBO_SUPERUSER_PASSWORD
+      label: "Superuser password"
+      required: true
+      default: "kobo_superpassword"
+      type: string
+    - variable: KOBO_SUPPORT_EMAIL
+      label: "Kobo support email"
+      required: true
+      default: "support@kexample.com"
+      type: string
+    - variable: PUBLIC_DOMAIN_NAME
+      label: "Public Domain Name"
+      description: "Domain name addressable from the outside"
+      required: true
+      default: "kobotoolbox.test"
+      type: string
+    - variable: WEBSERVER_PORT
+      label: "Addressable port for web"
+      required: true
+      default: 80
+      type: int
+    - variable: KOBOTOOLBOX_PROTOCOL
+      label: "Web protocol to use"
+      description: "Set up certificate manually from Rancher if using https"
+      type: enum
+      default: http
+      options:
+        - http
+        - https
+    - variable: PROXY_WEB_SERVER
+      label: "Proxying method to use"
+      type: enum
+      default: uWSGI
+      options:
+        - uWSGI
+        - Nginx
+    - variable: KOBOFORM_PUBLIC_SUBDOMAIN
+      label: "Public Subdomain of koboform"
+      description: "Domain name addressable from the outside"
+      required: true
+      default: "koboform"
+      type: string
+    - variable: KOBOCAT_PUBLIC_SUBDOMAIN
+      label: "Public Subdomain of kobocat"
+      description: "Domain name addressable from the outside"
+      required: true
+      default: "kobocat"
+      type: string
+    - variable: ENKETO_EXPRESS_PUBLIC_SUBDOMAIN
+      label: "Public Subdomain of enketo express"
+      description: "Domain name addressable from the outside"
+      required: true
+      default: "enketo"
+      type: string
+
+    - variable: USE_EXTERNAL_SMTP
+      label: "Use external SMTP host"
+      description: "Set to false to use local SMTP server for testing"
+      default: false
+      type: boolean
+    - variable: EMAIL_HOST
+      label: "SMTP host to use"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_PORT
+      label: "SMTP port to use"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_HOST_USER
+      label: "SMTP host user"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_HOST_PASSWORD
+      label: "Email host password"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_USE_TLS
+      label: "Email TLS settings"
+      description: "Only used if using external SMTP"
+      type: enum
+      default: 'False'
+      options:
+        - 'True'
+        - 'False'
+
+    - variable: POSTGRES_BACKUP_SCHEDULE
+      label: "Cron schedule of Postgres backup."
+      type: string
+      default: '0 2 * * 0'
+
+    - variable: MONGO_BACKUP_SCHEDULE
+      label: "Cron schedule of Mongo db backup."
+      type: string
+      default: '0 1 * * 0'
+
+    - variable: KOBOCAT_MEDIA_BACKUP_SCHEDULE
+      label: "Cron schedule of KoboCat media backup."
+      type: string
+      default: '0 0 * * 0'
+
+    - variable: USE_ENV_VAR
+      label: "Use custom defined environment variable"
+      description: "Set this to true if you choose to define the rest of env var by yourself"
+      required: true
+      default: false
+      type: boolean
+
+    - variable: KOBOFORM_SERVER_NAME
+      label: "Full Server Name for Koboform"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "koboform.kobotoolbox.test"
+      type: string
+    - variable: KOBOCAT_SERVER_NAME
+      label: "Full Server Name for Kobocat"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "kobocat.kobotoolbox.test"
+      type: string
+    - variable: ENKETO_SERVER_NAME
+      label: "Full Server Name for Enketo express"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: "enketo.kobotoolbox.test"
+      type: string
+
+    - variable: CSRF_COOKIE_DOMAIN
+      label: "Shared CSRF Cookie Domain"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: ".kobotoolbox.test"
+      type: string
+
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Shared Django Allowed hosts"
+      description: "Optional only if using USE_ENV_VAR set to true"
+      required: true
+      default: ".kobotoolbox.test"
+      type: string
+
+    - variable: TASK_SOFT_TIMEOUT
+      label: "Task Timeout in seconds"
+      description: "Celery task time limits in seconds"
+      required: true
+      default: 7200
+      type: int
+
+    - variable: TASK_TIMEOUT
+      label: "Task Timeout in seconds"
+      description: "Cut off time for celery waiting for a task to be done"
+      required: true
+      default: 9000
+      type: int
+
+services:
+  nginx:
+    scale: 1
+    start_on_create: true
+#    health_check:
+#      response_timeout: 2000
+#      healthy_threshold: 2
+#      port: 9000
+#      unhealthy_threshold: 3
+#      initializing_timeout: 60000
+#      interval: 2000
+#      strategy: recreate
+#      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${PUBLIC_DOMAIN}"'
+#      reinitializing_timeout: 60000
+  web-lb:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: ${PUBLIC_DOMAIN_NAME}
+        path: ''
+        priority: 1
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 9000
+      - hostname: ${KOBOFORM_PUBLIC_SUBDOMAIN}.${PUBLIC_DOMAIN_NAME}
+        path: ''
+        priority: 2
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 9000
+      - hostname: ${KOBOCAT_PUBLIC_SUBDOMAIN}.${PUBLIC_DOMAIN_NAME}
+        path: ''
+        priority: 3
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 9001
+      - hostname: ${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}.${PUBLIC_DOMAIN_NAME}
+        path: ''
+        priority: 3
+        protocol: http
+        service: nginx
+        source_port: ${WEBSERVER_PORT}
+        target_port: 9005
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 42
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      reinitializing_timeout: 60000

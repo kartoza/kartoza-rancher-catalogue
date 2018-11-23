@@ -5,7 +5,7 @@
 
 # Rancher currently only supports up to version 2
 # If you want to use docker-swarm, create another orchestration with version 3
-version: '2'
+version: "2"
 volumes:
   postgis-data:
   db-backups:
@@ -37,7 +37,6 @@ volumes:
   nginx-logs:
 
 services:
-
   smtp:
     image: catatnight/postfix
     hostname: postfix
@@ -50,7 +49,7 @@ services:
     image: elasticsearch:2.4.2
     environment:
       cluster.name: docker-cluster
-      bootstrap.memory_lock: 'true'
+      bootstrap.memory_lock: "true"
     stdin_open: true
     tty: true
     labels:
@@ -61,11 +60,11 @@ services:
     image: dimasciput/kartoza_nginx:latest
     hostname: nginx
     volumes:
-    - django-static:/home/web/static:ro
-    - django-media:/home/web/media:ro
-    - nginx-logs:/var/log/nginx
+      - django-static:/home/web/static:ro
+      - django-media:/home/web/media:ro
+      - nginx-logs:/var/log/nginx
     ports:
-    - ${WEBSERVER_PORT}:8080/tcp
+      - ${WEBSERVER_PORT}:8080/tcp
     environment:
       - SERVER_NAME=${SERVER_NAME}
     command: sh /update-nginx-conf.sh
@@ -84,22 +83,23 @@ services:
       DJANGO_SETTINGS_MODULE: core.settings.prod_docker
       RABBITMQ_HOST: rabbitmq
       VIRTUAL_HOST: healthyrivers.kartoza.com
-      VIRTUAL_PORT: '8080'
+      VIRTUAL_PORT: "8080"
       HAYSTACK_HOST: elasticsearch
       GEOCONTEXT_URL: ${GEOCONTEXT_URL}
+      GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
       CONTACT_US_EMAIL: ${CONTACT_US_EMAIL}
       IUCN_API_KEY: ${IUCN_API_KEY}
       BING_MAP_KEY: ${BING_MAP_KEY}
       MAP_TILER_KEY: ${MAP_TILER_KEY}
     entrypoint:
-    - /entry-point.sh
+      - /entry-point.sh
     volumes:
-    - django-static:/home/web/static:rw
-    - django-media:/home/web/media:rw
-    - django-reports:/home/web/reports
-    - django-logs:/var/log/
+      - django-static:/home/web/static:rw
+      - django-media:/home/web/media:rw
+      - django-reports:/home/web/reports
+      - django-logs:/var/log/
     links:
-    - elasticsearch:elasticsearch
+      - elasticsearch:elasticsearch
     user: root
     labels:
       io.rancher.container.pull_image: always
@@ -130,6 +130,39 @@ services:
       io.rancher.container.start_once: true
     restart: unless-stopped
 
+  update-location-context-documents:
+    # This container will just run, update location context documents for all
+    # location site and then exit. Restart it again in rancher to rerun
+    # the updates.
+    image: dimasciput/docker-healthyrivers-uwsgi:latest
+    hostname: uwsgi
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: gis
+      DATABASE_PASSWORD: docker
+      DATABASE_USERNAME: docker
+      DJANGO_SETTINGS_MODULE: core.settings.prod_docker
+      RABBITMQ_HOST: rabbitmq
+      VIRTUAL_HOST: healthyrivers.kartoza.com
+      VIRTUAL_PORT: "8080"
+      GEOCONTEXT_URL: ${GEOCONTEXT_URL}
+      GEOCONTEXT_COLLECTION_KEY: ${GEOCONTEXT_COLLECTION_KEY}
+    entrypoint:
+      - /entry-point.sh
+    volumes:
+      - django-static:/home/web/static:rw
+      - django-media:/home/web/media:rw
+      - django-reports:/home/web/reports
+      - django-logs:/var/log/
+    command: -c "python manage.py update_location_context_documents"
+    links:
+      - geoserver:geoserver
+      - rabbitmq:rabbitmq
+      - db:db
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: true
+    restart: unless-stopped
 
   rabbitmq:
     image: library/rabbitmq
@@ -160,7 +193,7 @@ services:
       PGDATABASE: gis
       PGHOST: db
       PGPASSWORD: docker
-      PGPORT: '5432'
+      PGPORT: "5432"
       PGUSER: docker
     volumes:
       - db-backups:/backups
@@ -177,7 +210,6 @@ services:
       io.rancher.container.pull_image: always
       io.rancher.container.start_once: true
     restart: unless-stopped
-
 
   mediabackup:
     image: kartoza/sftp-backup:1.0

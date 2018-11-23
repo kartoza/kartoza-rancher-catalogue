@@ -1,0 +1,246 @@
+---
+version: '2'
+catalog:
+  name: "Scanagroempresa"
+  version: "v1.0"
+  description: "Scanagroempresa + GeoNode Generic deployment"
+  uuid: scanagroempresa-0
+  minimum_rancher_version: 'v1.6'
+
+  questions:
+    - variable: USE_THEME_APP
+      label: "Does this instance use specific GeoNode skin?"
+      required: true
+      default: "False"
+      type: "enum"
+      options:
+      - "True"
+      - "False"
+    - variable: THEME_APP_NAME
+      label: "The name of django app for the skin"
+      type: "string"
+    - variable: CUSTOM_THEME_APP_PIP_URL
+      label: "The django app PIP URL for installation"
+      description: "Example: git+https://github.com/user/repo.git@tag"
+      type: "string"
+
+    - variable: "NGINX_PORT_MAPPING"
+      label: "Port mapping for Nginx container"
+      description: |
+          Port mapping for Nginx container. For instance "80:80"
+          will map Nginx port 80 to port 80 of the host machine.
+          Set to "80" to assign a random port
+
+      default: "80:80"
+      required: true
+      type: "string"
+
+    - variable: "SECRET_KEY"
+      label: "Django Secret Key"
+      type: string
+      default: "2510)aks1u*9mgjjss_+s1@rutm3v(sfv5hw8k#*t(jsdmg-"
+
+    - variable: "ALLOWED_HOSTS"
+      label: "List of allowed host header values"
+      description: |
+            List of host header values which should be
+            permitted. You should add full-qualified domain
+            names under which deployment is visible. Default
+            values, django and geonode values are
+            added internally. Example ['123.123.123.123','foo.bar.org']
+      required: true
+      type: string
+      default: "[]"
+
+    - variable: "SITEURL"
+      label: "Default URL for site"
+      description: |
+            URL to default location of site. It will be used
+            to construct absolute urls. Without protocol string.
+            Do not add trailing slash. Example www.foo.org
+      required: true
+      type: 'string'
+      default:
+
+    - variable: "SITENAME"
+      label: "Name of site"
+      description: |
+            Name of the site to be used in title
+      required: false
+      default: "GeoNode"
+      type: string
+
+    - variable: "SCANAGROEMPRESA_URL_PREFIX"
+      label: "URL prefix to be used to access Scanagroempresa App"
+      description: |
+            Must start with alphanumeric, ends with slash and should be
+            a proper URL form. Example: 'scanagroempresa/'
+      required: true
+      default: "scanagroempresa/"
+      type: string
+
+    - variable: "ADMIN_EMAILS"
+      label: "List of admin emails"
+      description: |
+            List of emails of admins, who should
+            receive notifications. Entries
+            should be separated with coma.
+      required: false
+      type: string
+      default:
+
+    - variable: "GEOSERVER_ADMIN_PASSWORD"
+      label: "Password for GeoServer admin user"
+      description: |
+            Password for admin user in GeoServer.
+      required: true
+      type: string
+      default:
+
+    - variable: "HOST_AFFINITY"
+      label: "Label of host to deploy on"
+      description: |
+            To keep containers running on specific
+            hosts, provide label attached to host
+            to deploy on. For example, if you create a label
+            when deploying your host with key geonode
+            and value true then you would enter here geonode=true
+      required: true
+      type: string
+      default:
+
+    - variable: "BACKUPS_VOLUME_DRIVER"
+      label: "Backups Volume driver to use"
+      description: |
+          Volume driver to use for the Volume attached
+          to the backups container (local, rancher-nfs, ...)
+      required: true
+      type: string
+      default: local
+
+    - variable: "BACKUPS_VOLUME_EXTERNAL"
+      label: "Use pre-existing volume to store Backups"
+      description: |
+          Set to true to use a pre-existing Volume for backups,
+          set to false to create a named volume local to the stack.
+      required: true
+      type: boolean
+      default: false
+
+    - variable: BTSYNC_TEMPLATES_SECRET
+      label: "Templates backups key"
+      description: "Resilio sync read/write key for syncing geonode-generic  templates"
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: BTSYNC_DATA_SECRET
+      label: "Data backups key"
+      description: "Resilio sync read/write key for syncing database backups"
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: KOBO_API_URL
+      label: "Kobo API endpoint URL"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_API_CLIENTID
+      label: "Kobo API Client ID"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_API_CLIENTSECRET
+      label: "Kobo API Client Secret"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_API_USER
+      label: "Kobo API USER"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_API_PASSWORD
+      label: "Kobo API PASSWORD"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_PGDATABASE
+      label: "Kobo PGDATABASE for direct db access"
+      required: true
+      default: "kobotoolbox"
+      type: string
+
+    - variable: KOBO_PGUSER
+      label: "Kobo PGUSER for direct db access"
+      required: true
+      default: "kobo"
+      type: string
+
+    - variable: KOBO_PGPASSWORD
+      label: "Kobo PGPASSWORD for direct db access"
+      required: true
+      default: "kobo"
+      type: string
+
+    - variable: KOBO_PGHOST
+      label: "Kobo PGHOST for direct db access"
+      required: true
+      default: "postgres.kobotoolbox"
+      type: string
+
+    - variable: KOBO_PGPORT
+      label: "Kobo PGPORT for direct db access"
+      required: true
+      default: "5432"
+      type: string
+
+services:
+  db:
+    scale: 1
+    labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  django:
+    retain_ip: true
+    scale: 1
+    labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  geoserver:
+    scale: 1
+    labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  geonode:
+    scale: 1
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITEURL}"'
+      reinitializing_timeout: 60000
+    labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  data-dir-conf:
+    labels:
+        io.rancher.container.start_once: true
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+    scale: 1
+  backup:
+    scale: 1
+    labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  restore:
+    scale: 1
+    start_on_create: false
+    labels:
+        io.rancher.container.start_once: true
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}

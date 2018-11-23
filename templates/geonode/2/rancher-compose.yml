@@ -1,9 +1,9 @@
 version: '2'
 catalog:
-  name: "Kartoza GeoSAFE"
-  description: "Kartoza's spin of GeoNode with a QGIS backend and GeoSAFE."
-  version: 2.8.x-qgis_server-geosafe-beta
-  uuid: kartoza-geosafe-2.8.x-qgis_server
+  name: "Kartoza Geonode"
+  description: "Kartoza's spin of GeoNode with a QGIS backend."
+  version: 2.8.x-qgis_server-beta
+  uuid: kartoza-geonode-qgis-server-2.8.x-qgis_server
   questions:
     - variable: USE_THEME_APP
       label: "Does this instance use specific GeoNode skin?"
@@ -11,8 +11,8 @@ catalog:
       default: "False"
       type: "enum"
       options:
-        - "True"
-        - "False"
+      - "True"
+      - "False"
     - variable: THEME_APP_NAME
       label: "The name of django app for the skin"
       type: "string"
@@ -42,24 +42,15 @@ catalog:
       required: true
       default: 0.0.0.0/0
       type: "string"
-    - variable: MAIL_DOMAIN
-      label: "Email Domain"
-      description: "Configure email domain for this site."
-      default: ""
-      type: "string"
-    - variable: DEFAULT_FROM_EMAIL
-      label: "From: address of default email sent from this site."
-      description: "Example: GeoNode <noreply@geonode.org>"
-      default: "GeoNode <noreply@geonode.org>"
-      type: "string"
     - variable: ADMIN_EMAIL
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      required: true
       default: ""
       type: "string"
     - variable: SITE_URL
       label: "Site URL"
-      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /). Also do not use quotes."
       required: true
       default: ""
       type: "string"
@@ -73,37 +64,25 @@ catalog:
       label: "Django allowed hosts"
       description: "Comma separated, quoted list of hosts that django will allow e.g. 'foo.com','bar.com'. The SITE_URL will automatically be added to the allowed hosts list so you can leave this blank if needed."
       required: false
-      default: ""
+      default: "'localhost'"
       type: "string"
-    - variable: INASAFE_ANALYSIS_RUN_TIME_LIMIT
-      label: "InaSAFE Analysis Run time limit"
-      description: "InaSAFE Analysis Run time limit in seconds"
-      default: 600
-      type: "int"
-    - variable: INASAFE_ANALYSIS_AREA_LIMIT
-      label: "InaSAFE Analysis Area limit"
-      description: "InaSAFE Analysis Area limit in meter squared"
-      default: 1000000000
-      type: "int"
+    - variable: VOLUME_DRIVER
+      label: "Storage volume driver"
+      description: "Storage volume driver, can be local or rancher-nfs, etc"
+      required: true
+      default: local
+      type: "string"
     - variable: BTSYNC_DB_SECRET
       label: "Database backups key"
       description: "Resilio sync read/write key for syncing database backups"
       required: false
-      default: 
-      type: "string"
-    - variable: BTSYNC_DB_DEVICE
-      label: "BtSync DB device ID"
-      default: "GeoSAFE - Postgis Data"
+      default:
       type: "string"
     - variable: BTSYNC_MEDIA_SECRET
       label: "Media backups key"
       description: "Resilio sync read/write key for syncing geonode media backups"
       required: false
-      default: 
-      type: "string"
-    - variable: BTSYNC_MEDIA_DEVICE
-      label: "BtSync MEDIA device ID"
-      default: "GeoSAFE - Media Data"
+      default:
       type: "string"
 services:
   qgis-server:
@@ -127,7 +106,7 @@ services:
         interval: 2000
         reinitializing_timeout: 60000
   celery:
-    scale: 4
+    scale: 1
     start_on_create: true
   django:
     scale: 1
@@ -166,15 +145,22 @@ services:
       initializing_timeout: 60000
       interval: 2000
       reinitializing_timeout: 60000
-  inasafe-headless:
-    scale: 4
-    start_on_create: true
   rabbitmq:
     scale: 1
     start_on_create: true
   qgis-server-backend:
     scale: ${QGIS_BACKEND_INSTANCE_COUNT}
     start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: qgis-server-backend"'
+      reinitializing_timeout: 60000
   postgis:
     scale: 1
     start_on_create: true

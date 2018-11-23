@@ -8,15 +8,23 @@
 version: '2'
 volumes:
   postgis-data:
+    driver: ${VOLUME_DRIVER}
   postgis-history-data:
+    driver: ${VOLUME_DRIVER}
   django-media-data:
+    driver: ${VOLUME_DRIVER}
   django-media-history-data:
+    driver: ${VOLUME_DRIVER}
   django-static-data:
   qgis-server-qgis-layer-data:
+    driver: ${VOLUME_DRIVER}
   qgis-server-qgis-layer-history-data:
+    driver: ${VOLUME_DRIVER}
   qgis-server-qgis-cache-data:
-  inasafe-headless-output-data:
-  inasafe-headless-settings-data:
+  geonode-backup-data:
+    driver: ${VOLUME_DRIVER}
+  nginx-conf-data:
+    driver: ${VOLUME_DRIVER}
 
 services:
 
@@ -117,24 +125,14 @@ services:
       io.rancher.container.pull_image: always
     restart: unless-stopped
 
-  smtp:
-    image: catatnight/postfix
-    environment:
-      # You could change this to something more suitable
-      - maildomain=${MAIL_DOMAIN}
-      - smtp_user=noreply:docker
-    restart: unless-stopped
-
   django:
-    image: kartoza/geonode_django_geosafe:2.8.x-qgis_server
+    image: kartoza/geonode_django_qgis-server:2.8.x-qgis_server
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'django-static-data:/usr/src/app/geonode/static_root'
       - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
       - 'geonode-backup-data:/geonode_backup'
-      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
-      - 'inasafe-headless-settings-data:/home/headless/settings'
     entrypoint:
       - /entry-point.sh
     command:
@@ -143,7 +141,6 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_DB}:${POSTGRES_PASS}@db:5432/gis
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
-      - CELERY_TASK_ALWAYS_EAGER=False
 # Should be specified in docker-compose.override.yml. Because it depends on the
 # host
       - ADMIN=${ADMIN_EMAIL}
@@ -155,14 +152,8 @@ services:
       - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
-      # Email settings
-      - EMAIL_ENABLE=True
-      - EMAIL_HOST=smtp
-      - EMAIL_PORT=25
-      - EMAIL_HOST_USER=noreply
-      - EMAIL_HOST_PASSWORD=docker
-      - EMAIL_USE_TLS=False
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - USE_GEOSAFE=False
+      - CELERY_TASK_ALWAYS_EAGER=False
       # Skin settings
       {{- if eq .Values.USE_THEME_APP "True" }}
 
@@ -180,22 +171,8 @@ services:
       - GEONODE_GEODATABASE_PASSWORD=${POSTGRES_PASS}
       - STATIC_ROOT=/usr/src/app/geonode/static_root
       - MEDIA_ROOT=/usr/src/app/geonode/uploaded
-      # GeoSAFE Related
-      - USE_GEOSAFE=True
-      - USE_LAYER_FILE_ACCESS=True
-      # Base directory that will be used by InaSAFE Headless
-      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
-      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/qgis_layer/
-      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
-      - INASAFE_IMPACT_BASE_URL=/output/
-      - USE_LAYER_HTTP_ACCESS=False
-      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
-      - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
-      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
-      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
     restart: unless-stopped
     links:
-      - smtp
       - postgis:db
       - rabbitmq
       - qgis-server
@@ -234,23 +211,20 @@ services:
       io.rancher.container.create_agent: 'true'
 
   celery:
-    image: kartoza/geonode_django_geosafe:2.8.x-qgis_server
+    image: kartoza/geonode_django_qgis-server:2.8.x-qgis_server
     restart: on-failure
     working_dir: /usr/src/app
     volumes:
       - 'django-media-data:/usr/src/app/geonode/uploaded'
       - 'qgis-server-qgis-layer-data:/usr/src/app/geonode/qgis_layer'
       - 'qgis-server-qgis-cache-data:/usr/src/app/geonode/qgis_tiles'
-      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
-      - 'inasafe-headless-settings-data:/home/headless/settings'
     environment:
       - C_FORCE_ROOT=True
       - DATABASE_URL=postgres://${POSTGRES_DB}:${POSTGRES_PASS}@db:5432/gis
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - GEOSERVER_BASE_URL="http://geoserver:8080/geoserver/"
-      - CELERY_TASK_ALWAYS_EAGER=False
-      # Should be specified in docker-compose.override.yml. Because it depends on the
-      # host
+# Should be specified in docker-compose.override.yml. Because it depends on the
+# host
       - ADMIN=${ADMIN_EMAIL}
       - ALLOWED_HOSTS=['django','localhost','${SITE_URL}',${DJANGO_ALLOWED_HOSTS}]
       - DEBUG=False
@@ -260,14 +234,8 @@ services:
       - SITEURL=http://${SITE_URL}/
       - GEONODE_BASE_URL=http://nginx/
       - QGIS_SERVER_URL=http://qgis-server/
-      # Email settings
-      - EMAIL_ENABLE=True
-      - EMAIL_HOST=smtp
-      - EMAIL_PORT=25
-      - EMAIL_HOST_USER=noreply
-      - EMAIL_HOST_PASSWORD=docker
-      - EMAIL_USE_TLS=False
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - USE_GEOSAFE=False
+      - CELERY_TASK_ALWAYS_EAGER=False
       # Skin settings
       {{- if eq .Values.USE_THEME_APP "True" }}
 
@@ -283,82 +251,12 @@ services:
       - GEONODE_DATABASE_PASSWORD=${POSTGRES_PASS}
       - GEONODE_GEODATABASE=${POSTGRES_DB}
       - GEONODE_GEODATABASE_PASSWORD=${POSTGRES_PASS}
-      # GeoSAFE Related
-      - USE_GEOSAFE=True
-      - USE_LAYER_FILE_ACCESS=True
-      # Base directory that will be used by InaSAFE Headless
-      - INASAFE_LAYER_DIRECTORY=/home/geosafe/media/
-      - INASAFE_LAYER_DIRECTORY_BASE_PATH=/usr/src/app/geonode/qgis_layer/
-      - GEOSAFE_IMPACT_OUTPUT_DIRECTORY=/home/geosafe/impact_layers
-      - INASAFE_IMPACT_BASE_URL=/output/
-      - USE_LAYER_HTTP_ACCESS=False
-      - INASAFE_ANALYSIS_RUN_TIME_LIMIT=${INASAFE_ANALYSIS_RUN_TIME_LIMIT}
-      - INASAFE_ANALYSIS_AREA_LIMIT=${INASAFE_ANALYSIS_AREA_LIMIT}
-      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
-      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
     entrypoint:
-      - /celery-entry-point.sh
-    command: /usr/local/bin/celery -A geosafe worker -l debug -Q default,cleanup,email,update,geosafe -n geonode.%h -B
+      - /bin/sh
+    command: -c "celery -A geonode.celery_app worker -l debug -Q default,cleanup,email,update -n geonode.%h -B"
     links:
-      - smtp
       - rabbitmq
       - postgis:db
       - qgis-server
     labels:
       io.rancher.container.pull_image: always
-
-  inasafe-headless:
-    image: inasafe/headless_processor:latest
-    restart: on-failure
-    environment:
-      - C_FORCE_ROOT=True
-      - PYTHONPATH=/usr/share/qgis/python:/usr/share/qgis/python/plugins:/usr/share/qgis/python/plugins/inasafe
-      - DISPLAY=:99
-      - INASAFE_HEADLESS_BROKER_HOST=amqp://guest:guest@rabbitmq:5672/
-      - INASAFE_HEADLESS_DEPLOY_OUTPUT_DIR=/home/output/
-      - INASAFE_HEADLESS_DEPLOY_OUTPUT_URL=http://inasafe-output/output/
-      - INASAFE_OUTPUT_DIR=/home/geosafe/impact_layers
-      - INASAFE_WORK_DIR=/tmp/inasafe
-      - INASAFE_SETTINGS_PATH=/home/headless/settings/inasafe-settings.json
-      - MINIMUM_NEEDS_LOCALE_MAPPING_PATH=/home/headless/settings/min-needs-mapping.json
-      - QGIS_LOG_FILE=/tmp/inasafe/realtime/logs/qgis.log
-      - QGIS_DEBUG_FILE=/tmp/inasafe/realtime/logs/qgis-debug.log
-      - QGIS_DEBUG=0
-    volumes:
-      - 'qgis-server-qgis-layer-data:/home/geosafe/media/'
-      - 'inasafe-headless-output-data:/home/geosafe/impact_layers'
-      - 'inasafe-headless-settings-data:/home/headless/settings'
-    command: prod inasafe-headless-worker
-    links:
-      - rabbitmq
-      - nginx
-      - django
-    labels:
-      io.rancher.container.pull_image: always
-      cron.action: restart
-      cron.schedule: 0 0 * * * ?
-
-  btsync-data:
-    # BTSync backups for database dumps
-    image: kartoza/btsync:rancher
-    hostname: btsync-data
-    restart: unless-stopped
-    volumes:
-      - postgis-history-data:/web:rw
-    environment:
-      - SECRET=${BTSYNC_DB_SECRET}
-      - DEVICE=${BTSYNC_DB_DEVICE}
-      - STANDBY_MODE=TRUE
-     
-  btsync-media:
-    # BTSync backups for django media
-    image: kartoza/btsync:rancher
-    hostname: btsync-logs
-    restart: unless-stopped
-    volumes:
-      - django-media-history-data:/web:rw
-    environment:
-      - SECRET=${BTSYNC_MEDIA_SECRET}
-      - DEVICE=${BTSYNC_MEDIA_SECRET}
-      - STANDBY_MODE=TRUE
-
