@@ -107,7 +107,7 @@ services:
       DOCKERHOST:
       DOCKER_HOST_IP:
       GEONODE_HOST_IP:
-      NGINX_BASE_URL: http://${SITEURL}
+      NGINX_BASE_URL: http://${SITEURL}/
 
   geonode:
     image: geosolutionsit/nginx-geonode:latest
