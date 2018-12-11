@@ -286,7 +286,7 @@ services:
 
       {{- end }}
 
-      {{- if eq .Values.USE_KOBOCAT_THEME_APP "true" }}
+      {{- if eq .Values.USE_KOBOCAT_THEME_APP "True" }}
 
       - DJANGO_SETTINGS_MODULE=custom_kobocat_theme.settings
       - PYTHONPATH=/srv/src/custom_kobocat_theme
@@ -397,7 +397,7 @@ services:
 
       {{- end }}
 
-      {{- if eq .Values.USE_KPI_THEME_APP "true" }}
+      {{- if eq .Values.USE_KPI_THEME_APP "True" }}
 
       - DJANGO_SETTINGS_MODULE=custom_kpi_theme.settings
       - PYTHONPATH=/srv/src/custom_kpi_theme
