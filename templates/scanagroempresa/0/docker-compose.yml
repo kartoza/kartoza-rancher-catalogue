@@ -85,6 +85,14 @@ services:
       # See https://github.com/geosolutions-it/geonode-generic/issues/28
       # to see why we force API version to 1.24
       DOCKER_API_VERSION: "1.24"
+      # Skin settings
+      {{- if eq .Values.USE_GEONODE_THEME_APP "True" }}
+
+      USE_GEONODE_THEME_APP: ${USE_GEONODE_THEME_APP}
+      GEONODE_THEME_APP_NAME: ${GEONODE_THEME_APP_NAME}
+      GEONODE_THEME_APP_PIP_URL: ${GEONODE_THEME_APP_PIP_URL}
+
+      {{- end }}
 
   geoserver:
     image: geosolutionsit/geoserver-docker:2.13.x
@@ -280,11 +288,11 @@ services:
       REDIS_DEFAULT_DB: 1
       REDIS_SESSION_DB: 2
       # Skin settings
-      {{- if eq .Values.USE_THEME_APP "True" }}
+      {{- if eq .Values.USE_SCANAGROEMPRESA_THEME_APP "True" }}
 
-      - USE_THEME_APP=${USE_THEME_APP}
-      - THEME_APP_NAME=${THEME_APP_NAME}
-      - CUSTOM_THEME_APP_PIP_URL=${CUSTOM_THEME_APP_PIP_URL}
+      USE_SCANAGROEMPRESA_THEME_APP: ${USE_SCANAGROEMPRESA_THEME_APP}
+      SCANAGROEMPRESA_THEME_APP_NAME: ${SCANAGROEMPRESA_THEME_APP_NAME}
+      SCANAGROEMPRESA_THEME_APP_PIP_URL: ${SCANAGROEMPRESA_THEME_APP_PIP_URL}
 
       {{- end }}
 
@@ -348,11 +356,11 @@ services:
       REDIS_DEFAULT_DB: 1
       REDIS_SESSION_DB: 2
       # Skin settings
-      {{- if eq .Values.USE_THEME_APP "True" }}
+      {{- if eq .Values.USE_SCANAGROEMPRESA_THEME_APP "True" }}
 
-      - USE_THEME_APP=${USE_THEME_APP}
-      - THEME_APP_NAME=${THEME_APP_NAME}
-      - CUSTOM_THEME_APP_PIP_URL=${CUSTOM_THEME_APP_PIP_URL}
+      USE_SCANAGROEMPRESA_THEME_APP: ${USE_SCANAGROEMPRESA_THEME_APP}
+      SCANAGROEMPRESA_THEME_APP_NAME: ${SCANAGROEMPRESA_THEME_APP_NAME}
+      SCANAGROEMPRESA_THEME_APP_PIP_URL: ${SCANAGROEMPRESA_THEME_APP_PIP_URL}
 
       {{- end }}
 

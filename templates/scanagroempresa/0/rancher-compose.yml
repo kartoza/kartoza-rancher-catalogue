@@ -8,7 +8,7 @@ catalog:
   minimum_rancher_version: 'v1.6'
 
   questions:
-    - variable: USE_THEME_APP
+    - variable: USE_GEONODE_THEME_APP
       label: "Does this instance use specific GeoNode skin?"
       required: true
       default: "False"
@@ -16,11 +16,27 @@ catalog:
       options:
       - "True"
       - "False"
-    - variable: THEME_APP_NAME
-      label: "The name of django app for the skin"
+    - variable: GEONODE_THEME_APP_NAME
+      label: "The name of django app for the GeoNode skin"
       type: "string"
-    - variable: CUSTOM_THEME_APP_PIP_URL
-      label: "The django app PIP URL for installation"
+    - variable: GEONODE_THEME_APP_PIP_URL
+      label: "The GeoNode django app PIP URL for installation"
+      description: "Example: git+https://github.com/user/repo.git@tag"
+      type: "string"
+
+    - variable: USE_SCANAGROEMPRESA_THEME_APP
+      label: "Does this instance use specific ScanAgroEmpresa skin?"
+      required: true
+      default: "False"
+      type: "enum"
+      options:
+        - "True"
+        - "False"
+    - variable: SCANAGROEMPRESA_GEONODE_THEME_APP_NAME
+      label: "The name of django app for the ScanAgroEmpresa skin"
+      type: "string"
+    - variable: SCANAGROEMPRESA_THEME_APP_PIP_URL
+      label: "The ScanAgroEmpresa django app PIP URL for installation"
       description: "Example: git+https://github.com/user/repo.git@tag"
       type: "string"
 
