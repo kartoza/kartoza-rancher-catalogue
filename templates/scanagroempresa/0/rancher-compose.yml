@@ -32,7 +32,7 @@ catalog:
       options:
         - "True"
         - "False"
-    - variable: SCANAGROEMPRESA_GEONODE_THEME_APP_NAME
+    - variable: SCANAGROEMPRESA_THEME_APP_NAME
       label: "The name of django app for the ScanAgroEmpresa skin"
       type: "string"
     - variable: SCANAGROEMPRESA_THEME_APP_PIP_URL
