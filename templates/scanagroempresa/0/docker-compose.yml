@@ -273,8 +273,8 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEOSERVER_SERVER_HOST: http://geoserver:8080
-      GEOSERVER_HOST: http://geoserver:8080
+      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       # Kobo API
@@ -341,8 +341,8 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEOSERVER_SERVER_HOST: http://geoserver:8080
-      GEOSERVER_HOST: http://geoserver:8080
+      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       # Kobo API
