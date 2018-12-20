@@ -49,6 +49,7 @@ services:
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
+      DEBUG: False
       # Database URL should be in the form:
       # postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
       #       DATABASE_URL: postgres://postgres:postgres@db:5432/geonode
@@ -271,9 +272,9 @@ services:
       KOBO_PGHOST: ${KOBO_PGHOST}
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
-      GEONODE_SERVER_HOST: http://${SITEURL}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEONODE_SERVER_HOST: http://geonode
+      GEOSERVER_SERVER_HOST: http://geoserver:8080
+      GEOSERVER_HOST: http://geoserver:8080
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       # Kobo API
@@ -339,9 +340,9 @@ services:
       KOBO_PGHOST: ${KOBO_PGHOST}
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
-      GEONODE_SERVER_HOST: http://${SITEURL}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEONODE_SERVER_HOST: http://geonode
+      GEOSERVER_SERVER_HOST: http://geoserver:8080
+      GEOSERVER_HOST: http://geoserver:8080
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       # Kobo API
