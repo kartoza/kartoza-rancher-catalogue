@@ -8,6 +8,54 @@ catalog:
   minimum_rancher_version: 'v1.6'
 
   questions:
+
+    - variable: USE_EXTERNAL_SMTP
+      label: "Use external SMTP host"
+      description: "Set to false to use local SMTP server for testing"
+      default: false
+      type: boolean
+
+    - variable: EMAIL_HOST
+      label: "SMTP host to use"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_PORT
+      label: "SMTP port to use"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_HOST_USER
+      label: "SMTP host user"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_HOST_PASSWORD
+      label: "Email host password"
+      description: "Only used if using external SMTP"
+      type: string
+
+    - variable: EMAIL_USE_TLS
+      label: "Email TLS settings"
+      description: "Only used if using external SMTP"
+      type: enum
+      default: "False"
+      options:
+      - 'True'
+      - 'False'
+
+    - variable: EMAIL_SUBJECT_PREFIX
+      label: "Email Subject Prefix used by GeoNode"
+      description: "This prefix will be used by GeoNode email subject."
+      type: string
+      default: "[GeoNode]"
+
+    - variable: GEONODE_SUPPORT_EMAIL
+      label: "GeoNode support email"
+      required: true
+      default: "support@example.com"
+      type: string
+
     - variable: USE_GEONODE_THEME_APP
       label: "Does this instance use specific GeoNode skin?"
       required: true

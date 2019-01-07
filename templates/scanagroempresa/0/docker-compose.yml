@@ -19,6 +19,13 @@ services:
       GEONODE_GEODATABASE: geonode_data
       GEONODE_GEODATABASE_PASSWORD: geonode_data
 
+  smtp:
+    image: catatnight/postfix
+    environment:
+      # You could change this to something more suitable
+      maildomain: ${SITEURL}
+      smtp_user: noreply:docker
+
   django:
     restart: unless-stopped
     # built on hub as an autobuild against our fork
@@ -35,6 +42,9 @@ services:
     depends_on:
       - db
       - restore
+    links:
+      - smtp
+      - db
     command: uwsgi --ini /usr/src/app/uwsgi.ini
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -49,7 +59,7 @@ services:
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
-      DEBUG: False
+      DEBUG: 'False'
       # Database URL should be in the form:
       # postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
       #       DATABASE_URL: postgres://postgres:postgres@db:5432/geonode
@@ -70,6 +80,27 @@ services:
       IS_CELERY: False
       C_FORCE_ROOT: 1
       SITEURL: http://${SITEURL}/
+      EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+
+      {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
+
+      MAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
+
+      {{- else }}
+
+      EMAIL_HOST: smtp
+      EMAIL_PORT: 25
+      EMAIL_HOST_USER: noreply
+      EMAIL_HOST_PASSWORD: docker
+      EMAIL_USE_TLS: 'False'
+
+      {{- end }}
+
+      DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
       GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
       GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
@@ -239,7 +270,9 @@ services:
     image: kartoza/scanagroempresa:latest
     working_dir: /home/web/extra_app
     volumes:
-    - scanagroempresa-statics:/home/web/static:rw
+      - scanagroempresa-statics:/home/web/static:rw
+    links:
+      - db
     environment:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
