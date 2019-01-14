@@ -306,6 +306,7 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
+      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
       GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
@@ -374,6 +375,7 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
+      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
       GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
