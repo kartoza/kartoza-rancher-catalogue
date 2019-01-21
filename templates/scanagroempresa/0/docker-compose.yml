@@ -335,6 +335,107 @@ services:
       io.rancher.container.pull_image: always
     restart: unless-stopped
 
+  geonode-updatelayers:
+    restart: unless-stopped
+    # built on hub as an autobuild against our fork
+    # see https://github.com/kartoza/geonode-generic
+    # and https://hub.docker.com/r/kartoza/geonode-generic
+    image: kartoza/scanagroempresa_geonode_generic:latest
+    # tty: true
+    command: python manage.py updatelayers -i -s kobo_form_data
+    labels:
+      org.geonode.component: django
+      org.geonode.instance.name: geonode
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 */10 * * * ?
+      cron.action: restart
+    depends_on:
+      - db
+      - restore
+    links:
+      - smtp
+      - db
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - statics:/mnt/volumes/statics
+      # See btsync and volume notes below for details on this
+      - templates:/usr/src/app/geonode_generic/templates
+    environment:
+      GEONODE_PREFIX: "''"
+      ROOT_URLCONF: core.root_urls
+      PYTHONPATH: '/usr/src/scanagroempresa-docker'
+      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      GEONODE_INSTANCE_NAME: geonode
+      GEONODE_LB_HOST_IP:
+      GEONODE_LB_PORT:
+      DEBUG: 'False'
+      # Database URL should be in the form:
+      # postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+      #       DATABASE_URL: postgres://postgres:postgres@db:5432/geonode
+      DATABASE_HOST: db
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: geonode
+      DEFAULT_BACKEND_DATASTORE: datastore
+      GEONODE_DATABASE: geonode
+      GEONODE_DATABASE_PASSWORD: geonode
+      GEONODE_GEODATABASE: geonode_data
+      GEONODE_GEODATABASE_PASSWORD: geonode_data
+      # BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+      DJANGO_SETTINGS_MODULE: core.settings.overrides
+      SECRET_KEY: ${SECRET_KEY}
+      # Left empty so entrypoint can run custom script
+      DOCKER_ENV: ""
+      UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
+      IS_CELERY: False
+      C_FORCE_ROOT: 1
+      SITEURL: http://${SITEURL}/
+      EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+
+      {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
+
+      MAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
+
+      {{- else }}
+
+      EMAIL_HOST: smtp
+      EMAIL_PORT: 25
+      EMAIL_HOST_USER: noreply
+      EMAIL_HOST_PASSWORD: docker
+      EMAIL_USE_TLS: 'False'
+
+      {{- end }}
+
+      DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
+      # replaced with defaults in settings
+      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
+      STATIC_ROOT: /mnt/volumes/statics/static/
+      MEDIA_ROOT: /mnt/volumes/statics/uploaded/
+      GEOIP_PATH: /mnt/volumes/statics/geoip.db
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
+      # mind that following lines are rancher-specific
+      RANCHER_STACK: {{ .Stack.Name }}
+      RANCHER_ENV: {{ .Environment.Name }}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      # See https://github.com/geosolutions-it/geonode-generic/issues/28
+      # to see why we force API version to 1.24
+      DOCKER_API_VERSION: "1.24"
+      # Skin settings
+      {{- if eq .Values.USE_GEONODE_THEME_APP "True" }}
+
+      USE_GEONODE_THEME_APP: ${USE_GEONODE_THEME_APP}
+      GEONODE_THEME_APP_NAME: ${GEONODE_THEME_APP_NAME}
+      GEONODE_THEME_APP_PIP_URL: ${GEONODE_THEME_APP_PIP_URL}
+
+      {{- end }}
+
   kobo-geonode-integration:
     image: kartoza/scanagroempresa:latest
     command: -c 'python runSync.py'
