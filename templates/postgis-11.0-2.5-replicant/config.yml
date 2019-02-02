@@ -1,0 +1,7 @@
+name: "PostGIS Replicant 11.0-2.5"
+description: "Replication client for PostgreSQL."
+version: 1
+category: Software
+maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
+license: GPL v3
+projectURL: https://github.com/kartoza/docker-postgis
