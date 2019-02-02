@@ -47,7 +47,7 @@
     label: "Database IP range to listen to"
     description: "PostgreSQL conf (host based authentication) listen address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
     required: true
-    default: *
+    default: '*'
     type: "string"
   - variable: PROMOTE_TO_MASTER
     description: "Enter 'True' to convert current replicant into a writable state. Useful if master is down and the current replicant needs to be promoted until manual recovery."
