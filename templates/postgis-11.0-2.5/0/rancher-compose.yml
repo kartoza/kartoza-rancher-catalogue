@@ -35,7 +35,7 @@
     label: "Database IP range to listen to"
     description: "PostgreSQL conf (host based authentication) listen address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
     required: true
-    default: *
+    default: '*'
     type: "string"
   - variable: POSTGRES_PORT
     description: "Postgres port"
