@@ -44,7 +44,6 @@ services:
       - restore
     links:
       - smtp
-      - db
     command: uwsgi --ini /usr/src/app/uwsgi.ini
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -354,7 +353,6 @@ services:
       - restore
     links:
       - smtp
-      - db
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - statics:/mnt/volumes/statics
