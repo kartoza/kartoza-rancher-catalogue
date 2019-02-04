@@ -39,10 +39,9 @@ services:
       org.geonode.component: django
       org.geonode.instance.name: geonode
       io.rancher.container.pull_image: always
-    depends_on:
+    links:
       - db
       - restore
-    links:
       - smtp
     command: uwsgi --ini /usr/src/app/uwsgi.ini
     volumes:
@@ -135,7 +134,7 @@ services:
       org.geonode.component: geoserver
       org.geonode.instance.name: geonode
       io.rancher.container.pull_image: always
-    depends_on:
+    links:
       - db
       - data-dir-conf
       - restore
@@ -158,7 +157,7 @@ services:
       org.geonode.component: nginx
       org.geonode.instance.name: geonode
       io.rancher.container.pull_image: always
-    depends_on:
+    links:
       - django
       - geoserver
       - restore
@@ -189,7 +188,7 @@ services:
     labels:
       org.geonode.component: backup
       org.geonode.instance.name: geonode
-    depends_on:
+    links:
       - django
       - geoserver
       - db
@@ -213,7 +212,7 @@ services:
     labels:
       org.geonode.component: restore
       org.geonode.instance.name: geonode
-    depends_on:
+    links:
       - db
       - data-dir-conf
     volumes:
@@ -348,10 +347,9 @@ services:
       io.rancher.container.pull_image: always
       cron.schedule: 0 */10 * * * ?
       cron.action: restart
-    depends_on:
+    links:
       - db
       - restore
-    links:
       - smtp
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
