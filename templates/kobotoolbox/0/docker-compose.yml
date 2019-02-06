@@ -56,6 +56,8 @@ volumes:
 #      type: none
 #      o: bind
 #      device: '$PWD/backups/kobocat'
+  borg-repo:
+  borg-cache:
   log-rabbitmq:
 #    driver_opts:
 #      type: none
@@ -559,3 +561,30 @@ services:
     restart: on-failure
     labels:
       io.rancher.container.pull_image: always
+
+  kobocat-borg-backup-service:
+    image: lucernae/borgbackup:1.1.8
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: ${BORG_BACKUP_FREQUENCY}
+      cron.action: restart
+      io.rancher.container.start_once: 'true'
+    environment:
+      BORG_REPO: /borg/repo
+      ARCHIVE_PREFIX: kobotoolbox
+      BACKUP_FROM: /borg/data
+      BACKUP_WHAT: "."
+      COMPRESSION: lz4
+      BORG_PASSPHRASE: ${BORG_PASSPHRASE}
+      PRUNE: 1
+      KEEP_DAILY: 7
+      KEEP_WEEKLY: 4
+      KEEP_MONTHLY: 12
+      KEEP_YEARLY: 1
+    volumes:
+      - borg-repo:/borg/repo
+      - borg-cache:/root/.cache/borg
+      - vols-kobocatmedia:/borg/data/kobocatmedia
+      - vols-kpimedia:/borg/data/kpimedia
+      - backup-postgres:/borg/data/rawbackups/postgres
+      - backup-mongo:/borg/data/rawbackups/mongo

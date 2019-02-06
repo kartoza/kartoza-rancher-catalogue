@@ -111,6 +111,16 @@ catalog:
         - 'True'
         - 'False'
 
+    - variable: BORG_BACKUP_FREQUENCY
+      label: "Rancher Cron schedule of Borg backup service."
+      type: string
+      default: '0 */5 * * *'
+
+    - variable: BORG_PASSPHRASE
+      label: "BORG Passphrase for encryption."
+      type: string
+      default: 'kobotoolboxincrementalbackup'
+
     - variable: POSTGRES_BACKUP_SCHEDULE
       label: "Cron schedule of Postgres backup."
       type: string
