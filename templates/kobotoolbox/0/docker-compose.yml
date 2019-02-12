@@ -116,7 +116,9 @@ services:
       - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
       - KOBO_POSTGRES_DB_NAME=kobotoolbox
       - POSTGRES_BACKUP_SCHEDULE=${POSTGRES_BACKUP_SCHEDULE}
+      - POSTGRES_BACKUP_ARCHIVE_FILENAME=postgres_backup_kobotoolbox.pg_restore
       - MONGO_BACKUP_SCHEDULE=${MONGO_BACKUP_SCHEDULE}
+      - MONGO_BACKUP_ARCHIVE_FILENAME=mongo_backup.mongorestore.tar.gz
       - KOBOCAT_MEDIA_BACKUP_SCHEDULE=${KOBOCAT_MEDIA_BACKUP_SCHEDULE}
 
       {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
@@ -167,7 +169,9 @@ services:
       - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
       - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
       - POSTGRES_BACKUP_SCHEDULE=${POSTGRES_BACKUP_SCHEDULE}
+      - POSTGRES_BACKUP_ARCHIVE_FILENAME=postgres_backup_kobotoolbox.pg_restore
       - MONGO_BACKUP_SCHEDULE=${MONGO_BACKUP_SCHEDULE}
+      - MONGO_BACKUP_ARCHIVE_FILENAME=mongo_backup.mongorestore.tar.gz
       - KOBOCAT_MEDIA_BACKUP_SCHEDULE=${KOBOCAT_MEDIA_BACKUP_SCHEDULE}
 
       {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
@@ -217,7 +221,9 @@ services:
       - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
       - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
       - POSTGRES_BACKUP_SCHEDULE=${POSTGRES_BACKUP_SCHEDULE}
+      - POSTGRES_BACKUP_ARCHIVE_FILENAME=postgres_backup_kobotoolbox.pg_restore
       - MONGO_BACKUP_SCHEDULE=${MONGO_BACKUP_SCHEDULE}
+      - MONGO_BACKUP_ARCHIVE_FILENAME=mongo_backup.mongorestore.tar.gz
       - KOBOCAT_MEDIA_BACKUP_SCHEDULE=${KOBOCAT_MEDIA_BACKUP_SCHEDULE}
 
       {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
@@ -309,7 +315,7 @@ services:
       io.rancher.container.pull_image: always
 
   kpi:
-    image: kartoza/kobotoolbox_kpi:2.018.32
+    image: kartoza/kobotoolbox_kpi:latest
     environment:
       - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
       - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
@@ -586,5 +592,5 @@ services:
       - borg-cache:/root/.cache/borg
       - vols-kobocatmedia:/borg/data/kobocatmedia
       - vols-kpimedia:/borg/data/kpimedia
-      - backup-postgres:/borg/data/rawbackups/postgres
-      - backup-mongo:/borg/data/rawbackups/mongo
+      - backups-postgres:/borg/data/rawbackups/postgres
+      - backups-mongo:/borg/data/rawbackups/mongo
