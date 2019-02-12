@@ -58,6 +58,7 @@ volumes:
 #      device: '$PWD/backups/kobocat'
   borg-repo:
   borg-cache:
+  borg-users-home:
   log-rabbitmq:
 #    driver_opts:
 #      type: none
@@ -588,6 +589,25 @@ services:
       KEEP_MONTHLY: 12
       KEEP_YEARLY: 1
     volumes:
+      - borg-repo:/borg/repo
+      - borg-cache:/root/.cache/borg
+      - vols-kobocatmedia:/borg/data/kobocatmedia
+      - vols-kpimedia:/borg/data/kpimedia
+      - backups-postgres:/borg/data/rawbackups/postgres
+      - backups-mongo:/borg/data/rawbackups/mongo
+
+  kobocat-borg-backup-service-server:
+    image: lucernae/borgbackup:1.1.8
+    labels:
+      io.rancher.container.pull_image: always
+    environment:
+      BORG_REPO: /borg/repo
+      ARCHIVE_PREFIX: kobotoolbox
+      BORG_PASSPHRASE: ${BORG_PASSPHRASE}
+      USERS: "root"
+      BORG_RELOCATED_REPO_ACCESS_IS_OK: 'yes'
+    volumes:
+      - borg-users-home:/root
       - borg-repo:/borg/repo
       - borg-cache:/root/.cache/borg
       - vols-kobocatmedia:/borg/data/kobocatmedia
