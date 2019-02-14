@@ -41,7 +41,6 @@ services:
       io.rancher.container.pull_image: always
     links:
       - db
-      - restore
       - smtp
     command: uwsgi --ini /usr/src/app/uwsgi.ini
     volumes:
@@ -137,7 +136,6 @@ services:
     links:
       - db
       - data-dir-conf
-      - restore
     volumes:
       - geoserver-data-dir:/geoserver_data/data
     environment:
@@ -160,7 +158,6 @@ services:
     links:
       - django
       - geoserver
-      - restore
     ports:
       - "${NGINX_PORT_MAPPING}"
     volumes:
@@ -179,8 +176,8 @@ services:
     volumes:
       - geoserver-data-dir:/geoserver_data/data
 
-  backup:
-    image: geosolutionsit/geonode-backup:latest
+  backup-db:
+    image: kartoza/pg-backup:9.6
     restart: unless-stopped
     container_name: backup4${COMPOSE_PROJECT_NAME}
     stdin_open: true
@@ -189,43 +186,24 @@ services:
       org.geonode.component: backup
       org.geonode.instance.name: geonode
     links:
-      - django
-      - geoserver
       - db
     volumes:
-      - statics:/mnt/volumes/statics/
-      - geoserver-data-dir:/mnt/volumes/data/
-      - dbbackups:/mnt/volumes/backups/
+      - dbbackups:/backups
     environment:
-      # mind that following lines are rancher-specific
-      RANCHER_STACK: {{ .Stack.Name }}
-      RANCHER_ENV: {{ .Environment.Name }}
+      DUMPPREFIX: PG_scanagroempresa
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: db
+      POSTGRES_DBNAME: geonode
+      ARCHIVE_FILENAME: /backups/PG_scanagroempresa
+      # for psql shortcut
       PGUSER: postgres
+      PGPASSWORD: postgres
+      PGPORT: 5432
       PGHOST: db
-
-  restore:
-    image: geosolutionsit/geonode-restore:latest
-    restart: unless-stopped
-    container_name: restore4${COMPOSE_PROJECT_NAME}
-    stdin_open: true
-    # tty: true
-    labels:
-      org.geonode.component: restore
-      org.geonode.instance.name: geonode
-    links:
-      - db
-      - data-dir-conf
-    volumes:
-      - statics:/mnt/volumes/statics/
-      - geoserver-data-dir:/mnt/volumes/data/
-      - dbbackups:/mnt/volumes/backups/
-    environment:
-      # mind that following lines are rancher-specific
-      RANCHER_STACK: {{ .Stack.Name }}
-      RANCHER_ENV: {{ .Environment.Name }}
-      PGUSER: postgres
-      PGHOST: db
-
+      # for restore script
+      WITH_POSTGIS: 1
 
   btsync-data:
     # BTSync backups for database dumps
@@ -349,7 +327,6 @@ services:
       cron.action: restart
     links:
       - db
-      - restore
       - smtp
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -503,6 +480,51 @@ services:
       cron.schedule: 0 0 * * * ?
       cron.action: restart
 
+  borg-backup-service:
+    image: lucernae/borgbackup:1.1.8
+    labels:
+      io.rancher.container.pull_image: always
+      cron.schedule: ${BORG_BACKUP_FREQUENCY}
+      cron.action: restart
+      io.rancher.container.start_once: 'true'
+    environment:
+      BORG_REPO: /borg/repo
+      ARCHIVE_PREFIX: kobotoolbox
+      BACKUP_FROM: /borg/data
+      BACKUP_WHAT: "."
+      COMPRESSION: lz4
+      BORG_PASSPHRASE: ${BORG_PASSPHRASE}
+      PRUNE: 1
+      KEEP_DAILY: 7
+      KEEP_WEEKLY: 4
+      KEEP_MONTHLY: 12
+      KEEP_YEARLY: 1
+    volumes:
+      - borg-repo:/borg/repo
+      - borg-cache:/root/.cache/borg
+      - geoserver-data-dir:/borg/data/geoserver-data-dir
+      - dbbackups:/borg/data/dbbackups
+      - templates:/borg/data/templates
+
+  borg-backup-service-server:
+    image: lucernae/borgbackup:1.1.8
+    labels:
+      io.rancher.container.pull_image: always
+    environment:
+      BORG_REPO: /borg/repo
+      ARCHIVE_PREFIX: kobotoolbox
+      BORG_PASSPHRASE: ${BORG_PASSPHRASE}
+      USERS: "root"
+      BORG_RELOCATED_REPO_ACCESS_IS_OK: 'yes'
+    volumes:
+      - borg-users-home:/root
+      - borg-repo:/borg/repo
+      - borg-cache:/root/.cache/borg
+      - geoserver-data-dir:/borg/data/geoserver-data-dir
+      - statics:/borg/data/statics
+      - dbbackups:/borg/data/dbbackups
+      - templates:/borg/data/templates
+
 volumes:
   geoserver-data-dir:
 #    name: ${COMPOSE_PROJECT_NAME}-gsdatadir
@@ -524,3 +546,7 @@ volumes:
   # after that).
   scanagroempresa-statics:
   scanagroempresa-redis-data:
+  # For borg
+  borg-repo:
+  borg-cache:
+  borg-users-home:
