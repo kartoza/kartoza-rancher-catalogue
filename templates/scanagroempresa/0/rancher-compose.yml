@@ -143,6 +143,15 @@ catalog:
       default: "scanagroempresa/"
       type: string
 
+    - variable: "GEONODE_INDEX_URL_PREFIX"
+      label: "URL prefix to be used to access GeoNode index page"
+      description: |
+            Must start with alphanumeric, ends with slash and should be
+            a proper URL form. Example: 'administration/'
+      required: true
+      default: "administration/"
+      type: string
+
     - variable: "ADMIN_EMAILS"
       label: "List of admin emails"
       description: |

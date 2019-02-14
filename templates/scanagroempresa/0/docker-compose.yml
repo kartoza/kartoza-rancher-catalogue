@@ -50,6 +50,7 @@ services:
       - templates:/usr/src/app/geonode_generic/templates
     environment:
       GEONODE_PREFIX: "''"
+      GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
       SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
@@ -253,6 +254,7 @@ services:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
       URL_PREFIX: ${SCANAGROEMPRESA_URL_PREFIX}
+      GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
       SITEURL: http://${SITEURL}
@@ -335,6 +337,7 @@ services:
       - templates:/usr/src/app/geonode_generic/templates
     environment:
       GEONODE_PREFIX: "''"
+      GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
       SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
@@ -420,6 +423,7 @@ services:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
       URL_PREFIX: ${SCANAGROEMPRESA_URL_PREFIX}
+      GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
       SITEURL: http://${SITEURL}
