@@ -569,7 +569,7 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
-  kobocat-borg-backup-service:
+  borg-backup-service:
     image: lucernae/borgbackup:1.1.8
     labels:
       io.rancher.container.pull_image: always
@@ -596,7 +596,7 @@ services:
       - backups-postgres:/borg/data/rawbackups/postgres
       - backups-mongo:/borg/data/rawbackups/mongo
 
-  kobocat-borg-backup-service-server:
+  borg-backup-service-server:
     image: lucernae/borgbackup:1.1.8
     labels:
       io.rancher.container.pull_image: always
