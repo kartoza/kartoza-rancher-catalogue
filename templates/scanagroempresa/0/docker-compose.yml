@@ -454,6 +454,8 @@ services:
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
       GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
+      GEONODE_ADMIN_USER: ${GEONODE_ADMIN_USER}
+      GEONODE_ADMIN_PASSWORD: ${GEONODE_ADMIN_PASSWORD}
       GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin

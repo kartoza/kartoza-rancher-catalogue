@@ -224,6 +224,16 @@ catalog:
       type: string
       default: 'scanagroempresaincrementalbackup'
 
+    - variable: GEONODE_ADMIN_USER
+      label: "GeoNode user with superadmin access for kobo-geonode sync service"
+      type: string
+      default: 'admin'
+
+    - variable: GEONODE_ADMIN_PASSWORD
+      label: "GeoNode user password with superadmin access for kobo-geonode sync service"
+      type: string
+      default: 'admin'
+
     - variable: KOBO_API_URL
       label: "Kobo API endpoint URL"
       required: true
