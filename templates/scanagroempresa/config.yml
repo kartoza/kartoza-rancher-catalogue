@@ -1,7 +1,7 @@
-name: "ScanWebGIS app"
+name: "ScanAgroempresa app"
 description: |
-    ScanWebGIS.
-version: "v1"
+    ScanAgroempresa.
+version: "v1.0"
 category: "GIS"
 maintainer: "Kartoza.com"
 license: "GPL"
