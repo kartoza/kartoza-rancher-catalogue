@@ -107,54 +107,38 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
-  postgres:
-    image: kartoza/kobotoolbox_postgres:latest
+  db-backup:
+    image: kartoza/pg-backup:9.6
     environment:
-      - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
-      - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
-      - KOBO_SUPERUSER_USERNAME=${KOBO_SUPERUSER_USERNAME}
-      - KOBO_SUPERUSER_PASSWORD=${KOBO_SUPERUSER_PASSWORD}
-      - KOBO_SUPPORT_EMAIL=${KOBO_SUPPORT_EMAIL}
-      - KOBO_POSTGRES_DB_NAME=kobotoolbox
-      - POSTGRES_BACKUP_SCHEDULE=${POSTGRES_BACKUP_SCHEDULE}
-      - POSTGRES_BACKUP_ARCHIVE_FILENAME=postgres_backup_kobotoolbox.pg_restore
-      - MONGO_BACKUP_SCHEDULE=${MONGO_BACKUP_SCHEDULE}
-      - MONGO_BACKUP_ARCHIVE_FILENAME=mongo_backup.mongorestore.tar.gz
-      - KOBOCAT_MEDIA_BACKUP_SCHEDULE=${KOBOCAT_MEDIA_BACKUP_SCHEDULE}
-
-      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "http" }}
-
-      - HOST_ADDRESS=${PUBLIC_DOMAIN_NAME}
-      - KPI_PUBLIC_PORT=9000
-      - KOBOCAT_PUBLIC_PORT=9001
-      - ENKETO_EXPRESS_PUBLIC_PORT=9005
-
-      {{- end }}
-
-      {{- if eq .Values.KOBOTOOLBOX_PROTOCOL "https" }}
-
-      - PUBLIC_DOMAIN_NAME=${PUBLIC_DOMAIN_NAME}
-      - KOBOFORM_PUBLIC_SUBDOMAIN=${KOBOFORM_PUBLIC_SUBDOMAIN}
-      - KOBOCAT_PUBLIC_SUBDOMAIN=${KOBOCAT_PUBLIC_SUBDOMAIN}
-      - ENKETO_EXPRESS_PUBLIC_SUBDOMAIN=${ENKETO_EXPRESS_PUBLIC_SUBDOMAIN}
-
-      {{- end }}
-
-      {{- if eq .Values.USE_ENV_VAR "true" }}
-
-      - USE_ENV_VAR=${USE_ENV_VAR}
-      - KOBOFORM_URL=${KOBOTOOLBOX_PROTOCOL}://${KOBOFORM_SERVER_NAME}
-      - KOBOCAT_URL=${KOBOTOOLBOX_PROTOCOL}://${KOBOCAT_SERVER_NAME}
-      - ENKETO_URL=${KOBOTOOLBOX_PROTOCOL}://${ENKETO_SERVER_NAME}
-      - CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
-      - KOBOFORM_SERVER_NAME=${KOBOFORM_SERVER_NAME}
-      - KOBOCAT_SERVER_NAME=${KOBOCAT_SERVER_NAME}
-      - ENKETO_SERVER_NAME=${ENKETO_SERVER_NAME}
-
-      {{- end }}
+      - ARCHIVE_FILENAME=/backups/postgres_backup
+      - DUMPPREFIX=postgres_backup
+      - PGHOST=postgres
+      - PGUSER=kobo
+      - PGPASSWORD=kobo
+      - PGPORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=kobo
+      - POSTGRES_PASSWORD=kobo
+      - POSTGRES_PORT=5432
+      - POSTGRES_DBNAME=kobotoolbox
+      - WITH_POSTGIS=1
+    links:
+      - postgres
     volumes:
-      - vols-db:/srv/db
+      - backups-postgres:/backups
+    restart: on-failure
+    labels:
+      io.rancher.container.pull_image: always
+
+  postgres:
+    image: kartoza/postgis:9.6-2.4
+    environment:
+      - ALLOW_IP_RANGE=0.0.0.0/0
+      - POSTGRES_USER=kobo
+      - POSTGRES_PASSWORD=kobo
+      - POSTGRES_DBNAME=kobotoolbox
+    volumes:
+      - vols-db:/var/lib/postgresql
       - backups-postgres:/srv/backups
     restart: on-failure
     labels:
