@@ -111,6 +111,7 @@ services:
     image: kartoza/pg-backup:9.6
     environment:
       - ARCHIVE_FILENAME=/backups/postgres_backup_kobotoolbox
+      - DUMPPREFIX=postgres_backup_
       - PGHOST=postgres
       - PGUSER=kobo
       - PGPASSWORD=kobo
