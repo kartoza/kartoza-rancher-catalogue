@@ -1,0 +1,134 @@
+version: '2'
+volumes:
+  postgis-data:
+  postgis-history-data:
+  django-statics-data:
+  django-media-data:
+  nginx-conf-data:
+services:
+  smtp:
+    image: catatnight/postfix
+    environment:
+      # You could change this to something more suitable
+      - maildomain=${MAIL_DOMAIN}
+      - smtp_user=noreply:docker
+    restart: unless-stopped
+
+  db:
+    image: kartoza/postgis:9.6-2.4
+    volumes:
+      - postgis-data:/var/lib/postgresql
+      - postgis-history-data:/backups
+    environment:
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - POSTGRES_DBNAME=${POSTGRES_DB}
+      # Postgres env var. For postgres CLI shortcut
+      - PGUSER=docker
+      - PGPASSWORD=${POSTGRES_PASS}
+      - PGDBNAME=${POSTGRES_DB}
+      - PGHOST=localhost
+    restart: unless-stopped
+
+  uwsgi:
+    image: kartoza/ford3_django:latest
+    working_dir: /home/web/django_project
+    environment:
+      - PYTHONPATH=/home/web/django_project
+      - DATABASE_NAME=${POSTGRES_DB}
+      - DATABASE_USERNAME=docker
+      - DATABASE_PASSWORD=${POSTGRES_PASS}
+      - DATABASE_HOST=db
+      - DJANGO_SETTINGS_MODULE=core.settings.prod_docker
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - SITEURL=${SITE_URL}
+      - DEBUG=${DJANGO_DEBUG_MODE}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    volumes:
+      - django-statics-data:/home/web/static:rw
+      - django-media-data:/home/web/media:rw
+    links:
+      - smtp:smtp
+      - db:db
+    restart: unless-stopped
+    labels:
+      io.rancher.container.pull_image: always
+
+  dbbackups:
+    image: kartoza/pg-backup:9.6
+    entrypoint: []
+    command: ["/start.sh"]
+    volumes:
+      - postgis-history-data:/backups
+    links:
+      - db:db
+    environment:
+      # take care to let the project name below match that
+      # declared in the top of the makefile
+      - DUMPPREFIX=PG_ford3
+      # These are all defaults anyway, but setting explicitly in
+      # case we ever want to ever use different credentials
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGPORT=5432
+      - PGHOST=db
+      - PGDATABASE=gis
+    restart: unless-stopped
+
+  nginx-conf:
+    image: kartoza/ford3_nginx_conf:latest
+    volumes:
+      - nginx-conf-data:/etc/nginx/sites-available
+    environment:
+      TARGET: /etc/nginx/sites-available
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: 'true'
+
+  web:
+    image: nginx
+    entrypoint: /etc/nginx/sites-available/docker-entrypoint.sh
+
+    {{- if eq .Values.DJANGO_DEBUG_MODE "True" }}
+
+    command: dev
+
+    {{- else }}
+
+    command: prod
+
+    {{- end }}
+    volumes:
+      - nginx-conf-data:/etc/nginx/sites-available
+      - django-statics-data:/home/web/static:ro
+      - django-media-data:/home/web/media:ro
+    links:
+      - uwsgi:uwsgi
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync:rancher
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - postgis-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=${BTSYNC_DB_DEVICE}
+      - STANDBY_MODE=TRUE
+
+  btsync-media:
+    # BTSync backups for django media
+    image: kartoza/btsync:rancher
+    hostname: btsync-logs
+    restart: unless-stopped
+    volumes:
+      - django-media-history-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_MEDIA_SECRET}
+      - DEVICE=${BTSYNC_MEDIA_SECRET}
+      - STANDBY_MODE=TRUE
+
+

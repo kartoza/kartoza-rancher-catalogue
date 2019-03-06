@@ -1,0 +1,98 @@
+version: '2'
+catalog:
+  name: "Ford 3"
+  description: "Ford 3"
+  version: 1.0.0-RC
+  uuid: kartoza-ford3-0
+  questions:
+    - variable: SITE_URL
+      label: "Site URL"
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
+      required: true
+      default: ""
+      type: "string"
+
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Django allowed hosts"
+      description: "Python literal of hosts lists."
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: DJANGO_DEBUG_MODE
+      label: "Django DEBUG mode settings"
+      description: "Set to True to enable debug mode"
+      required: true
+      default: "False"
+      type: "enum"
+      options:
+        - "True"
+        - "False"
+
+    - variable: POSTGRES_DB
+      label: PostgreSQL db to create.
+      required: true
+      default: gis
+      type: "string"
+    - variable: POSTGRES_PASS
+      label: PostgreSQL superuser password to create.
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+      required: true
+      default: 0.0.0.0/0
+      type: "string"
+    - variable: MAIL_DOMAIN
+      label: "Email Domain"
+      description: "Configure email domain for this site."
+      default: ""
+      type: "string"
+    - variable: DEFAULT_FROM_EMAIL
+      label: "From: address of default email sent from this site."
+      description: "Example: Ford3 <noreply@ford3.org>"
+      default: "Ford3 <noreply@ford3.org>"
+      type: "string"
+    - variable: ADMIN_EMAIL
+      label: "Administrator email"
+      description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      default: ""
+      type: "string"
+
+    - variable: BTSYNC_DB_SECRET
+      label: "Database backups key"
+      description: "Resilio sync read/write key for syncing database backups"
+      required: false
+      default:
+      type: "string"
+    - variable: BTSYNC_DB_DEVICE
+      label: "BtSync DB device ID"
+      default: "Ford3 - Postgis Data"
+      type: "string"
+    - variable: BTSYNC_MEDIA_SECRET
+      label: "Media backups key"
+      description: "Resilio sync read/write key for syncing geonode media backups"
+      required: false
+      default:
+      type: "string"
+    - variable: BTSYNC_MEDIA_DEVICE
+      label: "BtSync MEDIA device ID"
+      default: "Ford3 - Media Data"
+      type: "string"
+
+services:
+  web:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
