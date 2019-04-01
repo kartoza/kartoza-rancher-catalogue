@@ -198,7 +198,7 @@ services:
       io.rancher.container.pull_image: always
 
   kobocat:
-    image: kartoza/kobotoolbox_kobocat:2.018.31
+    image: kartoza/kobotoolbox_kobocat
     environment:
       - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
       - DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}"
@@ -243,9 +243,21 @@ services:
 
       {{- end }}
 
+      {{- if eq .Values.USE_CUSTOM_KOBOCAT "true" }}
+
+      - DJANGO_SETTINGS_MODULE=${CUSTOM_KOBOCAT_DJANGO_SETTINGS_MODULE}
+      - CUSTOM_KOBOCAT_THEME_APP_PIP_URL=${CUSTOM_KOBOCAT_THEME_APP_PIP_URL}
+      - PYTHONPATH=${CUSTOM_KOBOCAT_PYTHONPATH}
+      - CUSTOM_KOBOCAT_THEME_DEPLOY_KEY=${CUSTOM_KOBOCAT_THEME_DEPLOY_KEY}
+
+      {{- else }}
+
+      - DJANGO_SETTINGS_MODULE=onadata.settings.kc_environ
+
+      {{- end }}
+
       - KOBOCAT_DJANGO_DEBUG=False
       - TEMPLATE_DEBUG=False
-      - DJANGO_SETTINGS_MODULE=onadata.settings.kc_environ
       - ENKETO_VERSION=Express
       - DATABASE_URL=postgis://kobo:kobo@postgres:5432/kobotoolbox
       - KOBO_POSTGRES_DB_NAME=kobotoolbox
