@@ -35,7 +35,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190319
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190425
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -138,7 +138,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190319
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190425
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -431,7 +431,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190319
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190425
     # tty: true
     command: python manage.py updatelayers -i -s kobo_form_data
     labels:
