@@ -27,6 +27,16 @@ catalog:
       required: true
       default: "kobo_superpassword"
       type: string
+    - variable: POSTGRES_USER
+      label: "Postgres superuser username"
+      required: true
+      default: "kobo"
+      type: string
+    - variable: POSTGRES_PASSWORD
+      label: "Postgres superuser password"
+      required: true
+      default: "kobo"
+      type: string
     - variable: KOBO_SUPPORT_EMAIL
       label: "Kobo support email"
       required: true
@@ -200,28 +210,24 @@ catalog:
     - variable: CUSTOM_KOBOCAT_THEME_APP_PIP_URL
       label: "A repo for custom kobocat theme"
       description: "Applicable only if USE_CUSTOM_KOBOCAT sets to true"
-      required: true
       default: "git+ssh://git@github.com/kartoza/custom_kobocat_theme.git@develop"
       type: string
 
     - variable: CUSTOM_KOBOCAT_DJANGO_SETTINGS_MODULE
       label: "A string to replace the settings module"
       description: "Applicable only if USE_CUSTOM_KOBOCAT sets to true"
-      required: true
       default: "custom_kobocat_theme.settings"
       type: string
 
     - variable: CUSTOM_KOBOCAT_PYTHONPATH
       label: "A string to override the PYTHONPATH"
       description: "Applicable only if USE_CUSTOM_KOBOCAT sets to true"
-      required: true
       default: "/srv/src/kobocat:/srv/src/custom_kobocat_theme"
       type: string
 
     - variable: CUSTOM_KOBOCAT_THEME_DEPLOY_KEY
       label: "SSH key to access custom kobocat repo"
       description: "Applicable only if USE_CUSTOM_KOBOCAT sets to true"
-      required: true
       type: string
 
 services:
