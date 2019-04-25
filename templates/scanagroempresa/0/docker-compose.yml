@@ -53,6 +53,8 @@ services:
       - statics:/mnt/volumes/statics
       # See btsync and volume notes below for details on this
       - templates:/usr/src/app/geonode_generic/templates
+      # To install private skin app
+      - geonode-ssh-config:/root/.ssh
     environment:
       GEONODE_PREFIX: "''"
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
@@ -156,6 +158,8 @@ services:
       - statics:/mnt/volumes/statics
       # See btsync and volume notes below for details on this
       - templates:/usr/src/app/geonode_generic/templates
+      # To install private skin app
+      - geonode-ssh-config:/root/.ssh
     environment:
       GEONODE_PREFIX: "''"
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
@@ -361,6 +365,8 @@ services:
     working_dir: /home/web/extra_app
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
+      # To install private skin app
+      - scanagroempresa-ssh-config:/root/.ssh
     links:
       - db
     environment:
@@ -449,6 +455,8 @@ services:
       - statics:/mnt/volumes/statics
       # See btsync and volume notes below for details on this
       - templates:/usr/src/app/geonode_generic/templates
+      # To install private skin app
+      - geonode-ssh-config:/root/.ssh
     environment:
       GEONODE_PREFIX: "''"
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
@@ -533,6 +541,8 @@ services:
     working_dir: /home/web/kobo_sync_service
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
+      # To install private skin app
+      - scanagroempresa-ssh-config:/root/.ssh
     environment:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
@@ -597,7 +607,7 @@ services:
     labels:
       io.rancher.container.start_once: 'true'
       io.rancher.container.pull_image: always
-      cron.schedule: 0 0 * * * ?
+      cron.schedule: 0 */5 * * * ?
       cron.action: restart
 
   borg-backup-service:
@@ -655,6 +665,8 @@ volumes:
     external: {{ .Values.BACKUPS_VOLUME_EXTERNAL }}
 #    name: ${COMPOSE_PROJECT_NAME}-dbbackups
   statics:
+  geonode-ssh-config:
+  scanagroempresa-ssh-config:
 #    name: ${COMPOSE_PROJECT_NAME}-statics
   # for templates generated on the fly by django
   # so that we can customise them and have them 
