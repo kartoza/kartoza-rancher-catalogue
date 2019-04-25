@@ -2,7 +2,7 @@
 version: '2'
 catalog:
   name: "Scanagroempresa"
-  version: "v1.0.5-20190319"
+  version: "v1.0.6-20190425"
   description: "Scanagroempresa + GeoNode Generic deployment"
   uuid: scanagroempresa-0
   minimum_rancher_version: 'v1.6'
