@@ -117,8 +117,8 @@ services:
       - PGPASSWORD=kobo
       - PGPORT=5432
       - POSTGRES_HOST=postgres
-      - POSTGRES_USER=kobo
-      - POSTGRES_PASSWORD=kobo
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_PORT=5432
       - POSTGRES_DBNAME=kobotoolbox
       - WITH_POSTGIS=1
@@ -134,8 +134,8 @@ services:
     image: kartoza/postgis:9.6-2.4
     environment:
       - ALLOW_IP_RANGE=0.0.0.0/0
-      - POSTGRES_USER=kobo
-      - POSTGRES_PASSWORD=kobo
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DBNAME=kobotoolbox
     volumes:
       - vols-db:/var/lib/postgresql
@@ -259,9 +259,9 @@ services:
       - KOBOCAT_DJANGO_DEBUG=False
       - TEMPLATE_DEBUG=False
       - ENKETO_VERSION=Express
-      - DATABASE_URL=postgis://kobo:kobo@postgres:5432/kobotoolbox
+      - DATABASE_URL=postgis://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kobotoolbox
       - KOBO_POSTGRES_DB_NAME=kobotoolbox
-      - KOBO_POSTGRES_USER=kobo
+      - KOBO_POSTGRES_USER=${POSTGRES_USER}
       - KOBOCAT_BROKER_URL=amqp://kobocat:kobocat@rabbit:5672/kobocat
 
       - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
@@ -358,7 +358,7 @@ services:
       - ENKETO_VERSION=Express
       - KPI_PREFIX=/
       - KPI_BROKER_URL=amqp://kpi:kpi@rabbit:5672/kpi
-      - DATABASE_URL=postgres://kobo:kobo@postgres:5432/kobotoolbox
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kobotoolbox
       - DJANGO_LANGUAGE_CODES=en fr es ar zh-hans hi ku
 
       - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
@@ -456,7 +456,7 @@ services:
       - KOBOCAT_DJANGO_DEBUG=False
       - DJANGO_SETTINGS_MODULE=onadata.settings.kc_environ
       - KOBO_POSTGRES_DB_NAME=kobotoolbox
-      - KOBO_POSTGRES_USER=kobo
+      - KOBO_POSTGRES_USER=${POSTGRES_USER}
       - KOBOCAT_BROKER_URL=amqp://kobocat:kobocat@rabbit:5672/kobocat
 
       - KPI_DJANGO_DEBUG=False
@@ -464,7 +464,7 @@ services:
       - ENKETO_VERSION=Express
       - KPI_PREFIX=/
       - KPI_BROKER_URL=amqp://kpi:kpi@rabbit:5672/kpi
-      - DATABASE_URL=postgres://kobo:kobo@postgres:5432/kobotoolbox
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kobotoolbox
       - DJANGO_LANGUAGE_CODES=en fr es ar zh-hans hi ku
 
       - KPI_WEB_SERVER=${PROXY_WEB_SERVER}
