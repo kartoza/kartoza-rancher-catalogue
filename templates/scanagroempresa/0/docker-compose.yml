@@ -536,13 +536,14 @@ services:
 
   kobo-geonode-integration:
     image: kartoza/scanagroempresa:v1.0.8-20190530
-    command: -c 'python runSync.py'
-    entrypoint: /bin/sh
+    command: python runSync.py
     working_dir: /home/web/kobo_sync_service
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
       # To install private skin app
       - scanagroempresa-ssh-config:/root/.ssh
+    links:
+      - db
     environment:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       PYTHONPATH: '/home/web/extra_app'
