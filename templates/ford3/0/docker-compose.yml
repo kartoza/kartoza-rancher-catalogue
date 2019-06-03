@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   uwsgi:
-    image: kartoza/ford3_django:latest
+    image: kartoza/ford3_django:v1.0.0-20190603
     working_dir: /home/web/django_project
     environment:
       - PYTHONPATH=/home/web/django_project
@@ -77,7 +77,7 @@ services:
     restart: unless-stopped
 
   nginx-conf:
-    image: kartoza/ford3_nginx_conf:latest
+    image: kartoza/ford3_nginx_conf:v1.0.0-20190603
     volumes:
       - nginx-conf-data:/etc/nginx/sites-available
     environment:
