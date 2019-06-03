@@ -81,6 +81,12 @@ catalog:
       label: "BtSync MEDIA device ID"
       default: "Ford3 - Media Data"
       type: "string"
+    - variable: SENTRY_KEY
+      label: "Sentry client key"
+      description: "SDK client key (SENTRY_DSN)"
+      default: ""
+      required: true
+      type: "string"
 
 services:
   web:
