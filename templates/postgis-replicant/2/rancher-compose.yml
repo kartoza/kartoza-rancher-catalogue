@@ -1,7 +1,7 @@
 .catalog:
   name: "Kartoza PostGIS Replicant 11.0-2.5"
   description: "This is replicant for [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
-  version: 11.0-2.5
+  version: v11.0-2.5
   uuid: kartoza-postgis-replicant-1
   questions:
   - variable: POSTGRES_USER

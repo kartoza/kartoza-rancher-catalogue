@@ -1,7 +1,7 @@
 .catalog:
   name: "Kartoza PostGIS Replicant 9.6-2.4 "
   description: "This is replicant for [PostGIS](http://postgis.org) 2.4 running on PostgreSQL 9.6 all set up and ready to go in Rancher."
-  version: 9.6-2.4
+  version: v9.6-2.4
   uuid: kartoza-postgis-replicant-1
   questions:
   - variable: POSTGRES_USER
