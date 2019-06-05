@@ -1,0 +1,137 @@
+version: '2'
+
+volumes:
+  osm-postgis-data:
+  import_done:
+  import_queue:
+  cache:
+  data:
+
+services:
+  db:
+    # About the postgresql version, it should match in the dockerfile of docker-imposm3
+    image: kartoza/postgis:9.6-2.4
+    restart: always
+    hostname: db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+      - IP_LIST=${ALLOW_LISTEN_RANGE}
+    volumes:
+     - osm-postgis-data:/var/lib/postgresql
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+
+  btsync:
+    image: kartoza/btsync
+    restart: always
+    hostname: db
+    environment:
+      - DEVICE=PROD_DB_SYNC
+      - SECRET=${BTSYNC_DB_SECRET}
+    volumes:
+       - data:/web:rw
+  imposm:
+    image: kartoza/docker-osm:imposm-latest
+    restart: always
+    volumes:
+      - data:/home/settings
+      - import_done:/home/import_done
+      - import_queue:/home/import_queue
+      - cache:/home/cache
+    links:
+      - db:db
+
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - POSTGRES_PORT=${PG_PORT}
+      - POSTGRES_HOST=db
+      # seconds between 2 executions of the script
+      # if 0, then no update will be done, only the first initial import from the PBF
+      - TIME=${UPDATE_TIME}
+      # folder for settings (with *.json and *.sql)
+      - SETTINGS=settings
+      # folder for caching
+      - CACHE=cache
+      # folder for diff which has been imported
+      - IMPORT_DONE=import_done
+      # folder for diff which hasn't been imported yet
+      - IMPORT_QUEUE=import_queue
+      # it can be 3857
+      - SRID=${TABLE_SRID}
+      # see http://imposm.org/docs/imposm3/latest/tutorial.html#optimize
+      - OPTIMIZE=false
+      # see http://imposm.org/docs/imposm3/latest/tutorial.html#deploy-production-tables
+      - DBSCHEMA_PRODUCTION=${DB_SCHEMA}
+      # http://imposm.org/docs/imposm3/latest/tutorial.html#deploy-production-tables
+      - DBSCHEMA_IMPORT=${DB_SCHEMA_IMPORT}
+      # http://imposm.org/docs/imposm3/latest/tutorial.html#deploy-production-tables
+      - DBSCHEMA_BACKUP=${DB_SCHEMA_BACKUP}
+      # Install some styles if you are using the default mapping. It can be 'yes' or 'no'
+      - QGIS_STYLE=${QGIS_STYLE_BOOLEAN}
+      # Use clip in the database
+      - CLIP=${CLIP_BOOLEAN}
+
+  osmupdate:
+    image: kartoza/docker-osm:osmupdate-latest
+    restart: always
+    volumes:
+      # These are sharable to other containers
+      - data:/home/settings
+      - import_done:/home/import_done
+      - import_queue:/home/import_queue
+      - cache:/home/cache
+    links:
+      - db:db
+
+    environment:
+      # These are all currently the defaults but listed here for your
+      # convenience if you want to change them
+      # the maximum time range to assemble a cumulated changefile.
+      - MAX_DAYS=${MAX_RANGE}
+      # osmupdate uses a combination of minutely, hourly and daily changefiles. This value can be minute, hour, day or sporadic.
+      - DIFF=${DIFF_VAL}
+      # argument to determine the maximum number of parallely processed changefiles.
+      - MAX_MERGE=${MAX_MERGE_TIME}
+      # define level for gzip compression. values between 1 (low compression but fast) and 9 (high compression but slow)
+      - COMPRESSION_LEVEL=${COMPRESS_LEVEL}
+      # change the URL to use a custom URL to fetch regional file updates.
+      - BASE_URL=http://planet.openstreetmap.org/replication/
+      # folder for diff which hasn't been imported yet
+      - IMPORT_QUEUE=import_queue
+      # folder for diff which has been imported
+      - IMPORT_DONE=import_done
+      # seconds between 2 executions of the script
+      # if 0, then no update will be done, only the first initial import from the PBF
+      - TIME=${UPDATE_TIME}
+
+  osmenrich:
+    image: kartoza/docker-osm:osmenrich-latest
+    restart: always
+    volumes:
+      - data:/home/settings
+      - import_done:/home/import_done
+      - import_queue:/home/import_queue
+      - cache:/home/cache
+    links:
+      - db:db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - POSTGRES_PORT=${PG_PORT}
+      - POSTGRES_HOST=db
+      # These are all currently the defaults but listed here for your
+      # convenience if you want to change them
+      # folder for diff which hasn't been imported yet
+      - IMPORT_QUEUE=import_queue
+      # folder for diff which has been imported
+      - IMPORT_DONE=import_done
+      # seconds between 2 executions of the script
+      # if 0, then no update will be done, only the first initial import from the PBF
+      - TIME={UPDATE_TIME}
