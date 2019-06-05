@@ -1,5 +1,5 @@
 name: "PostGIS 9.6-2.4"
-description: "PostGIS is a FOSS geospatial datastore for PostgreSQL."
+description: "PostGIS is a FOSS geospatial datastore for PostgreSQL. Deprecated in favour of generic PostGIS"
 version: 1
 category: Software
 maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com

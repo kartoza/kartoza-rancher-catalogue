@@ -1,5 +1,5 @@
 .catalog:
-  name: "Kartoza PostGIS 10.0-2.4 Deprecated in favour of generic PostGIS"
+  name: "Kartoza PostGIS 10.0-2.4 "
   description: "This is [PostGIS](http://postgis.org) 2.4 running on PostgreSQL 10.0 all set up and ready to go in Rancher."
   version: 10.0-2.4
   uuid: kartoza-postgis

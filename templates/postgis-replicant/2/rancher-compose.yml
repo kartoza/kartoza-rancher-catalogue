@@ -1,7 +1,7 @@
 .catalog:
-  name: "Kartoza PostGIS Replicant 9.6-2.4 "
-  description: "This is replicant for [PostGIS](http://postgis.org) 2.4 running on PostgreSQL 9.6 all set up and ready to go in Rancher."
-  version: 9.6-2.4
+  name: "Kartoza PostGIS Replicant 11.0-2.5"
+  description: "This is replicant for [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
+  version: 11.0-2.5
   uuid: kartoza-postgis-replicant-1
   questions:
   - variable: POSTGRES_USER
@@ -42,6 +42,12 @@
     label: "Destroy on restart"
     required: true
     default: "False"
+    type: "string"
+  - variable: ALLOW_LISTEN_RANGE
+    label: "Database IP range to listen to"
+    description: "PostgreSQL conf (host based authentication) listen address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
+    required: true
+    default: '*'
     type: "string"
   - variable: PROMOTE_TO_MASTER
     description: "Enter 'True' to convert current replicant into a writable state. Useful if master is down and the current replicant needs to be promoted until manual recovery."
