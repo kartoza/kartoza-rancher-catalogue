@@ -1,6 +1,5 @@
 name: "Docker OSM"
-description: "OSM PostGIS database with automatic updates from OSM periodically. Structure of Sync Directory
-              should resemble https://github.com/kartoza/docker-osm/tree/develop/settings"
+description: "OSM PostGIS database with automatic updates from OSM periodically."
 version: 1
 category: Software
 maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
