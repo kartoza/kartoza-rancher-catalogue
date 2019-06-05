@@ -1,0 +1,66 @@
+# Rancher currently only supports up to version 2
+version: '2'
+# Baned volumes will persist between container invocations
+volumes:
+  project:
+  plugins:
+
+services:
+
+  qgis-server:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+    - ${WEBSERVER_PORT}:80/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
+
+  qgis-server-backend:
+    image: kartoza/qgis-server:2.18
+    volumes:
+      - 'project:/project'
+      - 'plugins:/plugins'
+    environment:
+      - DEBUG=True
+      # Write to stdout so we dont fill the container with logs
+      - QGIS_LOG_FILE=/dev/stdout
+      - QGIS_SERVER_LOG_FILE=/dev/stdout
+      # Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)
+      - QGIS_DEBUG=${QGIS_DEBUG_LEVEL}
+      - QGIS_SERVER_LOG_LEVEL=${QGIS_DEBUG_LEVEL}
+      # It is important to include this environment variable
+      # QGIS-Server:LTR cgi needs it
+      #- QGIS_PROJECT_FILE=
+      - QGIS_PROJECT_FILE=${QGIS_PROJECT_FILE}
+      # /project/project.qgs
+      - QGIS_PLUGINPATH /plugins
+      - PGSERVICEFILE /project/pg_service.conf
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync for pushing and pulling data from the server
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - /project:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DATA_SECRET}
+      - DEVICE=QGISDataContainer
+
+  btsync-plugins:
+    # BTSync for pushing and pulling plugins from the server
+    # Note that you probably need to restart the QGIS containers
+    # When pushing new versions of the plugins
+    image: kartoza/btsync
+    hostname: btsync-plugins
+    restart: unless-stopped
+    volumes:
+      # Read only mount
+      - /plugins:/web:ro
+    environment:
+      - SECRET=${BTSYNC_PLUGINS_SECRET}
+      - DEVICE=QGISPluginsContainer

@@ -1,0 +1,111 @@
+
+.catalog:
+  name: "Kartoza QGIS Server"
+  description: "Kartoza's spin of a Dockerised QGIS backend."
+  version: 3.4
+  uuid: kartoza-qgis-server-0
+  questions:
+    - variable: POSTGRES_DB
+      label: "PostgreSQL db to create."
+      required: true
+      default: gis
+      type: "string"
+    - variable: POSTGRES_USER
+      label: "PostgresSQL superuser account to create."
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_PASS
+      label: "PostgreSQL superuser password to create."
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
+      required: true
+      default: 0.0.0.0/0
+      type: "string"
+    - variable: DB_EXTENSIONS
+      label: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
+      required: true
+      default: postgis,hstore,postgis_topology
+      type: "string"
+    - variable: POSTGRES_PORT
+      description: "Postgres port"
+      label: "Port on which the database should be served. Typically 5432"
+      required: true
+      default: 5432
+      type: "int"
+    - variable: QGIS_BACKEND_INSTANCE_COUNT
+      label: "QGIS backend instance count"
+      description: "How many QGIS backend rendering instances to start with."
+      required: true
+      default: 4
+      type: "int"
+    - variable: WEBSERVER_PORT
+      description: "Website port"
+      label: "Port on which the site should be served. Typically 80"
+      required: true
+      default: 80
+      type: "int"
+    - variable: QGIS_DEBUG_LEVEL
+      label: "Debug level for QGIS Server"
+      description: "Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)"
+      required: true
+      default: 5
+      type: "int"
+    - variable: SERVER_MAX_THREADS
+      label: "QGIS Server Maximum threads to use"
+      description: "The number of concurrent threads QGIS server should use"
+      required: true
+      default: 4
+      type: "int"
+    - variable: SERVER_CACHE_SIZE
+      label: "QGIS Server cache size"
+      description: "The size of the cache for QGIS Server"
+      required: true
+      default: 100
+      type: "int"
+    - variable: QGIS_PROJECT_FILE
+      label: "Default project file for QGIS Server"
+      description: "If you leave this blank you will need to explicitly include a project file in your OGC requests."
+      required: false
+      default: "/project/project.qgs"
+      type: "string"
+    - variable: BTSYNC_DATA_SECRET
+      label: "Resilio sync key for QGIS projects and data."
+      description: "Resilio sync read/write key for syncing GIS data. Use a read only key if you never want your data altered on the server side (which is probably the normal case unless you plan to use WFS-T."
+      required: false
+      default: 
+      type: "string"
+    - variable: BTSYNC_PLUGINS_SECRET
+      Plugins label: "key"
+      description: "Resilio sync read only key for syncing QGIS Server side plugins."
+      required: false
+      default: 
+      type: "string"
+services:
+  qgis-server:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      port_rules:
+      - hostname: qgis-server
+        priority: 1
+        protocol: http
+        service: qgis-server-backend
+        source_port: 80
+        target_port: 80
+      health_check:
+        healthy_threshold: 2
+        response_timeout: 2000
+        port: 42
+        unhealthy_threshold: 3
+        initializing_timeout: 60000
+        interval: 2000
+        reinitializing_timeout: 60000
+  qgis-server-backend:
+    scale: ${QGIS_BACKEND_INSTANCE_COUNT}
+    start_on_create: true
