@@ -1,8 +1,8 @@
-version: '2'
-catalog:
-  name: "Kartoza QGIS Server"
+
+.catalog:
+  name: "Kartoza QGIS Server Deprecated in favour of generic QGIS Server"
   description: "Kartoza's spin of a Dockerised QGIS backend."
-  version: 1
+  version: 2.18
   uuid: kartoza-qgis-server-0
   questions:
     - variable: QGIS_BACKEND_INSTANCE_COUNT
