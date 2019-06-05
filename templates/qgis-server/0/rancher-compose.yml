@@ -1,6 +1,6 @@
 
 .catalog:
-  name: "Kartoza QGIS Server Deprecated in favour of generic QGIS Server"
+  name: "Kartoza QGIS Server"
   description: "Kartoza's spin of a Dockerised QGIS backend."
   version: 2.18
   uuid: kartoza-qgis-server-0

@@ -1,27 +1,26 @@
 .catalog:
-  name: "Kartoza PostGIS 11.0-2.5"
+  name: "Kartoza PostGIS 11.0-2.5 "
   description: "This is [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
-  version: 1
+  version: 11.0-2.5
   uuid: kartoza-postgis
   questions:
   - variable: POSTGRES_DUMP_PREFIX
-    label: Database dump prefix.
-    label: Prefix to use in the name of database dumps made by the backup container.
+    label: "Prefix to use in the name of database dumps made by the backup container."
     required: true
     default: "postgis"
     type: "string"
   - variable: POSTGRES_DB
-    label: PostgreSQL db to create.
+    label: "PostgreSQL db to create."
     required: true
     default: gis
     type: "string"
   - variable: POSTGRES_USER
-    label: PostgrsSQL superuser account to create.
+    label: "PostgrsSQL superuser account to create."
     required: true
     default: docker
     type: "string"
   - variable: POSTGRES_PASS
-    label: PostgreSQL superuser password to create.
+    label: "PostgreSQL superuser password to create."
     required: true
     default: docker
     type: "string"

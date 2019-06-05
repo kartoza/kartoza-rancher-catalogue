@@ -1,0 +1,87 @@
+version: '2'
+
+volumes:
+   db-backups:
+   geoserver-data:
+
+services:
+   db:
+      image: kartoza/postgis:11.0-2.5
+      hostname: postgis
+      volumes:
+         #- ./pg/postgres_data:/var/lib/postgresql
+         - db-backups:/backups
+      ports:
+        - "5432:5432"
+      environment:
+         - POSTGRES_DB=${POSTGRES_DB}
+         - POSTGRES_USER=${POSTGRES_USER}
+         - POSTGRES_PASS=${POSTGRES_PASS}
+         - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+      restart: unless-stopped
+
+   geoserver:
+      image: kartoza/geoserver:2.15.0
+      hostname: geoserver 
+      volumes:
+        - geoserver-data:/opt/geoserver/data_dir
+      environment:
+         - GEOSERVER_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      ports:
+        - "8080:8080"
+      links:
+         - db:db
+      restart: unless-stopped
+      user: root
+
+   dbbackups:
+      image: kartoza/pg-backup:11.0
+      hostname: pg-backups
+      volumes:
+        - db-backups:/backups
+      links:
+         - db:db
+      environment:
+         # take care to let the project name below match that
+         # declared in the top of the makefile
+         - DUMPPREFIX=PG_geoserver
+         # These are all defaults anyway, but setting explicitly in
+         # case we ever want to ever use different credentials
+         # TODO: Normalise these paramer names in pg backup docker image to match pg docker image
+         - PGUSER=${POSTGRES_USER}
+         - PGPASSWORD=${POSTGRES_PASS}
+         - PGDATABASE=${POSTGRES_DB}
+         - PGPORT=5432
+         - PGHOST=db
+      restart: unless-stopped
+
+   btsync-data:
+      # BTSync backups for database dumps
+      image: kartoza/btsync
+      hostname: btsync-data
+      restart: unless-stopped
+      volumes:
+         # We mount RW so that we can use remove peer to clean up old backups off the server
+         - db-backups:/web:rw
+      # Use this if you ARE orchestrating with Rancher 
+      # and then see the accompanying rancher-compose.yml file
+      environment:
+        - SECRET=${BTSYNC_DB_SECRET}
+        - DEVICE=GeoServerDatabase
+      
+   btsync-media:                                                                   
+      # BTSync backups for django media
+      image: kartoza/btsync
+      hostname: btsync-media
+      restart: unless-stopped
+      volumes:
+         # We mount RW so that we can use peers 
+         # to push shapefiles etc. to the server
+         - geoserver-data:/web:rw
+      # Use this if you ARE orchestrating with Rancher 
+      # and then see the accompanying rancher-compose.yml file
+      environment:
+        - SECRET=${BTSYNC_MEDIA_SECRET}
+        - DEVICE=GeoServerMedia
+
+

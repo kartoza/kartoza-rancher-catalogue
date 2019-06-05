@@ -1,5 +1,5 @@
 name: "PostGIS Replicant 9.6-2.4"
-description: "Replication client for PostgreSQL."
+description: "Replication client for PostgreSQL. Deprecated in favour of generic PostGIS Replicant"
 version: 1
 category: Software
 maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com

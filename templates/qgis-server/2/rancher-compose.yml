@@ -1,10 +1,42 @@
 
 .catalog:
-  name: "Kartoza QGIS Server Deprecated in favour of generic QGIS Server"
-  description: "Kartoza's spin of a Dockerised QGIS backend."
-  version: 2.18
+  name: "Kartoza QGIS Server"
+  description: "Dockerised QGIS backend."
+  version: 3.6
   uuid: kartoza-qgis-server-0
   questions:
+    - variable: POSTGRES_DB
+      label: "PostgreSQL db to create."
+      required: true
+      default: gis
+      type: "string"
+    - variable: POSTGRES_USER
+      label: "PostgresSQL superuser account to create."
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_PASS
+      label: "PostgreSQL superuser password to create."
+      required: true
+      default: docker
+      type: "string"
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
+      required: true
+      default: 0.0.0.0/0
+      type: "string"
+    - variable: DB_EXTENSIONS
+      label: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
+      required: true
+      default: postgis,hstore,postgis_topology
+      type: "string"
+    - variable: POSTGRES_PORT
+      description: "Postgres port"
+      label: "Port on which the database should be served. Typically 5432"
+      required: true
+      default: 5432
+      type: "int"
     - variable: QGIS_BACKEND_INSTANCE_COUNT
       label: "QGIS backend instance count"
       description: "How many QGIS backend rendering instances to start with."
@@ -22,6 +54,18 @@
       description: "Log level 0 is the lowest (catch all), 5 is the highest (only fatal error)"
       required: true
       default: 5
+      type: "int"
+    - variable: SERVER_MAX_THREADS
+      label: "QGIS Server Maximum threads to use"
+      description: "The number of concurrent threads QGIS server should use"
+      required: true
+      default: 4
+      type: "int"
+    - variable: SERVER_CACHE_SIZE
+      label: "QGIS Server cache size"
+      description: "The size of the cache for QGIS Server"
+      required: true
+      default: 100
       type: "int"
     - variable: QGIS_PROJECT_FILE
       label: "Default project file for QGIS Server"

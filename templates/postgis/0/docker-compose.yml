@@ -1,0 +1,50 @@
+version: '2'
+volumes:
+  backups:
+  media:
+  postgis-data:
+
+services:
+  
+  db:
+    image: kartoza/postgis:9.6-2.4
+    hostname: db
+    volumes:
+      - 'postgis-data:/var/lib/postgresql'
+      - 'backups:/backups'
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+    ports:
+      - ${POSTGRES_PORT}:5432 
+    restart: unless-stopped
+  
+  dbbackups:
+    image: kartoza/pg-backup:9.6
+    hostname: pg-backups
+    volumes:
+      - backups:/backups
+    links:
+      - db:db
+    environment:
+      - DUMPPREFIX=PG_${POSTGRES_DUMP_PREFIX}
+      # TODO: Normalise these paramer names in pg backup docker image to match pg docker image
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASS}
+      - PGDATABASE=${POSTGRES_DB}
+      - PGPORT=${POSTGRES_PORT}
+      - PGHOST=db
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - backups:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=PostGISDatabase

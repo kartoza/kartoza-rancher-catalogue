@@ -1,16 +1,16 @@
 .catalog:
   name: "Kartoza PostGIS Replicant 11.0-2.5"
   description: "This is replicant for [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
-  version: 1
+  version: 11.0-2.5
   uuid: kartoza-postgis-replicant-1
   questions:
   - variable: POSTGRES_USER
-    label: PostgrsSQL superuser on master.
+    label: "PostgreSQL superuser on master."
     required: true
     default: docker
     type: "string"
   - variable: POSTGRES_PASS
-    label: PostgreSQL superuser password on master.
+    label: "PostgreSQL superuser password on master."
     required: true
     default: docker
     type: "string"

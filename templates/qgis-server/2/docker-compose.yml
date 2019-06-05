@@ -1,0 +1,81 @@
+# Rancher currently only supports up to version 2
+version: '2'
+# Baned volumes will persist between container invocations
+volumes:
+  project:
+  plugins:
+  postgis-data:
+  backups:
+
+services:
+
+  db:
+    image: kartoza/postgis:11.0-2.5
+    hostname: db
+    volumes:
+      - postgis-data:/var/lib/postgresql
+      - backups:/backups
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+      - POSTGRES_MULTIPLE_EXTENSIONS=${DB_EXTENSIONS}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    restart: unless-stopped
+
+  qgis-server:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+    - ${WEBSERVER_PORT}:80/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
+
+  qgis-server-backend:
+    image: camptocamp/qgis-server:3.6
+    volumes:
+      - project:/project
+      - plugins:/plugins
+    environment:
+      - QGIS_SERVER_PARALLEL_RENDERING=True
+      - QGIS_SERVER_MAX_THREADS=${SERVER_MAX_THREADS}
+      - QGIS_SERVER_CACHE_DIRECTORY=/project
+      - QGIS_SERVER_CACHE_SIZE=${SERVER_CACHE_SIZE}
+      - QGIS_SERVER_LOG_FILE=/dev/stdout
+      - QGIS_SERVER_LOG_LEVEL=${QGIS_DEBUG_LEVEL}
+      - QGIS_PROJECT_FILE=${QGIS_PROJECT_FILE}
+      - QGIS_PLUGINS_PATH=/plugins
+      - PGSERVICEFILE=/project/pg_service.conf
+    links:
+      - db:db
+    labels:
+      io.rancher.container.pull_image: always
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync for pushing and pulling data from the server
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - /project:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DATA_SECRET}
+      - DEVICE=QGISDataContainer
+
+  btsync-plugins:
+    # BTSync for pushing and pulling plugins from the server
+    # Note that you probably need to restart the QGIS containers
+    # When pushing new versions of the plugins
+    image: kartoza/btsync
+    hostname: btsync-plugins
+    restart: unless-stopped
+    volumes:
+      # Read only mount
+      - /plugins:/web:ro
+    environment:
+      - SECRET=${BTSYNC_PLUGINS_SECRET}
+      - DEVICE=QGISPluginsContainer
