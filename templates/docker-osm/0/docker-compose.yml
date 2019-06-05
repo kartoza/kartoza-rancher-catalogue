@@ -21,6 +21,7 @@ services:
       - IP_LIST=${ALLOW_LISTEN_RANGE}
     volumes:
      - osm-postgis-data:/var/lib/postgresql
+     - data:/home/settings
     ports:
       - ${POSTGRES_PORT}:5432
 

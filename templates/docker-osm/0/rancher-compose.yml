@@ -10,7 +10,7 @@
     default: gis
     type: "string"
   - variable: POSTGRES_USER
-    label: "PostgrsSQL superuser account to create."
+    label: "PostgreSQL superuser account to create."
     required: true
     default: docker
     type: "string"
