@@ -1,0 +1,7 @@
+name: "PostGIS"
+description: "PostGIS is a FOSS geospatial datastore for PostgreSQL."
+version: 1
+category: Software
+maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
+license: GPL v3
+projectURL: https://github.com/kartoza/docker-postgis
