@@ -1,8 +1,8 @@
 version: '2'
 catalog:
-  name: "Kartoza QGIS Server"
-  description: "Dockerised QGIS backend."
-  version: 3.6
+  name: "Kartoza QGIS Server 3.6"
+  description: "Dockerised QGIS backend 3.6."
+  version: v3.6
   uuid: kartoza-qgis-server-0
   questions:
     - variable: POSTGRES_DB
