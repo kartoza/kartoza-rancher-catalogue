@@ -23,14 +23,6 @@ services:
       - ${POSTGRES_PORT}:5432
     restart: unless-stopped
 
-  qgis-server:
-    image: rancher/lb-service-haproxy:v0.6.4
-    expose:
-    - ${WEBSERVER_PORT}:80/tcp
-    labels:
-      io.rancher.container.agent.role: environmentAdmin
-      io.rancher.container.create_agent: 'true'
-    restart: unless-stopped
 
   qgis-server-backend:
     image: camptocamp/qgis-server:3.4
@@ -44,6 +36,8 @@ services:
       - PGSERVICEFILE=${PG_SERVICE_PATH}
     links:
       - db:db
+    ports:
+      - ${WEBSERVER_PORT}:80
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
