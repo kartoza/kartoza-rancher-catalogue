@@ -37,12 +37,6 @@
       required: true
       default: 5432
       type: "int"
-    - variable: QGIS_BACKEND_INSTANCE_COUNT
-      label: "QGIS backend instance count"
-      description: "How many QGIS backend rendering instances to start with."
-      required: true
-      default: 4
-      type: "int"
     - variable: WEBSERVER_PORT
       description: "Website port"
       label: "Port on which the site should be served. Typically 80"
@@ -55,23 +49,23 @@
       required: true
       default: 5
       type: "int"
-    - variable: SERVER_MAX_THREADS
-      label: "QGIS Server Maximum threads to use"
-      description: "The number of concurrent threads QGIS server should use"
+    - variable: MAX_REQUEST
+      label: "QGIS Server Maximum request per process"
+      description: "The number of concurrent maximum request per process"
       required: true
       default: 4
-      type: "int"
-    - variable: SERVER_CACHE_SIZE
-      label: "QGIS Server cache size"
-      description: "The size of the cache for QGIS Server"
-      required: true
-      default: 100
       type: "int"
     - variable: QGIS_PROJECT_FILE
       label: "Default project file for QGIS Server"
       description: "If you leave this blank you will need to explicitly include a project file in your OGC requests."
       required: false
       default: "/project/project.qgs"
+      type: "string"
+    - variable: PG_SERVICE_PATH
+      label: "Default path file for postgres conf"
+      description: "Path for service definitions when connecting to PostgreSQL"
+      required: true
+      default: ""
       type: "string"
     - variable: BTSYNC_DATA_SECRET
       label: "Resilio sync key for QGIS projects and data."
