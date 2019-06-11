@@ -1,6 +1,6 @@
-name: QGIS Server Backend
-description: QGIS Server backend, PostgreSQL and resilio sync
-version: 1
+name: QGIS Backend
+description: QGIS backend and resilio sync
+version: 2.18
 category: GIS
 maintainer: Kartoza (Pty) Ltd. - Tim Sutton, tim@kartoza.com
 license: GPL v3

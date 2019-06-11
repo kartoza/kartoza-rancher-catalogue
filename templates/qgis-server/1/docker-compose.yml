@@ -23,6 +23,14 @@ services:
       - ${POSTGRES_PORT}:5432
     restart: unless-stopped
 
+  qgis-server:
+    image: rancher/lb-service-haproxy:v0.6.4
+    expose:
+    - ${WEBSERVER_PORT}:80/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin
+      io.rancher.container.create_agent: 'true'
+    restart: unless-stopped
 
   qgis-server-backend:
     image: camptocamp/qgis-server:3.4
@@ -30,14 +38,17 @@ services:
       - project:/project
       - plugins:/plugins
     environment:
-      - MAX_REQUEST_PER_PROCESS=${MAX_REQUEST}
+      - QGIS_SERVER_PARALLEL_RENDERING=True
+      - QGIS_SERVER_MAX_THREADS=${SERVER_MAX_THREADS}
+      - QGIS_SERVER_CACHE_DIRECTORY=/project
+      - QGIS_SERVER_CACHE_SIZE=${SERVER_CACHE_SIZE}
+      - QGIS_SERVER_LOG_FILE=/dev/stdout
       - QGIS_SERVER_LOG_LEVEL=${QGIS_DEBUG_LEVEL}
       - QGIS_PROJECT_FILE=${QGIS_PROJECT_FILE}
-      - PGSERVICEFILE=${PG_SERVICE_PATH}
+      - QGIS_PLUGINS_PATH=/plugins
+      - PGSERVICEFILE=/project/pg_service.conf
     links:
       - db:db
-    ports:
-      - ${WEBSERVER_PORT}:80
     labels:
       io.rancher.container.pull_image: always
     restart: unless-stopped
