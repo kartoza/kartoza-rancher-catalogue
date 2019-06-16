@@ -6,6 +6,7 @@ volumes:
   pg:
   grafana:
   pw2:
+  pgadmin4:
 
 services:
   
@@ -53,13 +54,16 @@ services:
       - SECRET=${BTSYNC_DB_SECRET}
       - DEVICE=PostGISDatabase
   pgwatch:
-    image: cybertec/pgwatch2
+    image: cybertec/pgwatch2-postgres
     hostname: pg-watch-metrics
     volumes:
       - pg:/var/lib/postgresql
       - grafana:/var/lib/grafana
       - pw2:/pgwatch2/persistent-config
     environment:
+      - PW2_TESTDB=${TESTDB}
+      - PW2_WEBNOANONYMOUS=${WEBNOANONYMOUS}
+      - PW2_WEBNOCOMPONENTLOGS=${WEBNOCOMPONENTLOGS}
       - PW2_WEBUSER=${WEBUSER}
       - PW2_WEBPASSWORD=${WEBPASSWORD}
       - PW2_GRAFANA_BASEURL=${GRAFANA_BASEURL}
@@ -70,6 +74,19 @@ services:
       - ${PW2_WEBPORT}:8080
       - ${PW2_GRAFANAPORT}:3000
 
+    restart: unless-stopped
+    links:
+      - db:db
+  pgadmin4:
+    image: dpage/pgadmin4:4.8
+    hostname: pgadmin4
+    volumes:
+      - pgadmin4:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - ${PGADMIN_PORT}:80
     restart: unless-stopped
     links:
       - db:db
