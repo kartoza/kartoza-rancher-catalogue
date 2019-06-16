@@ -23,7 +23,7 @@
     label: "PostgreSQL superuser password to create."
     required: true
     default: docker
-    type: "string"
+    type: "password"
   - variable: POSTGRES_HBA_RANGE
     label: "Database allowed hosts"
     description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
@@ -58,7 +58,7 @@
     description: "User password for login in to define dashboards"
     required: true
     default: "pgwatch2admin"
-    type: "string"
+    type: "password"
   - variable: GRAFANA_BASEURL
     label: "Grafana Base URL"
     description: "For linking to Grafana Query details dashboard from Stat_stmt overview "
@@ -70,7 +70,7 @@
     description: "Can be set to require login even for viewing dashboards"
     required: true
     default: "True"
-    type: "string"
+    type: "boolean"
   - variable: GRAFANAUSER
     label: "Grafana administrative user"
     description: "Administrative user to login to grafana to view dashboards"
@@ -82,7 +82,7 @@
     description: "Administrative password to login to grafana to view dashboards"
     required: true
     default: "pgwatch2admin"
-    type: "string"
+    type: "password"
   - variable: PW2_WEBPORT
     description: "WebUI port for Dashboard setup"
     label: "Port on which the webui  should be served to define DB connections. Typically 8080"
@@ -95,6 +95,42 @@
     required: true
     default: 3000
     type: "int"
+  - variable: TESTDB
+    description: "Monitor test Database"
+    label: "Boolean value to indicate if you need to monitor test database"
+    required: true
+    default: false
+    type: "boolean"
+  - variable: WEBNOANONYMOUS
+    description: "Web login to add database"
+    label: "Web login to add databases to monitor"
+    required: true
+    default: true
+    type: "boolean"
+  - variable: WEBNOCOMPONENTLOGS
+    description: "Monitor docker logs"
+    label: "Boolean value to indicate wether you want to monitor docker logs"
+    required: true
+    default: false
+    type: "boolean"
+  - variable: PGADMIN_PORT
+    description: "Pgadmin Port"
+    label: "Listening port for DBManager"
+    required: true
+    default: 8600
+    type: "int"
+  - variable: PGADMIN_EMAIL
+    description: "Login Email address"
+    label: "Email address to login into the database"
+    required: true
+    default: pgadmin@docker.com
+    type: "string"
+  - variable: PGADMIN_PASSWORD
+    description: "Password to login to pgadmin"
+    label: "Password to login to pgadmin"
+    required: true
+    default: pgadmin4
+    type: "password"
   - variable: "HOST_AFFINITY"
     label: "Label of host to deploy on"
     description: |
