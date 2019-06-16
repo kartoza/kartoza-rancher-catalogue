@@ -6,21 +6,25 @@
   questions:
   - variable: POSTGRES_DUMP_PREFIX
     label: "Prefix to use in the name of database dumps made by the backup container."
+    description: "Prefix to use in the name of database dumps made by the backup container."
     required: true
     default: "postgis"
     type: "string"
   - variable: POSTGRES_DB
     label: "PostgreSQL db to create."
+    description: "PostgreSQL database to create. You can pass comma seperated values ie gis,data"
     required: true
     default: gis
     type: "string"
   - variable: POSTGRES_USER
-    label: "PostgresSQL superuser account to create."
+    label: "PostgreSQL superuser account to create."
+    description: "PostgreSQL superuser account to create"
     required: true
     default: docker
     type: "string"
   - variable: POSTGRES_PASS
     label: "PostgreSQL superuser password to create."
+    description: "PostgreSQL superuser password"
     required: true
     default: docker
     type: "password"
@@ -31,7 +35,8 @@
     default: 0.0.0.0/0
     type: "string"
   - variable: DB_EXTENSIONS
-    label: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
+    label: "PostgreSQL database extensions"
+    description: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
     required: true
     default: postgis,hstore,postgis_topology
     type: "string"
@@ -49,7 +54,7 @@
     type: "string"
   - variable: WEBUSER
     label: "Admin login for Dashboard"
-    description: "User for login in to define dashboards"
+    description: "User to login in to define dashboards"
     required: true
     default: "pgwatch2"
     type: "string"
@@ -84,52 +89,52 @@
     default: "pgwatch2admin"
     type: "password"
   - variable: PW2_WEBPORT
-    description: "WebUI port for Dashboard setup"
-    label: "Port on which the webui  should be served to define DB connections. Typically 8080"
+    description: "Port on which the webui  should be served to define DB connections. Typically 8080"
+    label: "WebUI port for Dashboard setup"
     required: true
     default: 8080
     type: "int"
   - variable: PW2_GRAFANAPORT
-    description: "Grafana port"
-    label: "Port on which the grafana should be served. Typically 3000"
+    description: "Port on which the grafana should be served. Typically 3000"
+    label: "Grafana port"
     required: true
     default: 3000
     type: "int"
   - variable: TESTDB
-    description: "Monitor test Database"
-    label: "Boolean value to indicate if you need to monitor test database"
+    description: "Boolean value to indicate if you need to monitor test database"
+    label: "Monitor test Database"
     required: true
-    default: false
+    default: "False"
     type: "boolean"
   - variable: WEBNOANONYMOUS
-    description: "Web login to add database"
-    label: "Web login to add databases to monitor"
+    description: "Web login to add database to monitor"
+    label: "Web UI login"
     required: true
-    default: true
+    default: "True"
     type: "boolean"
   - variable: WEBNOCOMPONENTLOGS
-    description: "Monitor docker logs"
-    label: "Boolean value to indicate wether you want to monitor docker logs"
+    description: "Boolean value to indicate whether you want to monitor docker logs"
+    label: "Monitor docker logs"
     required: true
-    default: false
+    default: "False"
     type: "boolean"
   - variable: PGADMIN_PORT
-    description: "Pgadmin Port"
-    label: "Listening port for DBManager"
+    description: "Listening port for Pgadmin"
+    label: "Pgadmin Port"
     required: true
     default: 8600
     type: "int"
   - variable: PGADMIN_EMAIL
-    description: "Login Email address"
-    label: "Email address to login into the database"
+    description: "Email address to login into the database"
+    label: "Login Email address"
     required: true
-    default: pgadmin@docker.com
+    default: "pgadmin@docker.com"
     type: "string"
   - variable: PGADMIN_PASSWORD
     description: "Password to login to pgadmin"
     label: "Password to login to pgadmin"
     required: true
-    default: pgadmin4
+    default: "pgadmin4"
     type: "password"
   - variable: "HOST_AFFINITY"
     label: "Label of host to deploy on"
