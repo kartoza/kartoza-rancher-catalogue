@@ -611,6 +611,83 @@ services:
       cron.schedule: 0 */5 * * * ?
       cron.action: restart
 
+  kobo-extractor:
+    image: kartoza/scanagroempresa:v1.0.8-20190530
+    command: python manage.py kobo_extractor
+    working_dir: /home/web/extra_app
+    volumes:
+      - scanagroempresa-statics:/home/web/static:rw
+      # To install private skin app
+      - scanagroempresa-ssh-config:/root/.ssh
+    links:
+      - db
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      PYTHONPATH: '/home/web/extra_app'
+      URL_PREFIX: ${SCANAGROEMPRESA_URL_PREFIX}
+      GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
+      ROOT_URLCONF: 'scanterra.root_urls'
+      DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
+      SITEURL: http://${SITEURL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      STATIC_ROOT: /home/web/static
+      MEDIA_ROOT: /home/web/media
+      # For database
+      PGDATABASE: scanweb
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: db
+      PGPORT: 5432
+      DATA_PGDATABASE: kobo_form_data
+      DATA_PGUSER: postgres
+      DATA_PGPASSWORD: postgres
+      DATA_PGHOST: db
+      DATA_PGPORT: 5432
+      GEONODE_PGDATABASE: geonode
+      GEONODE_PGUSER: postgres
+      GEONODE_PGPASSWORD: postgres
+      GEONODE_PGHOST: db
+      GEONODE_PGPORT: 5432
+      KOBO_PGDATABASE: ${KOBO_PGDATABASE}
+      KOBO_PGUSER: ${KOBO_PGUSER}
+      KOBO_PGPASSWORD: ${KOBO_PGPASSWORD}
+      KOBO_PGHOST: ${KOBO_PGHOST}
+      KOBO_PGPORT: ${KOBO_PGPORT}
+      # For GeoNode
+      GEONODE_SERVER_HOST: http://geonode
+      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
+      GEONODE_ADMIN_USER: ${GEONODE_ADMIN_USER}
+      GEONODE_ADMIN_PASSWORD: ${GEONODE_ADMIN_PASSWORD}
+      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      # Kobo API
+      KOBO_API_URL: ${KOBO_API_URL}
+      KOBO_API_CLIENTID: ${KOBO_API_CLIENTID}
+      KOBO_API_CLIENTSECRET: ${KOBO_API_CLIENTSECRET}
+      KOBO_API_USER: ${KOBO_API_USER}
+      KOBO_API_PASSWORD: ${KOBO_API_PASSWORD}
+      # Redis settings
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DEFAULT_DB: 1
+      REDIS_SESSION_DB: 2
+      # Skin settings
+      {{- if eq .Values.USE_SCANAGROEMPRESA_THEME_APP "True" }}
+
+      USE_SCANAGROEMPRESA_THEME_APP: ${USE_SCANAGROEMPRESA_THEME_APP}
+      SCANAGROEMPRESA_THEME_APP_NAME: ${SCANAGROEMPRESA_THEME_APP_NAME}
+      SCANAGROEMPRESA_THEME_APP_PIP_URL: ${SCANAGROEMPRESA_THEME_APP_PIP_URL}
+
+      {{- end }}
+
+    labels:
+      io.rancher.container.start_once: 'true'
+      io.rancher.container.pull_image: always
+      cron.schedule: 0 */5 * * * ?
+      cron.action: restart
+
   borg-backup-service:
     image: lucernae/borgbackup:1.1.8
     labels:
