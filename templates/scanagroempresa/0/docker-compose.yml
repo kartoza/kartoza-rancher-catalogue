@@ -35,7 +35,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190530
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190627
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -140,7 +140,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190530
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190627
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -361,7 +361,7 @@ services:
       - scanagroempresa-redis-data:/data/
 
   scanagroempresa:
-    image: kartoza/scanagroempresa:v1.0.8-20190530
+    image: kartoza/scanagroempresa:v1.0.10-20190627
     working_dir: /home/web/extra_app
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
@@ -535,7 +535,7 @@ services:
       {{- end }}
 
   kobo-geonode-integration:
-    image: kartoza/scanagroempresa:v1.0.8-20190530
+    image: kartoza/scanagroempresa:v1.0.10-20190627
     command: python runSync.py
     working_dir: /home/web/kobo_sync_service
     volumes:
@@ -612,7 +612,7 @@ services:
       cron.action: restart
 
   kobo-extractor:
-    image: kartoza/scanagroempresa:v1.0.8-20190530
+    image: kartoza/scanagroempresa:v1.0.10-20190627
     command: python manage.py kobo_extractor
     working_dir: /home/web/extra_app
     volumes:
