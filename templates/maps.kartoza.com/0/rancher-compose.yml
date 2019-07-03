@@ -5,6 +5,24 @@
   version: v1.0
   uuid: kartozamaps-0
   questions:
+    - variable: GEOSERVER_VERSION
+    label: "GeoServer image Version"
+    description: "Docker GeoServer Image version number "
+    required: true
+    default: '2.15.0'
+    type: "string"
+    - variable: BTSYNC_CTM_SECRET
+    label: "QGIS Server volumes key for CTM data"
+    description: "Resilio sync read/write key for syncing CTM QGIS projects and data"
+    required: true
+    default:
+    type: "string"
+  - variable: QGIS_VERSION
+    label: "QGIS Server version for docker"
+    description: "QGIS Server version for docker"
+    required: true
+    default: '3.6'
+    type: "string"
   - variable: BTSYNC_QGIS_SECRET
     label: "QGIS Server volumes key"
     description: "Resilio sync read/write key for syncing QGIS projects and data"

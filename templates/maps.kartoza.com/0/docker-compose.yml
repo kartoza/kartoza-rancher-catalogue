@@ -1,66 +1,94 @@
 version: '2'
-
 volumes:
-  web-data:
-  datadir:
-  geoserver-data:
-  sld:
-
+  web-data: {}
+  datadir: {}
+  geoserver-data: {}
+  sld: {}
 services:
   geoserver:
-    image: kartoza/geoserver:2.13.0
+    image: kartoza/geoserver:${GEOSERVER_VERSION}
     stdin_open: true
-    extra_hosts:
-    - postgis.kartoza.com:postgis.kartoza.com
     volumes:
     - geoserver-data:/opt/geoserver/data_dir
-    restart: on-failure
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
+    labels:
+      io.rancher.container.pull_image: always
+
+  btsync-ctm-data-dir:
+    image: kartoza/btsync
+    environment:
+      DEVICE: prod-ctm-data.kartoza.com
+      SECRET: ${BTSYNC_CTM_SECRET}
+    stdin_open: true
+    volumes:
+    - ctm-data:/web:rw
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
+
+  maps-loadbalancer:
+    image: rancher/lb-service-haproxy:v0.9.3
+    ports:
+    - 80:80/tcp
+    - 443:443/tcp
+    labels:
+      io.rancher.container.agent.role: environmentAdmin,agent
+      io.rancher.container.agent_service.drain_provider: 'true'
+      io.rancher.container.create_agent: 'true'
 
   web:
-    image: kartoza/qgis-server:2.18
+    image: camptocamp/qgis-server:${QGIS_VERSION}
     environment:
       PGSERVICEFILE: /web/pg_service.conf
       QGIS_PROJECT_FILE: ''
-    extra_hosts:
-    - postgis.kartoza.com:postgis.kartoza.com
+      GIS_SERVER_LOG_LEVEL: DEBUG
+      MAX_REQUESTS_PER_PROCESS: '100'
     volumes:
     - web-data:/web
-    restart: on-failure
+    - raw:/data:rw
+    - ctm-data:/CapeTownMarathon
+    extra_hosts:
+    - postgis.kartoza.com:postgis.kartoza.com
 
+  bstync-qgis-server:
+    image: kartoza/btsync
+    environment:
+      DEVICE: qgisserverdata.kartoza.com
+      SECRET: ${BTSYNC_QGIS_SECRET}
+    volumes:
+    - web-data:/web:rw
 
+  btsync-geoserver-data-dir:
+    image: kartoza/btsync
+    environment:
+      DEVICE: geoserverdata.kartoza.com
+      SECRET: ${BTSYNC_GEOSERVER_SECRET}
+    volumes:
+    - geoserver-data:/web:rw
 
   mapproxy:
     image: kartoza/mapproxy
     volumes:
-    - web-data:/web
+    - web-data:/mapproxy
     extra_hosts:
     - postgis.kartoza.com:postgis.kartoza.com
     links:
-    - geoserver:geoserver
     - web:web
-    restart: on-failure
+    - geoserver:geoserver
+    ports:
+    - 6050:8080/tcp
 
   ngnix:
     image: nginx
     volumes:
     - web-data:/web
+    - ctm-data:/CapeTownMarathon
     links:
-    - geoserver:geoserver
-    - mapproxy:mapproxy
     - web:web
+    - mapproxy:mapproxy
     - mapserver:mapserver
-    restart: on-failure
-
-  bstync-qgis-server:
-    image: kartoza/btsync
-    environment:
-      DEVICE: prod-maps.kartoza.com
-      SECRET: ${BTSYNC_QGIS_SECRET}
-    volumes:
-    - web-data:/web:rw
-    restart: on-failure
-
-
+    - geoserver:geoserver
 
   mapserver:
     image: mazano/mapserver:dev
@@ -69,24 +97,10 @@ services:
     volumes:
     - web-data:/web
     - sld:/map/sld
-
     extra_hosts:
     - postgis.kartoza.com:postgis.kartoza.com
-    restart: on-failure
 
-  btsync-geoserver-data-dir:
-    # BTSync backups for GeoServer data directory
-    image: kartoza/btsync
-    restart: on-failure
-    volumes:
-    # We mount RW so that we can use peers
-    # to push shapefiles etc. to the server
-    - geoserver-data:/web:rw
-    # Use this if you ARE orchestrating with Rancher
-    # and then see the accompanying rancher-compose.yml file
-    environment:
-    - SECRET=${BTSYNC_GEOSERVER_SECRET}
-    - DEVICE=geoserverdata.kartoza.com
+
 
 
 
