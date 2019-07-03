@@ -1,6 +1,6 @@
 .catalog:
   name: "Kartoza PostGIS 11.0-2.5"
-  description: "This is [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 10.0 all set up and ready to go in Rancher."
+  description: "This is [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
   version: v11.0-2.5
   uuid: kartoza-postgis
   questions:
