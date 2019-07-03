@@ -264,6 +264,12 @@ catalog:
       default: ""
       type: string
 
+    - variable: KOBO_API_TOKEN
+      label: "Kobo API TOKEN"
+      required: true
+      default: ""
+      type: string
+
     - variable: KOBO_PGDATABASE
       label: "Kobo PGDATABASE for direct db access"
       required: true
