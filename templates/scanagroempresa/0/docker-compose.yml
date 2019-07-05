@@ -19,6 +19,46 @@ services:
       GEONODE_GEODATABASE: geonode_data
       GEONODE_GEODATABASE_PASSWORD: geonode_data
 
+  qgis-server-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync:rancher
+    hostname: qgis-server-data
+    restart: unless-stopped
+    volumes:
+      - web-data:/web:rw
+    environment:
+      - SECRET=${BTSYNC_QGIS_DATA_SECRET}
+      - DEVICE=QGISSERVER-{{ .Stack.Name }}
+      - STANDBY_MODE=TRUE
+
+  qgis-server-plugins:
+    # BTSync backups for database dumps
+    image: kartoza/btsync:rancher
+    hostname: qgis-plugins
+    restart: unless-stopped
+    volumes:
+      - plugins:/web:rw
+    environment:
+      - SECRET=${BTSYNC_PLUGINS_DATA_SECRET}
+      - DEVICE=QGISSERVERPLUGINS-{{ .Stack.Name }}
+      - STANDBY_MODE=TRUE
+
+  qgis_server:
+    image: 3liz/qgis-map-server:3.8
+    environment:
+      QGSRV_SERVER_WORKERS: ${QGISSERVER_WORKERS}
+      QGSRV_LOGGING_LEVEL: 'DEBUG'
+      QGSRV_CACHE_ROOTDIR: /projects
+      QGSRV_CACHE_SIZE: 10
+      QGSRV_SERVER_PLUGINPATH: /plugins
+      QGIS_SERVER_PARALLEL_RENDERING: 'true'
+      QGIS_SERVER_MAX_THREADS: ${QGIS_SERVER_THREADS}
+    volumes:
+      - web-data:/projects
+      - plugins:/plugins
+    links:
+      - db
+
   smtp:
     image: catatnight/postfix
     environment:
@@ -276,6 +316,7 @@ services:
     links:
       - django
       - geoserver
+      - qgis_server
     ports:
       - "${NGINX_PORT_MAPPING}"
     volumes:
@@ -734,6 +775,8 @@ services:
       - templates:/borg/data/templates
 
 volumes:
+  web-data:
+  plugins:
   geoserver-data-dir:
 #    name: ${COMPOSE_PROJECT_NAME}-gsdatadir
   dbdata:
