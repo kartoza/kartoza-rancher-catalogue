@@ -34,28 +34,71 @@ catalog:
       required: true
       default: gis
       type: "string"
+
     - variable: POSTGRES_PASS
       label: PostgreSQL superuser password to create.
       required: true
       default: docker
       type: "string"
+
     - variable: POSTGRES_HBA_RANGE
       label: "Database allowed hosts"
       description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
       required: true
       default: 0.0.0.0/0
       type: "string"
+
+    - variable: EMAIL_HOST
+      required: true
+      label: "Email Host"
+      description: "Host for sending e-mail."
+      default: "smtp"
+      type: "string"
+
+    - variable: EMAIL_PORT
+      required: true
+      label: "Email PORT"
+      description: "Port for sending e-mail."
+      default: "25"
+      type: "string"
+
     - variable: MAIL_DOMAIN
+      required: true
       label: "Email Domain"
       description: "Configure email domain for this site."
-      default: ""
+      default: "kartoza.com"
       type: "string"
+
+    - variable: SMTP_USER
+      required: true
+      label: "SMTP User"
+      description: "Set the SMTP user."
+      default: "noreply"
+      type: "string"
+
+    - variable: SMTP_PASSWORD
+      required: true
+      label: "SMTP Password"
+      description: "Set the SMTP password."
+      default: "docker"
+      type: "string"
+
     - variable: DEFAULT_FROM_EMAIL
+      required: true
       label: "From: address of default email sent from this site."
       description: "Example: Ford3 <noreply@ford3.org>"
-      default: "Ford3 <noreply@ford3.org>"
+      default: "OpenEdu <noreply@openedu.org>"
       type: "string"
+
+    - variable: EMAIL_SUBJECT_PREFIX
+      required: true
+      label: "From: address of default email sent from this site."
+      description: "Example: Ford3 <noreply@ford3.org>"
+      default: "[OpenEdu]"
+      type: "string"
+
     - variable: ADMIN_EMAIL
+      required: true
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
       default: ""
@@ -67,20 +110,31 @@ catalog:
       required: false
       default:
       type: "string"
+
     - variable: BTSYNC_DB_DEVICE
       label: "BtSync DB device ID"
       default: "Ford3 - Postgis Data"
       type: "string"
+
     - variable: BTSYNC_MEDIA_SECRET
       label: "Media backups key"
       description: "Resilio sync read/write key for syncing geonode media backups"
       required: false
       default:
       type: "string"
+
     - variable: BTSYNC_MEDIA_DEVICE
       label: "BtSync MEDIA device ID"
       default: "Ford3 - Media Data"
       type: "string"
+
+    - variable: DJANGO_LOG_LEVEL
+      label: "Django log level"
+      description: "e.g: DEBUG, INFO, WARNING, ERROR, CRITICAL"
+      default: "INFO"
+      required: true
+      type: "string"
+
     - variable: SENTRY_KEY
       label: "Sentry client key"
       description: "SDK client key (SENTRY_DSN)"
