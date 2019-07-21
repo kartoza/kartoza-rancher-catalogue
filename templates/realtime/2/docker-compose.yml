@@ -210,7 +210,7 @@ services:
     - uwsgi:uwsgi
 
   web:
-    image: inasafe/inasafe-django_nginx:v4.0.1-18.08.21
+    image: inasafe/inasafe-django_nginx:v4.0.2-19.07.21
     command: prod
     volumes:
     - django-static-data:/home/web/static:ro
@@ -237,7 +237,7 @@ services:
       io.rancher.container.create_agent: 'true'
 
   indicator-worker:
-    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
+    image: inasafe/inasafe-django_uwsgi:v4.0.2-19.07.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -334,7 +334,7 @@ services:
       cron.action: restart
 
   uwsgi:
-    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
+    image: inasafe/inasafe-django_uwsgi:v4.0.2-19.07.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -377,7 +377,7 @@ services:
       io.rancher.container.pull_image: always
 
   checkprocessedeq:
-    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
+    image: inasafe/inasafe-django_uwsgi:v4.0.2-19.07.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
@@ -428,7 +428,7 @@ services:
       cron.action: restart
 
   django-worker:
-    image: inasafe/inasafe-django_uwsgi:v4.0.1-18.08.21
+    image: inasafe/inasafe-django_uwsgi:v4.0.2-19.07.21
     environment:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672/
       C_FORCE_ROOT: 'true'
