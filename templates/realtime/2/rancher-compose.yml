@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "InaSAFE Realtime v4"
   description: "InaSAFE Realtime using InaSAFE core v4"
-  version: v4.0
+  version: v4.0.1
   uuid: inasafe-realtime-v4-2
   minimum_rancher_version: v1.6.12
   questions:
@@ -188,6 +188,18 @@ services:
     scale: 4
   django-worker:
     scale: 2
+  rabbitmq:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 5672
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      reinitializing_timeout: 60000
   web:
     scale: 1
     start_on_create: true
