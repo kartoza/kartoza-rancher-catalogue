@@ -14,7 +14,10 @@ services:
   db:
     image: kartoza/postgis:9.6-2.4
     volumes:
-      - 'postgis-data:/var/lib/postgresql'
+      # Don't use a storage volume - the wal logs grow large 
+      # over time and can fill up the disk.
+      # Also the app by design does not need persistance 
+      #- 'postgis-data:/var/lib/postgresql'
       - 'backups:/backups'
     environment:
       - POSTGRES_DB=gis
