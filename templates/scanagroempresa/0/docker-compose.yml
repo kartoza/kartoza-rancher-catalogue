@@ -140,7 +140,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190716
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190724
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -361,7 +361,7 @@ services:
       - scanagroempresa-redis-data:/data/
 
   scanagroempresa:
-    image: kartoza/scanagroempresa:v1.0.15-20190716
+    image: kartoza/scanagroempresa:v1.0.16-20190724
     working_dir: /home/web/extra_app
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
@@ -435,7 +435,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190716
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190724
     # tty: true
     command: python manage.py updatelayers -i -s kobo_form_data
     labels:
@@ -533,7 +533,7 @@ services:
       {{- end }}
 
   kobo-extractor:
-    image: kartoza/scanagroempresa:v1.0.15-20190716
+    image: kartoza/scanagroempresa:v1.0.16-20190724
     command: python manage.py kobo_extractor
     working_dir: /home/web/extra_app
     volumes:
