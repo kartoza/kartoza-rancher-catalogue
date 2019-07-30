@@ -2,7 +2,7 @@
 version: '2'
 catalog:
   name: "Scanagroempresa"
-  version: "v1.0.13-20190704"
+  version: "v1.1.0-20190727"
   description: "Scanagroempresa + GeoNode Generic deployment"
   uuid: scanagroempresa-0
   minimum_rancher_version: 'v1.6'
@@ -262,31 +262,26 @@ catalog:
       default: 'admin'
 
     - variable: KOBO_API_URL
+      label: "KOBO URL (used to fetch medias)"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KPI_URL
+      label: "KPI URL (used to connect to KoboToolbox API)"
+      required: true
+      default: ""
+      type: string
+
+    - variable: KOBO_API_URL
       label: "Kobo API endpoint URL"
       required: true
       default: ""
       type: string
 
-    - variable: KOBO_API_CLIENTID
-      label: "Kobo API Client ID"
-      required: true
-      default: ""
-      type: string
 
-    - variable: KOBO_API_CLIENTSECRET
-      label: "Kobo API Client Secret"
-      required: true
-      default: ""
-      type: string
-
-    - variable: KOBO_API_USER
-      label: "Kobo API USER"
-      required: true
-      default: ""
-      type: string
-
-    - variable: KOBO_API_PASSWORD
-      label: "Kobo API PASSWORD"
+    - variable: KOBO_API_TOKEN
+      label: "Kobo API TOKEN"
       required: true
       default: ""
       type: string
