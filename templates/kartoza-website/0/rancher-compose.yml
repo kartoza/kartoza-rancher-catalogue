@@ -139,28 +139,23 @@ services:
       strategy: recreate
       request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
       reinitializing_timeout: 60000
-
-#      db:
-#        scale: 1
-#        labels:
-#          io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-#        web:
-#          scale: 1
-#          labels:
-#            io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-#        uwsgi:
-#          scale: 1
-#          labels:
-#            io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-#        smtp:
-#          scale: 1
-#          labels:
-#            io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-#        rabbitmq:
-#          scale: 1
-#          labels:
-#            io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-#        dbbackups:
-#          scale: 1
-#          labels:
-#            io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  db:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  uwsgi:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  smtp:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  rabbitmq:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  dbbackups:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
