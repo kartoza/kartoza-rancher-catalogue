@@ -137,8 +137,8 @@ services:
       strategy: recreate
       request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
       reinitializing_timeout: 60000
-    labels:
-      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#    labels:
+#      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
 #  uwsgi:
 #    scale: 1
 #    labels:
