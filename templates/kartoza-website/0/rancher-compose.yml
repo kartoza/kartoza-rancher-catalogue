@@ -127,26 +127,26 @@ catalog:
             scale: 1
             labels:
               io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-          web:
-            scale: 1
-            labels:
-              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-          uwsgi:
-            scale: 1
-            labels:
-              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-          smtp:
-            scale: 1
-            labels:
-              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-          rabbitmq:
-            scale: 1
-            labels:
-              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
-          dbbackups:
-            scale: 1
-            labels:
-              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#          web:
+#            scale: 1
+#            labels:
+#              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#          uwsgi:
+#            scale: 1
+#            labels:
+#              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#          smtp:
+#            scale: 1
+#            labels:
+#              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#          rabbitmq:
+#            scale: 1
+#            labels:
+#              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+#          dbbackups:
+#            scale: 1
+#            labels:
+#              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
 
 services:
   web:
