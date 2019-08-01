@@ -2,7 +2,7 @@ version: '2'
 catalog:
   name: "Kartoza.com"
   description: "Kartoza.com"
-  version: v1.0.1
+  version: 0
   uuid: kartoza-website-0
   questions:
     - variable: SITE_URL
@@ -86,14 +86,14 @@ catalog:
     - variable: DEFAULT_FROM_EMAIL
       required: true
       label: "From: address of default email sent from this site."
-      description: "Example: Ford3 <noreply@ford3.org>"
+      description: "Example: Kartoza-website <noreply@kartoza-website.org>"
       default: "OpenEdu <noreply@openedu.org>"
       type: "string"
 
     - variable: EMAIL_SUBJECT_PREFIX
       required: true
       label: "From: address of default email sent from this site."
-      description: "Example: Ford3 <noreply@ford3.org>"
+      description: "Example: Kartoza-website <noreply@kartoza-website.org>"
       default: "[OpenEdu]"
       type: "string"
 
