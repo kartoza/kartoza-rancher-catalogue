@@ -96,17 +96,7 @@ services:
 
   web:
     image: 10.0.0.13:5000/nginx
-#    entrypoint: /etc/nginx/sites-available/docker-entrypoint.sh
 
-    {{- if eq .Values.DJANGO_DEBUG_MODE "True" }}
-
-    command: dev
-
-    {{- else }}
-
-    command: prod
-
-    {{- end }}
     volumes:
       - nginx-conf-data:/etc/nginx/sites-available
       - django-statics-data:/home/web/static:ro
