@@ -111,18 +111,18 @@ catalog:
       required: true
       type: "string"
 
-#    - variable: "HOST_AFFINITY"
-#        label: "Label of host to deploy on"
-#        description: |
-#          To keep containers running on specific
-#          hosts, provide label attached to host
-#          to deploy on. For example, if you create a label
-#          when deploying your host with key gis-box-id
-#          and value 3 then you would enter here gis-box-id=3
-#        required: true
-#        type: string
-#        default: "mountain"
-#        services:
+    - variable: "HOST_AFFINITY"
+      label: "Label of host to deploy on"
+      description: |
+          To keep containers running on specific
+          hosts, provide label attached to host
+          to deploy on. For example, if you create a label
+          when deploying your host with key gis-box-id
+          and value 3 then you would enter here gis-box-id=3
+      required: true
+      type: string
+      default: "mountain"
+#      services:
 #          db:
 #            scale: 1
 #            labels:
