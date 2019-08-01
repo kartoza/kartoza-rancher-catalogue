@@ -122,7 +122,6 @@ catalog:
         required: true
         type: string
         default: "mountain"
-        services:
 
 services:
   web:
