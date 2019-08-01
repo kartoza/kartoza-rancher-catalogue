@@ -1,0 +1,7 @@
+name: KartozaWebsite
+description: KartozaWebsite
+version: "v1.0.0-20190801"
+category: Public
+maintainer: Kartoza (Pty) Ltd.
+license: GPL v3
+projectURL: https://github.com/kartoza/docker-mezzanine
