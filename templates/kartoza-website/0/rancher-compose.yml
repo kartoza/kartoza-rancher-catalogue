@@ -1,0 +1,164 @@
+version: '2'
+catalog:
+  name: "Kartoza.com"
+  description: "Kartoza.com"
+  version: v1.0.1
+  uuid: kartoza-website-0
+  questions:
+    - variable: SITE_URL
+      label: "Site URL"
+      description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
+      required: true
+      default: ""
+      type: "string"
+
+    - variable: DJANGO_ALLOWED_HOSTS
+      label: "Django allowed hosts"
+      description: "Python literal of hosts lists."
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: DJANGO_DEBUG_MODE
+      label: "Django DEBUG mode settings"
+      description: "Set to True to enable debug mode"
+      required: true
+      default: "False"
+      type: "enum"
+      options:
+        - "True"
+        - "False"
+
+    - variable: POSTGRES_DB
+      label: PostgreSQL db to create.
+      required: true
+      default: gis
+      type: "string"
+
+    - variable: POSTGRES_PASS
+      label: PostgreSQL superuser password to create.
+      required: true
+      default: docker
+      type: "string"
+
+    - variable: POSTGRES_HBA_RANGE
+      label: "Database allowed hosts"
+      description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses."
+      required: true
+      default: 0.0.0.0/0
+      type: "string"
+
+    - variable: EMAIL_HOST
+      required: true
+      label: "Email Host"
+      description: "Host for sending e-mail."
+      default: "smtp"
+      type: "string"
+
+    - variable: EMAIL_PORT
+      required: true
+      label: "Email PORT"
+      description: "Port for sending e-mail."
+      default: "25"
+      type: "string"
+
+    - variable: MAIL_DOMAIN
+      required: true
+      label: "Email Domain"
+      description: "Configure email domain for this site."
+      default: "kartoza.com"
+      type: "string"
+
+    - variable: SMTP_USER
+      required: true
+      label: "SMTP User"
+      description: "Set the SMTP user."
+      default: "noreply"
+      type: "string"
+
+    - variable: SMTP_PASSWORD
+      required: true
+      label: "SMTP Password"
+      description: "Set the SMTP password."
+      default: "docker"
+      type: "string"
+
+    - variable: DEFAULT_FROM_EMAIL
+      required: true
+      label: "From: address of default email sent from this site."
+      description: "Example: Ford3 <noreply@ford3.org>"
+      default: "OpenEdu <noreply@openedu.org>"
+      type: "string"
+
+    - variable: EMAIL_SUBJECT_PREFIX
+      required: true
+      label: "From: address of default email sent from this site."
+      description: "Example: Ford3 <noreply@ford3.org>"
+      default: "[OpenEdu]"
+      type: "string"
+
+    - variable: ADMIN_EMAIL
+      required: true
+      label: "Administrator email"
+      description: "Primary contact email for the site e.g. 'bob@foo.com'."
+      default: ""
+      type: "string"
+
+    - variable: DJANGO_LOG_LEVEL
+      label: "Django log level"
+      description: "e.g: DEBUG, INFO, WARNING, ERROR, CRITICAL"
+      default: "INFO"
+      required: true
+      type: "string"
+
+    - variable: "HOST_AFFINITY"
+        label: "Label of host to deploy on"
+        description: |
+          To keep containers running on specific
+          hosts, provide label attached to host
+          to deploy on. For example, if you create a label
+          when deploying your host with key gis-box-id
+          and value 3 then you would enter here gis-box-id=3
+        required: true
+        type: string
+        default: "mountain"
+        services:
+          db:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+          web:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+          uwsgi:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+          smtp:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+          rabbitmq:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+          dbbackups:
+            scale: 1
+            labels:
+              io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+
+services:
+  web:
+    scale: 1
+    start_on_create: true
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 80
+      unhealthy_threshold: 3
+      initializing_timeout: 60000
+      interval: 2000
+      strategy: recreate
+      request_line: 'GET "/" "HTTP/1.1\r\nHost: ${SITE_URL}"'
+      reinitializing_timeout: 60000
