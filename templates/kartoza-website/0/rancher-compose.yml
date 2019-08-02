@@ -23,7 +23,7 @@ catalog:
       label: "Django DEBUG mode settings"
       description: "Set to True to enable debug mode"
       required: true
-      default: "True"
+      default: "False"
       type: "enum"
       options:
         - "True"
