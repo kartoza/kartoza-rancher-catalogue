@@ -93,10 +93,29 @@ services:
       - PGDATABASE=gis
     restart: unless-stopped
 
+  nginx-conf:
+    image: kartoza/ford3_nginx_conf:v1.0.3-20190728
+    volumes:
+      - nginx-conf-data:/etc/nginx/sites-available
+    environment:
+      TARGET: /etc/nginx/sites-available
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.start_once: 'true'
 
   web:
-    image: 10.0.0.13:5000/nginx
+    image: nginx
+    entrypoint: /etc/nginx/sites-available/docker-entrypoint.sh
 
+    {{- if eq .Values.DJANGO_DEBUG_MODE "True" }}
+
+    command: dev
+
+    {{- else }}
+
+    command: prod
+
+    {{- end }}
     volumes:
       - nginx-conf-data:/etc/nginx/sites-available
       - django-statics-data:/home/web/static:ro
