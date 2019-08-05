@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
   uwsgi:
-    image: 10.0.0.13:5000/mezzanine_uwsgi
+    image: 10.0.0.13:5000/kartoza_django
     working_dir: /home/web/django_project
     environment:
       - PYTHONPATH=/home/web/django_project
