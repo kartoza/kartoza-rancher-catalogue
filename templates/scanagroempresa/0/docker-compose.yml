@@ -60,7 +60,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -88,7 +88,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -111,8 +111,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -166,7 +166,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -195,7 +195,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -218,8 +218,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -262,7 +262,7 @@ services:
       DOCKERHOST:
       DOCKER_HOST_IP:
       GEONODE_HOST_IP:
-      NGINX_BASE_URL: http://${SITEURL}/
+      NGINX_BASE_URL: ${PROTOCOL}://${SITEURL}/
 
   geonode:
     image: geosolutionsit/nginx-geonode:latest
@@ -377,7 +377,7 @@ services:
       GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
-      SITEURL: http://${SITEURL}
+      SITEURL: ${PROTOCOL}://${SITEURL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       STATIC_ROOT: /home/web/static
       MEDIA_ROOT: /home/web/media
@@ -404,9 +404,9 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEONODE_SERVER_PUBLIC_HOST: ${PROTOCOL}://${SITEURL}
+      GEOSERVER_SERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
+      GEOSERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
@@ -462,7 +462,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -487,7 +487,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -510,8 +510,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -551,7 +551,7 @@ services:
       GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
-      SITEURL: http://${SITEURL}
+      SITEURL: ${PROTOCOL}://${SITEURL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       STATIC_ROOT: /home/web/static
       MEDIA_ROOT: /home/web/media
@@ -578,11 +578,11 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
+      GEONODE_SERVER_PUBLIC_HOST: ${PROTOCOL}://${SITEURL}
       GEONODE_ADMIN_USER: ${GEONODE_ADMIN_USER}
       GEONODE_ADMIN_PASSWORD: ${GEONODE_ADMIN_PASSWORD}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_SERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
+      GEOSERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
       GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}

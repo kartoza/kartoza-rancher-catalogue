@@ -295,6 +295,12 @@ catalog:
       default: "csrftoken_geonode"
       type: string
 
+    - variable: PROTOCOL
+      label: "http or https"
+      required: true
+      default: "http"
+      type: string
+
 services:
   db:
     scale: 1
