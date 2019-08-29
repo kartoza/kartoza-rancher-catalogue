@@ -134,6 +134,7 @@ services:
       GEONODE_THEME_APP_PIP_URL: ${GEONODE_THEME_APP_PIP_URL}
 
       {{- end }}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
 
   worker:
     restart: unless-stopped
@@ -338,12 +339,12 @@ services:
   btsync-templates:
     # BTSync backups for database dumps
     # for templates generated on the fly by django
-    # so that we can customise them and have them 
+    # so that we can customise them and have them
     # persist between upgrades. Use the Django admin
     # Home › GeoNode Client Library › Themes
     # to generate an initial one, then customise
     # via btsync in this folder the generated theme
-    # (avoid regenerating the template in django admin 
+    # (avoid regenerating the template in django admin
     # after that).
     image: kartoza/btsync:rancher
     hostname: btsync-data
@@ -408,6 +409,7 @@ services:
       GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KPI_URL: ${KPI_URL}
@@ -583,6 +585,7 @@ services:
       GEOSERVER_HOST: http://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KPI_URL: ${KPI_URL}
@@ -666,12 +669,12 @@ volumes:
   scanagroempresa-ssh-config:
 #    name: ${COMPOSE_PROJECT_NAME}-statics
   # for templates generated on the fly by django
-  # so that we can customise them and have them 
+  # so that we can customise them and have them
   # persist between upgrades. Use the Django admin
   # Home › GeoNode Client Library › Themes
   # to generate an initial one, then customise
   # via btsync in this folder the generated theme
-  # (avoid regenerating the template in django admin 
+  # (avoid regenerating the template in django admin
   # after that).
   scanagroempresa-statics:
   scanagroempresa-redis-data:
