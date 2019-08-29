@@ -289,6 +289,12 @@ catalog:
       default: "5432"
       type: string
 
+    - variable: GEONODE_CSRF_COOKIE_NAME
+      label: "name for the GeoNode csrftoken cookie"
+      required: true
+      default: "csrftoken_geonode"
+      type: string
+
 services:
   db:
     scale: 1
