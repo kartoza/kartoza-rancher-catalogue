@@ -1,7 +1,7 @@
 name: "ScanAgroempresa app"
 description: |
     ScanAgroempresa.
-version: "v1.1.0-20190727"
+version: "v1.1.1-20190903"
 category: "GIS"
 maintainer: "Kartoza.com"
 license: "GPL"
