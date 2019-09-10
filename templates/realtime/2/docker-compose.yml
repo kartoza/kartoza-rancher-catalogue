@@ -290,7 +290,7 @@ services:
     - indicator.%h
     labels:
       io.rancher.container.pull_image: always
-      cron.schedule: "0 0 * * * ?"
+      cron.schedule: "0 1 * * * ?"
       cron.action: restart
 
   dbbackup:
