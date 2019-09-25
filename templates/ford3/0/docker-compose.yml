@@ -53,6 +53,7 @@ services:
       - EMAIL_SUBJECT_PREFIX=${EMAIL_SUBJECT_PREFIX}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL}
+      - SENTRY_KEY=${SENTRY_KEY}
     volumes:
       - django-statics-data:/home/web/static:rw
       - django-media-data:/home/web/media:rw
