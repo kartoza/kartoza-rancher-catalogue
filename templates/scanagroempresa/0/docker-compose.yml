@@ -75,7 +75,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190727
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190912
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -100,7 +100,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -128,7 +128,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -151,8 +151,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -174,13 +174,14 @@ services:
       GEONODE_THEME_APP_PIP_URL: ${GEONODE_THEME_APP_PIP_URL}
 
       {{- end }}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
 
   worker:
     restart: unless-stopped
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190727
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190912
     container_name: django4${COMPOSE_PROJECT_NAME}
     stdin_open: true
     # tty: true
@@ -205,7 +206,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -234,7 +235,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -257,8 +258,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -301,7 +302,7 @@ services:
       DOCKERHOST:
       DOCKER_HOST_IP:
       GEONODE_HOST_IP:
-      NGINX_BASE_URL: http://${SITEURL}/
+      NGINX_BASE_URL: ${PROTOCOL}://${SITEURL}/
 
   geonode:
     image: geosolutionsit/nginx-geonode:latest
@@ -379,12 +380,12 @@ services:
   btsync-templates:
     # BTSync backups for database dumps
     # for templates generated on the fly by django
-    # so that we can customise them and have them 
+    # so that we can customise them and have them
     # persist between upgrades. Use the Django admin
     # Home › GeoNode Client Library › Themes
     # to generate an initial one, then customise
     # via btsync in this folder the generated theme
-    # (avoid regenerating the template in django admin 
+    # (avoid regenerating the template in django admin
     # after that).
     image: kartoza/btsync:rancher
     hostname: btsync-data
@@ -402,7 +403,7 @@ services:
       - scanagroempresa-redis-data:/data/
 
   scanagroempresa:
-    image: kartoza/scanagroempresa:v1.1.0-20190727
+    image: kartoza/scanagroempresa:v1.1.2-20190912
     working_dir: /home/web/extra_app
     volumes:
       - scanagroempresa-statics:/home/web/static:rw
@@ -417,7 +418,7 @@ services:
       GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
-      SITEURL: http://${SITEURL}
+      SITEURL: ${PROTOCOL}://${SITEURL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       STATIC_ROOT: /home/web/static
       MEDIA_ROOT: /home/web/media
@@ -444,11 +445,12 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEONODE_SERVER_PUBLIC_HOST: ${PROTOCOL}://${SITEURL}
+      GEOSERVER_SERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
+      GEOSERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KPI_URL: ${KPI_URL}
@@ -476,7 +478,7 @@ services:
     # built on hub as an autobuild against our fork
     # see https://github.com/kartoza/geonode-generic
     # and https://hub.docker.com/r/kartoza/geonode-generic
-    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190727
+    image: kartoza/scanagroempresa_geonode_generic:2.9-dev-geonode_generic-20190912
     # tty: true
     command: python manage.py updatelayers -i -s kobo_form_data
     labels:
@@ -501,7 +503,7 @@ services:
       GEONODE_INDEX_PREFIX: "r'^${GEONODE_INDEX_URL_PREFIX}?'"
       ROOT_URLCONF: core.root_urls
       PYTHONPATH: '/usr/src/scanagroempresa-docker'
-      SCANAGROEMPRESA_URL: http://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
+      SCANAGROEMPRESA_URL: ${PROTOCOL}://${SITEURL}/${SCANAGROEMPRESA_URL_PREFIX}
       GEONODE_INSTANCE_NAME: geonode
       GEONODE_LB_HOST_IP:
       GEONODE_LB_PORT:
@@ -526,7 +528,7 @@ services:
       UWSGI_CMD: uwsgi --ini /usr/src/app/uwsgi.ini
       IS_CELERY: False
       C_FORCE_ROOT: 1
-      SITEURL: http://${SITEURL}/
+      SITEURL: ${PROTOCOL}://${SITEURL}/
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 
       {{- if eq .Values.USE_EXTERNAL_SMTP "true" }}
@@ -549,8 +551,8 @@ services:
 
       DEFAULT_FROM_EMAIL: ${GEONODE_SUPPORT_EMAIL}
       # replaced with defaults in settings
-      GEOSERVER_BASE_URL: http://${SITEURL}/geoserver/
-      GEOSERVER_PUBLIC_LOCATION: http://${SITEURL}/geoserver/
+      GEOSERVER_BASE_URL: ${PROTOCOL}://${SITEURL}/geoserver/
+      GEOSERVER_PUBLIC_LOCATION: ${PROTOCOL}://${SITEURL}/geoserver/
       GEOSERVER_LOCATION: http://geoserver:8080/geoserver/
       STATIC_ROOT: /mnt/volumes/statics/static/
       MEDIA_ROOT: /mnt/volumes/statics/uploaded/
@@ -574,7 +576,7 @@ services:
       {{- end }}
 
   kobo-extractor:
-    image: kartoza/scanagroempresa:v1.1.0-20190727
+    image: kartoza/scanagroempresa:v1.1.2-20190912
     command: python manage.py kobo_extractor
     working_dir: /home/web/extra_app
     volumes:
@@ -590,7 +592,7 @@ services:
       GEONODE_INDEX_PREFIX: ${GEONODE_INDEX_URL_PREFIX}
       ROOT_URLCONF: 'scanterra.root_urls'
       DJANGO_SETTINGS_MODULE: 'scanterra.settings_prod'
-      SITEURL: http://${SITEURL}
+      SITEURL: ${PROTOCOL}://${SITEURL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       STATIC_ROOT: /home/web/static
       MEDIA_ROOT: /home/web/media
@@ -617,13 +619,14 @@ services:
       KOBO_PGPORT: ${KOBO_PGPORT}
       # For GeoNode
       GEONODE_SERVER_HOST: http://geonode
-      GEONODE_SERVER_PUBLIC_HOST: http://${SITEURL}
+      GEONODE_SERVER_PUBLIC_HOST: ${PROTOCOL}://${SITEURL}
       GEONODE_ADMIN_USER: ${GEONODE_ADMIN_USER}
       GEONODE_ADMIN_PASSWORD: ${GEONODE_ADMIN_PASSWORD}
-      GEOSERVER_SERVER_HOST: http://${SITEURL}/geoserver
-      GEOSERVER_HOST: http://${SITEURL}/geoserver
+      GEOSERVER_SERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
+      GEOSERVER_HOST: ${PROTOCOL}://${SITEURL}/geoserver
       GEOSERVER_ADMIN_USER: admin
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      GEONODE_CSRF_COOKIE_NAME: ${GEONODE_CSRF_COOKIE_NAME}
       # Kobo API
       KOBO_API_URL: ${KOBO_API_URL}
       KPI_URL: ${KPI_URL}
@@ -709,12 +712,12 @@ volumes:
   scanagroempresa-ssh-config:
 #    name: ${COMPOSE_PROJECT_NAME}-statics
   # for templates generated on the fly by django
-  # so that we can customise them and have them 
+  # so that we can customise them and have them
   # persist between upgrades. Use the Django admin
   # Home › GeoNode Client Library › Themes
   # to generate an initial one, then customise
   # via btsync in this folder the generated theme
-  # (avoid regenerating the template in django admin 
+  # (avoid regenerating the template in django admin
   # after that).
   scanagroempresa-statics:
   scanagroempresa-redis-data:

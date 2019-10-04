@@ -2,7 +2,7 @@
 version: '2'
 catalog:
   name: "Scanagroempresa"
-  version: "v1.1.0-20190727"
+  version: "v1.1.2-20190912"
   description: "Scanagroempresa + GeoNode Generic deployment"
   uuid: scanagroempresa-0
   minimum_rancher_version: 'v1.6'
@@ -314,6 +314,18 @@ catalog:
       label: "Kobo PGPORT for direct db access"
       required: true
       default: "5432"
+      type: string
+
+    - variable: GEONODE_CSRF_COOKIE_NAME
+      label: "name for the GeoNode csrftoken cookie"
+      required: true
+      default: "csrftoken_geonode"
+      type: string
+
+    - variable: PROTOCOL
+      label: "http or https"
+      required: true
+      default: "http"
       type: string
 
 services:
