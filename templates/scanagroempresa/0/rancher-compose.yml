@@ -9,6 +9,33 @@ catalog:
 
   questions:
 
+    - variable: BTSYNC_QGIS_DATA_SECRET
+      label: "QGIS Projects key"
+      description: "Resilio sync read/write key for syncing qgis projects"
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: BTSYNC_PLUGINS_DATA_SECRET
+      label: "QGIS Pplugins key"
+      description: "Resilio sync read/write key for syncing qgis plugins"
+      required: false
+      default: ""
+      type: "string"
+
+    - variable: QGISSERVER_WORKERS
+      label: "QGIS Server Workers"
+      description: "Number of QGIS Workers to use"
+      required: true
+      default: 100
+      type: "int"
+
+    - variable: QGIS_SERVER_THREADS
+      label: "QGIS Server Threads"
+      description: "Number of QGIS threads to use concurrently"
+      required: true
+      default: 10
+      type: "int"
     - variable: USE_EXTERNAL_SMTP
       label: "Use external SMTP host"
       description: "Set to false to use local SMTP server for testing"
