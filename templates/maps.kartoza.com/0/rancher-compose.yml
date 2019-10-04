@@ -1,19 +1,38 @@
 .catalog:
-  name: Kartoza Map Gallery
-  description: "This is collection of mapping utilities for creating maps to showcase the power of Open Source GIS Technologies. The stack includes GeoServer (http://geoserver.org) with  remote PostGIS, MapServer (https://mapserver.org)
-   ,Mapproxy (https://mapproxy.org) and Resilio sync all set up and ready to go in Rancher."
-  version: v1.0
+  name: "Kartoza Map Gallery"
+  description: " This is collection of mapping utilities for creating maps to showcase the power of Open Source GIS Technologies.
+                The stack includes GeoServer (http://geoserver.org) with  remote PostGIS, MapServer
+                (https://mapserver.org) , Mapproxy (https://mapproxy.org) and Resilio sync all set up and ready to go in Rancher. "
+  version: 1
   uuid: kartozamaps-0
   questions:
-    - variable: GEOSERVER_VERSION
+  - variable: GEOSERVER_VERSION
     label: "GeoServer image Version"
     description: "Docker GeoServer Image version number "
     required: true
     default: '2.15.0'
     type: "string"
-    - variable: BTSYNC_CTM_SECRET
-    label: "QGIS Server volumes key for CTM data"
-    description: "Resilio sync read/write key for syncing CTM QGIS projects and data"
+  - variable: GEOSERVER_PASSWORD
+    label: "GeoServer superuser password to create."
+    description: "GeoServer superuser password"
+    required: true
+    default: 'geoserver'
+    type: "password"
+  - variable: INITIAL_JAVA_MEMORY
+    label: "Initial Java memory setting for GeoServer"
+    description: "Initial Java memory for optimising Java See https://docs.geoserver.org/stable/en/user/production/container.html"
+    required: true
+    default: '2G'
+    type: "string"
+  - variable: MAXIMUM_JAVA_MEMORY
+    label: "Maximum Java memory setting for GeoServer"
+    description: "Maximum Java memory for optimising Java See https://docs.geoserver.org/stable/en/user/production/container.html"
+    required: true
+    default: '4G'
+    type: "string"
+  - variable: BTSYNC_CTM_SECRET
+    description: "Btsync  volumes key for CTM data"
+    label: "Resilio sync read/write key for syncing CTM QGIS projects and data"
     required: true
     default:
     type: "string"
@@ -21,17 +40,35 @@
     label: "QGIS Server version for docker"
     description: "QGIS Server version for docker"
     required: true
-    default: '3.6'
+    default: "3.6"
     type: "string"
   - variable: BTSYNC_QGIS_SECRET
-    label: "QGIS Server volumes key"
-    description: "Resilio sync read/write key for syncing QGIS projects and data"
+    description: "Btsync volumes key for QGIS projects and data"
+    label: "Resilio sync read/write key for syncing QGIS projects and data"
     required: true
-    default: 
+    default:
     type: "string"
   - variable: BTSYNC_GEOSERVER_SECRET
-    label: "Geoserver backups key"
-    description: "Resilio sync read/write key for syncing GeoServer backups"
+    description: "Resilio sync read/write key for syncing GeoServer data Directory "
+    label: "Geoserver data dir backups key"
     required: true
-    default: 
+    default:
     type: "string"
+
+  - variable: "HOST_AFFINITY"
+    label: "Label of host to deploy on"
+    description: |
+      To keep containers running on specific
+      hosts, provide label attached to host
+      to deploy on. For example, if you create a label 
+      when deploying your host with key gis-box-id
+      and value 3 then you would enter here gis-box-id=3
+    required: true
+    type: string
+    default:
+  services:
+    db:
+      scale: 1
+      labels:
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+
