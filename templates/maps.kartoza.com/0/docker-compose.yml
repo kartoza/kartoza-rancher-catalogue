@@ -8,6 +8,13 @@ services:
   geoserver:
     image: kartoza/geoserver:${GEOSERVER_VERSION}
     stdin_open: true
+    environment:
+      ENABLE_JSONP: true
+      MAX_FILTER_RULES: 20
+      OPTIMIZE_LINE_WIDTH: false
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_PASSWORD}
+      INITIAL_MEMORY: ${INITIAL_JAVA_MEMORY}
+      MAXIMUM_MEMORY: ${MAXIMUM_JAVA_MEMORY}
     volumes:
     - geoserver-data:/opt/geoserver/data_dir
     extra_hosts:
@@ -96,7 +103,7 @@ services:
       extra_hosts: postgis.kartoza.com
     volumes:
     - web-data:/web
-    - sld:/map/sld
+    - sld:/sld
     extra_hosts:
     - postgis.kartoza.com:postgis.kartoza.com
 
