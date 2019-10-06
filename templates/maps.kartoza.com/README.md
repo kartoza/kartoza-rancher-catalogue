@@ -1,19 +1,17 @@
-# Kartoza Maps in Rancher
+# Docker-Osm in Rancher
 
 This is an orchestrated set of GIS hosting tools:
 
 * [PostGIS](http://postgis.org) - packaged by Kartoza
-* [Docker Geoserver](https://github.com/kartoza/docker-geoserver.git) - packaged by kartoza
-* [Docker MapServer](https://github.com/kartoza/docker-mapserver.git) - packaged by kartoza
-* [Docker Mapproxy](https://github.com/kartoza/docker-mapproxy.git) - packaged by kartoza
-* [Docker QGIS-Server](https://hub.docker.com/r/camptocamp/qgis-server) - packaged by CamptoCamp
+* [Docker OSM](https://github.com/kartoza/docker-osm.git) - packaged by kartoza
 * [PG-Backup](https://github.com/kartoza/docker-pg-backup) - packaged by Kartoza
 * [Resilio sync (formerly btsync)](http://resilio.com/) - packaged by Kartoza
 
+Here is the link graph for the orchestrated stack:
 
-
-Once the appliance is running, you can access the map gallery from http://localhost or the IP address or domain you have setup instance at
-
+![screen shot 2017-10-24 at 08 17 32](https://raw.githubusercontent.com/kartoza/docker-osm/develop/docs/architecture.png)
+Once the appliance is running, you can access the PostGIS instance at
+<ip>:5432 (taking the IP from the rancher admin panel).
 
 **Note:**  for non-personal use of Resilio Sync you need to acquire a licence
 from http://resilio.com
@@ -24,4 +22,4 @@ Individual software projects as listed above.
 
 Packaging for Docker and Rancher:
 
-Admire Nyakudya, October 2019
+Tim Sutton, October 2017
