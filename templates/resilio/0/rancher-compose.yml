@@ -37,5 +37,4 @@
     btsync-data:
       scale: 1
       labels:
-        io.rancher.scheduler.affinity:host_label: "${HOST_AFFINITY}"
-        io.rancher.scheduler.global: "true"
+        io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
