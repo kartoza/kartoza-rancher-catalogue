@@ -1,0 +1,7 @@
+name: Resilio
+description: Resilio Sync (ex btsync)
+version: 0
+category: GIS
+maintainer: Kartoza (Pty) Ltd
+license: GPL v3
+projectURL: https://github.com/kartoza/docker-btsync
