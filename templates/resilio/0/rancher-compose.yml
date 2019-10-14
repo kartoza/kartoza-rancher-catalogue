@@ -1,4 +1,6 @@
-.catalog:
+---
+version: '2'
+catalog:
   name: Kartoza Resilio
   description: "Resilio sync all set up and ready to go in Rancher."
   version: 0
