@@ -18,9 +18,9 @@ catalog:
     required: true
     default: 
     type: "string"
-  - variable: BTSYNC_PATH
+  - variable: BTSYNC_VOL
     label: "volume_path"
-    description: "Resilio sync volume mount path (a local host path for persistent storage)"
+    description: "enter a volume name (like 'resilio-data') and a docker volume will be used, else enter a host path and a bind mount will be used"
     required: true
     default: 
     type: "string"

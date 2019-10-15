@@ -1,7 +1,7 @@
 version: '2'
 
 volumes:
-   resilio-data:
+   ${BTSYNC_VOL}:/web
 
 services:
 
@@ -12,7 +12,7 @@ services:
       restart: unless-stopped
       volumes:
       # We mount RW so that we can read and write from any peer
-         - resilio-data:${BTSYNC_PATH}:rw
+         - ${BTSYNC_VOL}:/web:rw
       # Use this if you ARE orchestrating with Rancher 
       # and then see the accompanying rancher-compose.yml file
       environment:
