@@ -1,0 +1,24 @@
+version: '2'
+
+volumes:
+   ${BTSYNC_VOL}:/web
+
+services:
+
+   btsync-data:
+      # Resilio container for p2p file-sharing
+      image: kartoza/btsync
+      hostname: btsync-data
+      restart: unless-stopped
+      volumes:
+      # We mount RW so that we can read and write from any peer
+         - ${BTSYNC_VOL}:/web:rw
+      # Use this if you ARE orchestrating with Rancher 
+      # and then see the accompanying rancher-compose.yml file
+      environment:
+        - SECRET=${BTSYNC_SECRET}
+        - DEVICE=${BTSYNC_DEVICE}
+      
+
+
+
