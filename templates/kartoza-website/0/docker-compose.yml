@@ -72,6 +72,18 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
+
+  sftp:
+    image: atmoz/sftp
+    working_dir: /home/ftp/
+    volumes:
+      - postgis-data:/home/ftp/postgis-data:r
+      - postgis-history-data:/home/ftp/postgis-history:r
+      - django-statics-data:/home/ftp/django-statics-data:r
+      - django-media-data:/home/ftp/django-media-data:r
+      - nginx-conf-data:/home/ftp/nginx/conf-data:rw
+    restart: unless-stopped
+
   dbbackups:
     image: kartoza/pg-backup:9.6
     entrypoint: []

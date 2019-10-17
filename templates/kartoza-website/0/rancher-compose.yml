@@ -159,3 +159,7 @@ services:
     scale: 1
     labels:
       io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
+  sftp:
+    scale: 1
+    labels:
+      io.rancher.scheduler.affinity:host_label: ${HOST_AFFINITY}
