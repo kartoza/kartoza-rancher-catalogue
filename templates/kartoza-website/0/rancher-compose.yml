@@ -9,7 +9,7 @@ catalog:
       label: "Site URL"
       description: "Primary URL for the site e.g. 'foo.com' (do not include http:// and doesn't end with /)."
       required: true
-      default: ""
+      default: "www.kartoza.com"
       type: "string"
 
     - variable: DJANGO_ALLOWED_HOSTS
@@ -87,18 +87,19 @@ catalog:
       required: true
       label: "From: address of default email sent from this site."
       description: "Example: Kartoza-website <noreply@kartoza-website.org>"
-      default: "OpenEdu <noreply@openedu.org>"
+      default: "noreply@kartoza.com"
       type: "string"
 
     - variable: EMAIL_SUBJECT_PREFIX
       required: true
       label: "From: address of default email sent from this site."
       description: "Example: Kartoza-website <noreply@kartoza-website.org>"
-      default: "[OpenEdu]"
+      default: "noreply@kartoza.com"
       type: "string"
 
     - variable: ADMIN_EMAIL
       required: true
+      default: "christiaan@kartoza.com"
       label: "Administrator email"
       description: "Primary contact email for the site e.g. 'bob@foo.com'."
       default: ""
