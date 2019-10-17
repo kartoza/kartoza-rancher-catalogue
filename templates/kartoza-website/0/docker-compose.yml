@@ -75,7 +75,6 @@ services:
 
   sftp:
     image: atmoz/sftp
-    working_dir: /home/ftp/
     volumes:
       - postgis-data:/home/ftp/postgis-data:r
       - postgis-history-data:/home/ftp/postgis-history:r
