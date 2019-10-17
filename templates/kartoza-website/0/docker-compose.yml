@@ -76,10 +76,10 @@ services:
   sftp:
     image: atmoz/sftp
     volumes:
-      - postgis-data:/home/ftp/postgis-data:r
-      - postgis-history-data:/home/ftp/postgis-history:r
-      - django-statics-data:/home/ftp/django-statics-data:r
-      - django-media-data:/home/ftp/django-media-data:r
+      - postgis-data:/home/ftp/postgis-data:rw
+      - postgis-history-data:/home/ftp/postgis-history:rw
+      - django-statics-data:/home/ftp/django-statics-data:rw
+      - django-media-data:/home/ftp/django-media-data:rw
       - nginx-conf-data:/home/ftp/nginx/conf-data:rw
     restart: unless-stopped
 
