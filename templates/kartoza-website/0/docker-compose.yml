@@ -83,7 +83,7 @@ services:
       - django-media-data:/home/ftp/django-media-data:rw
       - nginx-conf-data:/home/ftp/nginx/conf-data:rw
     ports:
-      - "2222:22"
+      - "22:22"
     command: kartoza:welovekartoza:1001
 
   dbbackups:
