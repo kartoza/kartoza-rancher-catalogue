@@ -121,7 +121,7 @@ catalog:
           and value 3 then you would enter here gis-box-id=3
       required: true
       type: string
-      default: "hostname=Mountain"
+      default: "name=kartoza_public"
 
 services:
   web:
