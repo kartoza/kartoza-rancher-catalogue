@@ -75,6 +75,8 @@ services:
 
   sftp:
     image: atmoz/sftp
+    environment:
+      - SFTP_USERS=kartoza:welovekartoza2019:1001
     volumes:
       - postgis-data:/home/ftp/postgis-data:rw
       - postgis-history-data:/home/ftp/postgis-history:rw
