@@ -1,7 +1,7 @@
 version: '2'
 
 volumes:
-   ${BTSYNC_VOL}:/web
+   ${BTSYNC_VOL}:
 
 services:
 
