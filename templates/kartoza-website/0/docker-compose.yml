@@ -72,7 +72,6 @@ services:
     labels:
       io.rancher.container.pull_image: always
 
-
   sftp:
 
     image: atmoz/sftp
