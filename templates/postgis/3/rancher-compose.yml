@@ -28,6 +28,16 @@
     required: true
     default: docker
     type: "password"
+  - variable: REPLICATION_USER
+    label: "PostgreSQL replication user on master."
+    required: true
+    default: docker
+    type: "string"
+  - variable: REPLICATION_PASS
+    label: "PostgreSQL replication password on master."
+    required: true
+    default: docker
+    type: "password"
   - variable: NUMBER_OF_DAYS
     label: "Remove all backups older than specified days"
     description: "Remove all backups older than specified days"
@@ -44,7 +54,7 @@
     label: "PostgreSQL database extensions"
     description: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
     required: true
-    default: postgis,hstore,postgis_topology
+    default: postgis,hstore,postgis_topology,pg_raster
     type: "string"
   - variable: POSTGRES_PORT
     description: "Postgres port"
