@@ -1,0 +1,85 @@
+version: '2'
+
+
+services:
+  
+  db:
+    image: kartoza/postgis:12.0
+    hostname: db
+    volumes:
+      - {{ .Stack.Name }}-postgis-data:/var/lib/postgresql
+      - {{ .Stack.Name }}-backups:/backups
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${POSTGRES_HBA_RANGE}
+      - POSTGRES_MULTIPLE_EXTENSIONS=${DB_EXTENSIONS}
+    ports:
+      - ${POSTGRES_PORT}:5432 
+    restart: unless-stopped
+  
+  dbbackups:
+    image: kartoza/pg-backup:12.0
+    hostname: pg-backups
+    volumes:
+      - {{ .Stack.Name }}-backups:/backups
+    links:
+      - db:db
+    environment:
+      - DUMPPREFIX=PG_${POSTGRES_DUMP_PREFIX}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - POSTGRES_DBNAME=${POSTGRES_DB}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=db
+      - REMOVE_BEFORE=${NUMBER_OF_DAYS}
+    restart: unless-stopped
+
+  btsync-data:
+    # BTSync backups for database dumps
+    image: kartoza/btsync
+    hostname: btsync-data
+    restart: unless-stopped
+    volumes:
+      - {{ .Stack.Name }}-backups:/web:rw
+    environment:
+      - SECRET=${BTSYNC_DB_SECRET}
+      - DEVICE=PostGISDatabase
+  pgwatch:
+    image: cybertec/pgwatch2-postgres
+    hostname: pg-watch-metrics
+    volumes:
+      - {{ .Stack.Name }}-pg:/var/lib/postgresql
+      - {{ .Stack.Name }}-grafana:/var/lib/grafana
+      - {{ .Stack.Name }}-pw2:/pgwatch2/persistent-config
+    environment:
+      - PW2_TESTDB=${TESTDB}
+      - PW2_WEBNOANONYMOUS=${WEBNOANONYMOUS}
+      - PW2_WEBNOCOMPONENTLOGS=${WEBNOCOMPONENTLOGS}
+      - PW2_WEBUSER=${WEBUSER}
+      - PW2_WEBPASSWORD=${WEBPASSWORD}
+      - PW2_GRAFANA_BASEURL=${GRAFANA_BASEURL}
+      - PW2_GRAFANANOANONYMOUS=${GRAFANANOANONYMOUS}
+      - PW2_GRAFANAUSER=${GRAFANAUSER}
+      - PW2_GRAFANAPASSWORD=${GRAFANAPASSWORD}
+    ports:
+      - ${PW2_WEBPORT}:8080
+      - ${PW2_GRAFANAPORT}:3000
+
+    restart: unless-stopped
+    links:
+      - db:db
+  pgadmin4:
+    image: dpage/pgadmin4:4.8
+    hostname: pgadmin4
+    volumes:
+      - {{ .Stack.Name }}-pgadmin4:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - ${PGADMIN_PORT}:80
+    restart: unless-stopped
+    links:
+      - db:db
