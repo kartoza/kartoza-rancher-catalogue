@@ -71,7 +71,7 @@ services:
     links:
       - db:db
   pgadmin4:
-    image: dpage/pgadmin4:4.8
+    image: dpage/pgadmin4:${PGADMIN_VERSION}
     hostname: pgadmin4
     volumes:
       - {{ .Stack.Name }}-pgadmin4:/var/lib/pgadmin
