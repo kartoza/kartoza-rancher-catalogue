@@ -1,7 +1,7 @@
 .catalog:
-  name: "Kartoza PostGIS 11.0-2.5"
-  description: "This is [PostGIS](http://postgis.org) 2.5 running on PostgreSQL 11.0 all set up and ready to go in Rancher."
-  version: v11.0-2.5
+  name: "Kartoza PostGIS 12.0"
+  description: "This is [PostGIS](http://postgis.org) 3 running on PostgreSQL 12.0 all set up and ready to go in Rancher."
+  version: v12.0
   uuid: kartoza-postgis
   questions:
   - variable: POSTGRES_DUMP_PREFIX
@@ -28,6 +28,22 @@
     required: true
     default: docker
     type: "password"
+  - variable: REPLICATION_USER
+    label: "PostgreSQL replication user on master."
+    required: true
+    default: replicator
+    type: "string"
+  - variable: REPLICATION_PASS
+    label: "PostgreSQL replication password on master."
+    required: true
+    default: replicator
+    type: "password"
+  - variable: NUMBER_OF_DAYS
+    label: "Remove all backups older than specified days"
+    description: "Remove all backups older than specified days"
+    required: true
+    default: 7
+    type: "int"
   - variable: POSTGRES_HBA_RANGE
     label: "Database allowed hosts"
     description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
@@ -38,7 +54,7 @@
     label: "PostgreSQL database extensions"
     description: "PostgreSQL database extensions to create in the choosen database. You can pass comma separated values"
     required: true
-    default: postgis,hstore,postgis_topology
+    default: postgis,hstore,postgis_topology,pg_raster
     type: "string"
   - variable: POSTGRES_PORT
     description: "Postgres port"
@@ -136,6 +152,12 @@
     required: true
     default: "pgadmin4"
     type: "password"
+  - variable: PGADMIN_VERSION
+    label: "PGADMIN  version"
+    description: "PGADMIN version"
+    required: true
+    default: "4.16"
+    type: "string"
   - variable: "HOST_AFFINITY"
     label: "Label of host to deploy on"
     description: |
