@@ -5,12 +5,13 @@ volumes:
   import_done:
   import_queue:
   cache:
-  data:
+  osm_data:
+  pgadmin_data:
 
 services:
   db:
     # About the postgresql version, it should match in the dockerfile of docker-imposm3
-    image: kartoza/postgis:9.6-2.4
+    image: kartoza/postgis:12.0
     restart: always
     hostname: db
     environment:
@@ -21,31 +22,34 @@ services:
       - IP_LIST=${ALLOW_LISTEN_RANGE}
     volumes:
      - osm-postgis-data:/var/lib/postgresql
-     - data:/home/settings
     ports:
       - ${POSTGRES_PORT}:5432
 
-
-  btsync:
-    image: kartoza/btsync
-    restart: always
-    hostname: db
-    environment:
-      - DEVICE=PROD_DB_SYNC
-      - SECRET=${BTSYNC_DB_SECRET}
+  osm_downloader:
+    image: kartoza/docker-osm:pbf-downloader
     volumes:
-       - data:/web:rw
+      # These are sharable to other containers
+      - osm_data:/home/settings
+    environment:
+      # Read the README in docker-osm-pbf
+      - CONTINENT=${CONTINENT}
+      - COUNTRY=${COUNTRY}
+      - BASE_URL=${PBF_URL}
+      - MAPPING_URL=${MAPPING_URL}
+      - GEOJSON_URL=${GEOJSON_URL}
+    labels:
+      io.rancher.container.start_once: 'true'
+
   imposm:
     image: kartoza/docker-osm:imposm-latest
     restart: always
     volumes:
-      - data:/home/settings
+      - osm_data:/home/settings
       - import_done:/home/import_done
       - import_queue:/home/import_queue
       - cache:/home/cache
     links:
       - db:db
-
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -77,13 +81,14 @@ services:
       - QGIS_STYLE=${QGIS_STYLE_BOOLEAN}
       # Use clip in the database
       - CLIP=${CLIP_BOOLEAN}
+    command: bash -c "while [ ! -f /home/settings/country.pbf ] ; do sleep 1; done && python3 -u /home/importer.py"
 
   osmupdate:
     image: kartoza/docker-osm:osmupdate-latest
     restart: always
     volumes:
       # These are sharable to other containers
-      - data:/home/settings
+      - osm_data:/home/settings
       - import_done:/home/import_done
       - import_queue:/home/import_queue
       - cache:/home/cache
@@ -110,12 +115,13 @@ services:
       # seconds between 2 executions of the script
       # if 0, then no update will be done, only the first initial import from the PBF
       - TIME=${UPDATE_TIME}
+    command: bash -c "while [ ! -f /home/settings/country.pbf ] ; do sleep 1; done && python3 -u /home/download.py"
 
   osmenrich:
     image: kartoza/docker-osm:osmenrich-latest
     restart: always
     volumes:
-      - data:/home/settings
+      - osm_data:/home/settings
       - import_done:/home/import_done
       - import_queue:/home/import_queue
       - cache:/home/cache
@@ -136,3 +142,17 @@ services:
       # seconds between 2 executions of the script
       # if 0, then no update will be done, only the first initial import from the PBF
       - TIME={UPDATE_TIME}
+
+  pgadmin4:
+     image: dpage/pgadmin4:${PGADMIN_VERSION}
+     hostname: pgadmin4
+     volumes:
+      - pgadmin_data:/var/lib/pgadmin
+     environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+     ports:
+      - ${PGADMIN_PORT}:80
+     restart: on-failure
+     links:
+      - db:db

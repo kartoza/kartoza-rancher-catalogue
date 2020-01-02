@@ -1,18 +1,16 @@
 version: '2'
 
-volumes:
-  postgis-data:
 
 services:
   
   pg-slave:
-    image: kartoza/postgis:9.6-2.4
+    image: kartoza/postgis:12.0
     # You can optionally mount to volume, but we're not able to scale it
     # in that case.
     # The slave will always destroy its database and copy from master at
     # runtime
     volumes:
-      - postgis-data:/var/lib/postgresql
+      - {{ .Stack.Name }}-postgis-data:/var/lib/postgresql
     environment:
       # ALLOW_IP_RANGE option is used to specify additionals allowed domains
       # in pg_hba.
@@ -50,8 +48,9 @@ services:
       # For now we don't support different credentials for replication
       # so we use the same credentials as master's superuser, or anything that
       # have replication role.
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASS: ${POSTGRES_PASS}
+      REPLICATION_USER: ${REPLICATION_USER}
+      REPLICATION_PASS: ${REPLICATION_PASS}
+      IP_LIST: ${ALLOW_LISTEN_RANGE}
     # You can expose the port to observe it in your local machine
     # For this sample, it was disabled by default to allow scaling test
     ports:

@@ -18,7 +18,7 @@
     label: "PostgreSQL superuser password to create."
     required: true
     default: docker
-    type: "string"
+    type: "password"
   - variable: POSTGRES_HBA_RANGE
     label: "Database allowed hosts"
     description: "PostgreSQL pg_hba (host based authentication) address range from which connections should be allowed. See http://rancher.com/docs/rancher/latest/en/rancher-services/networking/#differences-from-previous-releases for the network range that Rancher uses. NOTE That the default is to be open / public!"
@@ -37,12 +37,35 @@
     required: true
     default: 5432
     type: "int"
-  - variable: BTSYNC_DB_SECRET
-    label: "Database backups key"
-    description: "Resilio sync read/write key for syncing settings. Structure of Sync Directory
-                  should resemble https://github.com/kartoza/docker-osm/tree/develop/settings"
+  - variable: CONTINENT
+    label: "Continent name to download PBF"
+    description: "Continent name - used to construct url to download PBF files"
     required: true
-    default: ""
+    default: africa
+    type: "string"
+  - variable: COUNTRY
+    label: "Country name to download PBF files"
+    description: "Country name - used to construct url to download PBF files"
+    required: true
+    default: south-africa
+    type: "string"
+  - variable: MAPPING_URL
+    label: "Repository link to download settings files"
+    description: " Repository link to download setting files ie https://github.com/kartoza/docker-osm/tree/develop/settings"
+    required: true
+    default: https://github.com/kartoza/docker-osm/tree/develop/settings
+    type: "string"
+  - variable: GEOJSON_URL
+    label: "URL to download geojson file"
+    description: "URL to download geojson file ie https://github.com/kartoza/docker-osm/blob/develop/settings/clip.geojson"
+    required: false
+    default: ''
+    type: "string"
+  - variable: PBF_URL
+    label: "URL to downloan PBF - currently points to Geofrabik"
+    description: "URL to downloan PBF - currently points to Geofrabik"
+    required: true
+    default: http://download.geofabrik.de
     type: "string"
   - variable: UPDATE_TIME
     description: "Time Interval for update cycle"
@@ -116,7 +139,30 @@
     required: true
     default: http://planet.openstreetmap.org/replication/
     type: "string"
-
+  - variable: PGADMIN_PORT
+    description: "Listening port for Pgadmin"
+    label: "Pgadmin Port"
+    required: true
+    default: 8600
+    type: "int"
+  - variable: PGADMIN_EMAIL
+    description: "Email address to login into the database"
+    label: "Login Email address"
+    required: true
+    default: "pgadmin@docker.com"
+    type: "string"
+  - variable: PGADMIN_PASSWORD
+    description: "Password to login to pgadmin"
+    label: "Password to login to pgadmin"
+    required: true
+    default: "pgadmin4"
+    type: "password"
+  - variable: PGADMIN_VERSION
+    label: "PGADMIN  version"
+    description: "PGADMIN version"
+    required: true
+    default: "4.16"
+    type: "string"
   - variable: "HOST_AFFINITY"
     label: "Label of host to deploy on"
     description: |
