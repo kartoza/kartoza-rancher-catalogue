@@ -7,12 +7,12 @@
   - variable: REPLICATION_USER
     label: "PostgreSQL replication user on master."
     required: true
-    default: docker
+    default: replicator
     type: "string"
   - variable: REPLICATION_PASS
     label: "PostgreSQL replication password on master."
     required: true
-    default: docker
+    default: replicator
     type: "string"
   - variable: POSTGRES_HBA_RANGE
     label: "Database allowed hosts"
